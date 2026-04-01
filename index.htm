@@ -358,8 +358,7 @@
     </style>
 </head>
 <body>
-
-    <div id="iframeContainer">
+<div id="iframeContainer">
         <button id="floatingBackBtn" onclick="closeIframe()">
             <div class="back-arrow"></div>
         </button>
@@ -388,15 +387,17 @@
         <button class="nav-btn" onclick="toggleSections()"><i class="fas fa-th-large"></i> <span>Sections</span></button>
         <button class="nav-btn active" onclick="goHome()"><i class="fas fa-home"></i> <span>Home</span></button>
         <button class="nav-btn" onclick="openLink('https://offers-ce75e.web.app/')"><i class="fas fa-tags"></i> <span>Offers</span></button>
-        <button class="nav-btn" onclick="openLink('https://supportme.edgeone.app/')"><i class="fas fa-user-tie"></i> <span>Developer</span></button>
+        <button class="nav-btn" onclick="openLink('dev.htm')"><i class="fas fa-user-tie"></i> <span>Developer</span></button>
     </nav>
 
     <div id="sectionsMenu">
         <div class="menu-header"><span>Select Mode</span></div>
-        <button class="section-btn" onclick="openLink('https://moduty.vercel.app/')"><i class="fas fa-briefcase-medical"></i> <span>Duty Mode</span></button>
+        <button class="section-btn" onclick="openLink('moduty.htm')"><i class="fas fa-briefcase-medical"></i> <span>Duty Mode</span></button>
         <button class="section-btn" onclick="openLink('https://mwazna.vercel.app/')"><i class="fas fa-balance-scale"></i> <span>Mwazna</span></button>
-        <button class="section-btn" onclick="openLink('https://cgp-lilac.vercel.app/')"><i class="fas fa-book-medical"></i> <span>CGP Mode</span></button>
-        <button class="section-btn full-width" onclick="openLink('https://aldwaa-links.vercel.app/')"><i class="fas fa-link"></i> <span>Links / Resources Mode</span></button>
+        <button class="section-btn" onclick="openLink('./cgp.htm')">
+    <i class="fas fa-book-medical"></i> <span>CGP Mode</span>
+</button>
+        <button class="section-btn full-width" onclick="openLink('links.htm')"><i class="fas fa-link"></i> <span>Links / Resources Mode</span></button>
     </div>
 
     <div id="overlay" onclick="closeAllMenus()"></div>
@@ -412,7 +413,6 @@
         </div>
         <div style="color:white; font-weight:bold; margin-top: 15px;">Loading Content...</div>
     </div>
-
 <!-- ✅ الرابط الصح والموثوق -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
