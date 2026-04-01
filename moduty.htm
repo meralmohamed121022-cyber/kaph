@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1200">
+<meta name="viewport" content="width=1024, user-scalable=yes">
 <title> Mono DUTY System - PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
 
@@ -13,16 +13,34 @@
 <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
 
 <style>
-
 /* ─────────── 1. GENERAL LAYOUT ─────────── */
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
-body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding:18px;color:#1e293b;overflow-x:hidden;}
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+    font-family: 'Inter', sans-serif; 
+}
+
+body {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    min-height: 100vh;
+    padding: 18px;
+    color: #1e293b;
+    /* ✅ غيرنا دي من hidden لـ auto عشان الصفحة تتحرك معاك عرضياً */
+    overflow-x: auto !important; 
+    /* ✅ السطر ده بيضمن إن الموبايل يفهم إن فيه محتوى عريض */
+    -webkit-overflow-scrolling: touch; 
+}
+
 /* 1. الحاوية الرئيسية: ثبت العرض */
 .container {
-    width: 1150px !important; /* تثبيت العرض عشان مفيش حاجة تنزل تحت بعضها */
+    /* ✅ عرض ثابت عشان يحافظ على شكل اللاب توب */
+    width: 1150px !important; 
     max-width: none !important;
     margin: 20px auto;
-    display: none; /* هيفضل مخفي لحد ما الـ JS يظهره */
+    /* ✅ لازم تكون visible عشان متبقاش مقصوصة */
+    overflow: visible !important; 
+    display: none; 
     position: relative;
     z-index: 10;
 }
@@ -55,16 +73,17 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
 .config-box{background:white;border:2px solid #e2e8f0;border-radius:16px;padding:25px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.03);}
 /* --- MODERN DASHBOARD --- */
 /* --- MODERN DASHBOARD (FIXED DESKTOP VIEW) --- */
+/* --- MODERN DASHBOARD (FIXED LAPTOP VIEW) --- */
 .modern-dashboard { 
     display: grid !important; 
-    /* ✅ هنا أجبرناه يفضل 4 أعمدة جنب بعض مهما كانت الشاشة صغيرة */
+    /* ✅ إجبار 4 أعمدة جنب بعض مهما حصل */
     grid-template-columns: repeat(4, 1fr) !important; 
     gap: 15px; 
     margin-bottom: 25px; 
+    /* ✅ تثبيت الحد الأدنى للعرض عشان الأيقونات متدخلش في بعضها */
+    min-width: 1100px; 
     width: 100%;
 }
-
-/* ✅ حذفنا الميديا كويري اللي كان بيغير الشكل في الموبايل */
 
 .dash-card { 
     background: white; 
@@ -76,18 +95,20 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-width: 0; /* بيمنع الكارت إنه يخرج عن السيطرة */
+    /* ✅ يمنع الكارت من الانكماش الزائد */
+    min-width: 250px; 
 }
 
 .dash-card label { 
     display: block; 
-    font-size: 13px; /* رجعنا الحجم الطبيعي للاب توب */
+    font-size: 13px; 
     font-weight: 800; 
     color: #475569; 
     text-transform: uppercase; 
     margin-bottom: 10px; 
     letter-spacing: 0.5px;
-    white-space: nowrap; /* بيمنع الكلمة تنقسم سطرين */
+    /* ✅ يمنع الكلام إنه ينزل سطر جديد ويخلي شكل الصفحة لاب توب فعلاً */
+    white-space: nowrap; 
 }
 
 .dash-input { 
