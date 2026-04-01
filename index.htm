@@ -856,7 +856,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-  
+    
 
     function closeAllMenus() {
         document.getElementById('sectionsMenu').classList.remove('show');
@@ -866,11 +866,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 function openLink(url) {
     if (!url || url === '#' || url.trim() === '') return;
 
-    // ✅ الجزء الجديد: تحديث الحالة النشطة (Active) في الناف بار
+    // ✅ السطر ده بيقفل قائمة السكاشن والـ Overlay فوراً أول ما تضغط على أي اختيار
+    closeAllMenus();
+
+    // تحديث الحالة النشطة (Active) في الناف بار
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         btn.classList.remove('active');
-        // لو الزرار جواه كود بيفتح نفس الـ url ده، خليه هو الـ active
         if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(url)) {
             btn.classList.add('active');
         }
@@ -933,7 +935,6 @@ function openLink(url) {
         iframe.src = 'about:blank'; 
     };
 }
-
 function closeIframe() {
     document.getElementById('iframeContainer').classList.remove('show');
     document.getElementById('iframeError').classList.remove('show');
