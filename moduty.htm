@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=800, initial-scale=1, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title> Mono DUTY System - PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
 
@@ -13,10 +13,22 @@
 <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
 
 <style>
+
 /* ─────────── 1. GENERAL LAYOUT ─────────── */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
 body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding:18px;color:#1e293b;overflow-x:hidden;}
-.container{max-width:1200px;margin:auto;background:rgba(255,255,255,.98);border-radius:24px;box-shadow:0 25px 50px rgba(0,0,0,.15);overflow:hidden; display:none; position: relative; z-index: 10;}
+.container {
+    width: 95%; /* ✅ تم إضافتها لضمان مرونة الحاوية على الموبايل */
+    max-width: 1200px;
+    margin: 10px auto; /* تقليل الهوامش قليلاً للموبايل */
+    background: rgba(255,255,255,.98);
+    border-radius: 24px;
+    box-shadow: 0 25px 50px rgba(0,0,0,.15);
+    overflow: hidden; 
+    display: none; 
+    position: relative; 
+    z-index: 10;
+}
 
 /* ─────────── 2. CSS ART TOASTS ─────────── */
 #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
@@ -45,13 +57,69 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
 
 .controls{padding:25px;background:#f8fafc;}
 .config-box{background:white;border:2px solid #e2e8f0;border-radius:16px;padding:25px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.03);}
+/* --- MODERN DASHBOARD --- */
+.modern-dashboard { 
+    display: grid; 
+    /* الافتراضي للموبايل: عمود واحد فقط */
+    grid-template-columns: 1fr; 
+    gap: 12px; 
+    margin-bottom: 25px; 
+}
 
-.modern-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
-.dash-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-.dash-card label { display: block; font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 10px; letter-spacing:0.5px;}
-.dash-input { width: 100%; padding: 12px; font-size: 16px; font-weight: 700; color: #1e293b; text-align: center; border: 2px solid #cbd5e1; border-radius: 10px; background: white; outline: none; transition: .2s; }
-.dash-input:focus { border-color: #06b6d4; }
-.dash-input[readonly] { border-color: transparent; background: #f1f5f9; color: #0891b2; font-size: 20px;}
+/* لما الشاشة تكبر شوية (تابلت أو لابتوب) يوزعهم جنب بعض */
+@media (min-width: 600px) {
+    .modern-dashboard {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+    }
+}
+
+.dash-card { 
+    background: white; 
+    border: 1px solid #e2e8f0; 
+    border-radius: 12px; 
+    padding: 15px; 
+    text-align: center; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.dash-card label { 
+    display: block; 
+    font-size: 11px; /* صغرنا الخط سنة للموبايل */
+    font-weight: 800; 
+    color: #475569; 
+    text-transform: uppercase; 
+    margin-bottom: 8px; 
+    letter-spacing: 0.5px;
+}
+
+.dash-input { 
+    width: 100%; 
+    padding: 10px; /* تقليل البادينج لزيادة المساحة */
+    font-size: 15px; 
+    font-weight: 700; 
+    color: #1e293b; 
+    text-align: center; 
+    border: 2px solid #cbd5e1; 
+    border-radius: 10px; 
+    background: white; 
+    outline: none; 
+    transition: .2s; 
+}
+
+.dash-input:focus { 
+    border-color: #06b6d4; 
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+}
+
+.dash-input[readonly] { 
+    border-color: transparent; 
+    background: #f1f5f9; 
+    color: #0891b2; 
+    font-size: 18px; /* مريحة للعين أكتر على الشاشات الصغيرة */
+}
 
 /* Pharmacists Names Input Style */
 .pharmacist-names-grid {display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:15px;}
