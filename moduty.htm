@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1024, user-scalable=yes">
+<meta name="viewport" content="width=1024">
 <title> Mono DUTY System - PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
 
@@ -31,14 +31,10 @@ body {
     /* ✅ السطر ده بيضمن إن الموبايل يفهم إن فيه محتوى عريض */
     -webkit-overflow-scrolling: touch; 
 }
-
-/* 1. الحاوية الرئيسية: ثبت العرض */
 .container {
-    /* ✅ عرض ثابت عشان يحافظ على شكل اللاب توب */
-    width: 1150px !important; 
-    max-width: none !important;
-    margin: 20px auto;
-    /* ✅ لازم تكون visible عشان متبقاش مقصوصة */
+    width: 98% !important; /* خليها 98% بدل الرقم الثابت */
+    max-width: 1200px !important; /* ده أقصى عرض يوصله في اللاب توب */
+    margin: 10px auto;
     overflow: visible !important; 
     display: none; 
     position: relative;
@@ -76,15 +72,12 @@ body {
 /* --- MODERN DASHBOARD (FIXED LAPTOP VIEW) --- */
 .modern-dashboard { 
     display: grid !important; 
-    /* ✅ إجبار 4 أعمدة جنب بعض مهما حصل */
-    grid-template-columns: repeat(4, 1fr) !important; 
+    /* التعديل هنا: خليه يتكيف حسب الشاشة */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; 
     gap: 15px; 
     margin-bottom: 25px; 
-    /* ✅ تثبيت الحد الأدنى للعرض عشان الأيقونات متدخلش في بعضها */
-    min-width: 1100px; 
     width: 100%;
 }
-
 .dash-card { 
     background: white; 
     border: 1px solid #e2e8f0; 
@@ -95,8 +88,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    /* ✅ يمنع الكارت من الانكماش الزائد */
-    min-width: 250px; 
+    /* صغر الحد الأدنى عشان الكروت تلم في الموبايل */
+    min-width: 140px; 
 }
 
 .dash-card label { 
