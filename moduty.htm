@@ -3,7 +3,7 @@
 <head>
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=1024">
+<meta name="viewport" content="width=800, initial-scale=1, user-scalable=yes">
 <title> Mono DUTY System - PRO</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800;900&display=swap" rel="stylesheet">
 
@@ -14,32 +14,10 @@
 
 <style>
 /* ─────────── 1. GENERAL LAYOUT ─────────── */
-* { 
-    margin: 0; 
-    padding: 0; 
-    box-sizing: border-box; 
-    font-family: 'Inter', sans-serif; 
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding:18px;color:#1e293b;overflow-x:hidden;}
+.container{max-width:1200px;margin:auto;background:rgba(255,255,255,.98);border-radius:24px;box-shadow:0 25px 50px rgba(0,0,0,.15);overflow:hidden; display:none; position: relative; z-index: 10;}
 
-body {
-    background: linear-gradient(135deg, #06b6d4, #0891b2);
-    min-height: 100vh;
-    padding: 18px;
-    color: #1e293b;
-    /* ✅ غيرنا دي من hidden لـ auto عشان الصفحة تتحرك معاك عرضياً */
-    overflow-x: auto !important; 
-    /* ✅ السطر ده بيضمن إن الموبايل يفهم إن فيه محتوى عريض */
-    -webkit-overflow-scrolling: touch; 
-}
-.container {
-    width: 98% !important; /* خليها 98% بدل الرقم الثابت */
-    max-width: 1200px !important; /* ده أقصى عرض يوصله في اللاب توب */
-    margin: 10px auto;
-    overflow: visible !important; 
-    display: none; 
-    position: relative;
-    z-index: 10;
-}
 /* ─────────── 2. CSS ART TOASTS ─────────── */
 #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .toast { min-width: 320px; text-align: center; padding: 16px 24px; border-radius: 16px; font-weight: 800; color: white; font-size: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards, fadeOut 0.5s ease-in forwards 3s; display:flex; align-items:center; justify-content:center; gap:10px; }
@@ -67,68 +45,14 @@ body {
 
 .controls{padding:25px;background:#f8fafc;}
 .config-box{background:white;border:2px solid #e2e8f0;border-radius:16px;padding:25px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.03);}
-/* --- MODERN DASHBOARD --- */
-/* --- MODERN DASHBOARD (FIXED DESKTOP VIEW) --- */
-/* --- MODERN DASHBOARD (FIXED LAPTOP VIEW) --- */
-.modern-dashboard { 
-    display: grid !important; 
-    /* التعديل هنا: خليه يتكيف حسب الشاشة */
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)) !important; 
-    gap: 15px; 
-    margin-bottom: 25px; 
-    width: 100%;
-}
-.dash-card { 
-    background: white; 
-    border: 1px solid #e2e8f0; 
-    border-radius: 12px; 
-    padding: 15px; 
-    text-align: center; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02); 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    /* صغر الحد الأدنى عشان الكروت تلم في الموبايل */
-    min-width: 140px; 
-}
 
-.dash-card label { 
-    display: block; 
-    font-size: 13px; 
-    font-weight: 800; 
-    color: #475569; 
-    text-transform: uppercase; 
-    margin-bottom: 10px; 
-    letter-spacing: 0.5px;
-    /* ✅ يمنع الكلام إنه ينزل سطر جديد ويخلي شكل الصفحة لاب توب فعلاً */
-    white-space: nowrap; 
-}
+.modern-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin-bottom: 25px; }
+.dash-card { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+.dash-card label { display: block; font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 10px; letter-spacing:0.5px;}
+.dash-input { width: 100%; padding: 12px; font-size: 16px; font-weight: 700; color: #1e293b; text-align: center; border: 2px solid #cbd5e1; border-radius: 10px; background: white; outline: none; transition: .2s; }
+.dash-input:focus { border-color: #06b6d4; }
+.dash-input[readonly] { border-color: transparent; background: #f1f5f9; color: #0891b2; font-size: 20px;}
 
-.dash-input { 
-    width: 100%; 
-    padding: 12px; 
-    font-size: 16px; 
-    font-weight: 700; 
-    color: #1e293b; 
-    text-align: center; 
-    border: 2px solid #cbd5e1; 
-    border-radius: 10px; 
-    background: white; 
-    outline: none; 
-    transition: .2s; 
-}
-
-.dash-input:focus { 
-    border-color: #06b6d4; 
-    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
-}
-
-.dash-input[readonly] { 
-    border-color: transparent; 
-    background: #f1f5f9; 
-    color: #0891b2; 
-    font-size: 20px; 
-}
 /* Pharmacists Names Input Style */
 .pharmacist-names-grid {display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:15px;}
 .pharmacist-input-wrapper {display:flex; align-items:center; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:4px 8px; transition:0.3s; box-shadow:0 2px 5px rgba(0,0,0,0.02);}
