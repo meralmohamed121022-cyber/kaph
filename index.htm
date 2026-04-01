@@ -76,6 +76,7 @@
         .mode-toggle { top: 20px; left: 20px; background: var(--accent-orange); color: white; font-size: 20px; border: 2px solid white; }
         .scroll-toggle { bottom: 100px; right: 20px; background: var(--nav-bg-start); color: var(--text-primary); border: 1px solid var(--border-color); }
 /* 🔥 IFRAME FULLSCREEN CONTAINER 🔥 */
+    /* 🔥 IFRAME FULLSCREEN CONTAINER - UPDATED BY GEMINI 🔥 */
         #iframeContainer {
             position: fixed; 
             top: 0; 
@@ -83,26 +84,36 @@
             width: 100%; 
             height: 100%;
             background: var(--bg-primary); 
-            z-index: 15000; /* بيفضل تحت الـ Nav Bar اللي خليناه 21000 */
+            /* رفعنا الـ z-index ليكون أعلى من الـ Nav Bar (21000) ومن أي عنصر آخر */
+            z-index: 30000; 
             display: none; 
             flex-direction: column; 
             opacity: 0; 
             transition: opacity 0.4s ease;
-            padding-bottom: 70px; /* ✅ إضافة مساحة تحت عشان الـ Nav Bar ميتغطاش */
+            /* لغينا الـ padding عشان الـ Iframe يملأ الشاشة تماماً وأي ضغطة تروح له هو */
+            padding-bottom: 0; 
         }
         
-        #iframeContainer.show { display: flex; opacity: 1; }
+        #iframeContainer.show { 
+            display: flex; 
+            opacity: 1; 
+        }
 
         #iframeBackBtn {
-            background: transparent; 
+            background: rgba(0, 0, 0, 0.5); /* إضافة خلفية بسيطة عشان يبان فوق محتوى الـ Iframe */
+            backdrop-filter: blur(5px);
             border: none; 
             cursor: pointer; 
             display: flex;
             align-items: center; 
             justify-content: center; 
-            padding: 8px; 
+            padding: 10px; 
             transition: 0.3s; 
-            position: relative;
+            position: absolute; /* تغيير لـ absolute عشان يثبت فوق الـ Iframe */
+            top: 20px;
+            left: 20px;
+            z-index: 31000;
+            border-radius: 50%;
         }
         
         #iframeBackBtn:active { transform: scale(0.9); }
@@ -110,9 +121,9 @@
         .back-arrow {
             width: 0; 
             height: 0; 
-            border-top: 14px solid transparent; 
-            border-bottom: 14px solid transparent;
-            border-right: 18px solid #4ade80; 
+            border-top: 12px solid transparent; 
+            border-bottom: 12px solid transparent;
+            border-right: 16px solid #4ade80; 
             transition: 0.3s; 
             filter: drop-shadow(0 2px 8px rgba(74, 222, 128, 0.4));
         }
@@ -122,8 +133,11 @@
         #embeddedFrame { 
             flex: 1; 
             width: 100%; 
+            height: 100%;
             border: none; 
             background: white; 
+            /* إضافة السطر ده لضمان استجابة اللمس في الموبايل */
+            pointer-events: auto;
         }
 
         /* 🛡️ ERROR MESSAGE 🛡️ */
@@ -140,7 +154,7 @@
             padding: 40px 30px;
             box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
             display: none; 
-            z-index: 16000; 
+            z-index: 32000; 
             max-width: 400px; 
             width: 90%;
         }
@@ -529,7 +543,13 @@
         <button id="floatingBackBtn" onclick="closeIframe()">
             <div class="back-arrow"></div>
         </button>
-      <iframe id="embeddedFrame" src="about:blank" allowfullscreen allow="autoplay; fullscreen" scrolling="yes"></iframe>
+     <iframe id="embeddedFrame" 
+        src="about:blank" 
+        allowfullscreen 
+        allow="autoplay; fullscreen" 
+        scrolling="yes"
+        sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts">
+</iframe>
         <div id="iframeError">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Connection Error</h3>
@@ -554,7 +574,7 @@
         <button class="nav-btn" onclick="toggleSections()"><i class="fas fa-th-large"></i> <span>Sections</span></button>
         <button class="nav-btn active" onclick="goHome()"><i class="fas fa-home"></i> <span>Home</span></button>
         <button class="nav-btn" onclick="openLink('https://offers-ce75e.web.app/')"><i class="fas fa-tags"></i> <span>Offers</span></button>
-        <button class="nav-btn" onclick="openLink('dev.htm')"><i class="fas fa-user-tie"></i> <span>Developer</span></button>
+        <button class="nav-btn" onclick="openLink('dev.htm')"><i class="fas fa-user-tie"></i> <span>Dev</span></button>
     </nav>
 
     <div id="sectionsMenu">
