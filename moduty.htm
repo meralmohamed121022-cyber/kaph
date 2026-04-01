@@ -17,19 +17,15 @@
 /* ─────────── 1. GENERAL LAYOUT ─────────── */
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
 body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding:18px;color:#1e293b;overflow-x:hidden;}
+/* 1. الحاوية الرئيسية: ثبت العرض */
 .container {
-    width: 95%; /* ✅ تم إضافتها لضمان مرونة الحاوية على الموبايل */
-    max-width: 1200px;
-    margin: 10px auto; /* تقليل الهوامش قليلاً للموبايل */
-    background: rgba(255,255,255,.98);
-    border-radius: 24px;
-    box-shadow: 0 25px 50px rgba(0,0,0,.15);
-    overflow: hidden; 
-    display: none; 
-    position: relative; 
+    width: 1150px !important; /* تثبيت العرض عشان مفيش حاجة تنزل تحت بعضها */
+    max-width: none !important;
+    margin: 20px auto;
+    display: none; /* هيفضل مخفي لحد ما الـ JS يظهره */
+    position: relative;
     z-index: 10;
 }
-
 /* ─────────── 2. CSS ART TOASTS ─────────── */
 #toast-container { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
 .toast { min-width: 320px; text-align: center; padding: 16px 24px; border-radius: 16px; font-weight: 800; color: white; font-size: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards, fadeOut 0.5s ease-in forwards 3s; display:flex; align-items:center; justify-content:center; gap:10px; }
@@ -58,20 +54,17 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
 .controls{padding:25px;background:#f8fafc;}
 .config-box{background:white;border:2px solid #e2e8f0;border-radius:16px;padding:25px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,.03);}
 /* --- MODERN DASHBOARD --- */
+/* --- MODERN DASHBOARD (FIXED DESKTOP VIEW) --- */
 .modern-dashboard { 
-    display: grid; 
-    /* الافتراضي للموبايل: عمود واحد فقط */
-    grid-template-columns: 1fr; 
-    gap: 12px; 
+    display: grid !important; 
+    /* ✅ هنا أجبرناه يفضل 4 أعمدة جنب بعض مهما كانت الشاشة صغيرة */
+    grid-template-columns: repeat(4, 1fr) !important; 
+    gap: 15px; 
     margin-bottom: 25px; 
+    width: 100%;
 }
 
-/* لما الشاشة تكبر شوية (تابلت أو لابتوب) يوزعهم جنب بعض */
-@media (min-width: 600px) {
-    .modern-dashboard {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-    }
-}
+/* ✅ حذفنا الميديا كويري اللي كان بيغير الشكل في الموبايل */
 
 .dash-card { 
     background: white; 
@@ -83,22 +76,24 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
     display: flex;
     flex-direction: column;
     justify-content: center;
+    min-width: 0; /* بيمنع الكارت إنه يخرج عن السيطرة */
 }
 
 .dash-card label { 
     display: block; 
-    font-size: 11px; /* صغرنا الخط سنة للموبايل */
+    font-size: 13px; /* رجعنا الحجم الطبيعي للاب توب */
     font-weight: 800; 
     color: #475569; 
     text-transform: uppercase; 
-    margin-bottom: 8px; 
+    margin-bottom: 10px; 
     letter-spacing: 0.5px;
+    white-space: nowrap; /* بيمنع الكلمة تنقسم سطرين */
 }
 
 .dash-input { 
     width: 100%; 
-    padding: 10px; /* تقليل البادينج لزيادة المساحة */
-    font-size: 15px; 
+    padding: 12px; 
+    font-size: 16px; 
     font-weight: 700; 
     color: #1e293b; 
     text-align: center; 
@@ -118,9 +113,8 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
     border-color: transparent; 
     background: #f1f5f9; 
     color: #0891b2; 
-    font-size: 18px; /* مريحة للعين أكتر على الشاشات الصغيرة */
+    font-size: 20px; 
 }
-
 /* Pharmacists Names Input Style */
 .pharmacist-names-grid {display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:15px;}
 .pharmacist-input-wrapper {display:flex; align-items:center; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:4px 8px; transition:0.3s; box-shadow:0 2px 5px rgba(0,0,0,0.02);}
