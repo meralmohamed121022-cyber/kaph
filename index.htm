@@ -75,41 +75,80 @@
 
         .mode-toggle { top: 20px; left: 20px; background: var(--accent-orange); color: white; font-size: 20px; border: 2px solid white; }
         .scroll-toggle { bottom: 100px; right: 20px; background: var(--nav-bg-start); color: var(--text-primary); border: 1px solid var(--border-color); }
-
-        /* 🔥 IFRAME FULLSCREEN CONTAINER 🔥 */
+/* 🔥 IFRAME FULLSCREEN CONTAINER 🔥 */
         #iframeContainer {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-primary); z-index: 15000;
-            display: none; flex-direction: column; opacity: 0; transition: opacity 0.4s ease;
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: var(--bg-primary); 
+            z-index: 15000; /* بيفضل تحت الـ Nav Bar اللي خليناه 21000 */
+            display: none; 
+            flex-direction: column; 
+            opacity: 0; 
+            transition: opacity 0.4s ease;
+            padding-bottom: 70px; /* ✅ إضافة مساحة تحت عشان الـ Nav Bar ميتغطاش */
         }
+        
         #iframeContainer.show { display: flex; opacity: 1; }
 
         #iframeBackBtn {
-            background: transparent; border: none; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; padding: 8px; transition: 0.3s; position: relative;
+            background: transparent; 
+            border: none; 
+            cursor: pointer; 
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            padding: 8px; 
+            transition: 0.3s; 
+            position: relative;
         }
+        
         #iframeBackBtn:active { transform: scale(0.9); }
 
         .back-arrow {
-            width: 0; height: 0; border-top: 14px solid transparent; border-bottom: 14px solid transparent;
-            border-right: 18px solid #4ade80; transition: 0.3s; filter: drop-shadow(0 2px 8px rgba(74, 222, 128, 0.4));
+            width: 0; 
+            height: 0; 
+            border-top: 14px solid transparent; 
+            border-bottom: 14px solid transparent;
+            border-right: 18px solid #4ade80; 
+            transition: 0.3s; 
+            filter: drop-shadow(0 2px 8px rgba(74, 222, 128, 0.4));
         }
+        
         #iframeBackBtn:hover .back-arrow { border-right-color: #22c55e; transform: translateX(-3px); }
 
-        #embeddedFrame { flex: 1; width: 100%; border: none; background: white; }
+        #embeddedFrame { 
+            flex: 1; 
+            width: 100%; 
+            border: none; 
+            background: white; 
+        }
 
         /* 🛡️ ERROR MESSAGE 🛡️ */
         #iframeError {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            text-align: center; background: var(--card-bg); backdrop-filter: blur(15px);
-            border: 1px solid var(--border-color); border-radius: 20px; padding: 40px 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3); display: none; z-index: 16000; max-width: 400px; width: 90%;
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            text-align: center; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--border-color); 
+            border-radius: 20px; 
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+            display: none; 
+            z-index: 16000; 
+            max-width: 400px; 
+            width: 90%;
         }
+        
         #iframeError.show { display: block; }
         #iframeError i { font-size: 60px; color: var(--accent-orange); margin-bottom: 20px; }
         #iframeError h3 { font-size: 20px; margin-bottom: 10px; color: var(--text-primary); }
         #iframeError p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-
         /* --- HOME PAGE --- */
         #homePage { padding: 20px; padding-top: 90px; max-width: 800px; margin: 0 auto; }
 
@@ -178,44 +217,156 @@
         #lightbox img:active { cursor: grabbing; }
         .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10001; }
 
-        /* --- NAV BAR --- */
-        #bottomNav {
-            position: fixed; bottom: 0; left: 0; width: 100%; background: var(--glass-bg); backdrop-filter: blur(20px);
-            padding: 10px 0; display: flex; justify-content: space-around; border-top: 1px solid var(--border-color);
-            z-index: 9000; transition: transform 0.4s ease; padding-bottom: max(10px, env(safe-area-inset-bottom)); box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
-        }
-        #bottomNav.hidden { transform: translateY(100%); }
-        .nav-btn { background: none; border: none; color: var(--text-secondary); display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; transition: 0.3s; }
-        .nav-btn i { font-size: 20px; opacity: 0.7; }
-        .nav-btn span { font-size: 10px; font-weight: 600; opacity: 0.7; }
-        .nav-btn.active i, .nav-btn.active span { color: var(--accent-orange); opacity: 1; }
-        .nav-btn.active i { transform: translateY(-3px); }
+       /* --- NAV BAR --- */
+#bottomNav {
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    background: var(--glass-bg); 
+    backdrop-filter: blur(20px);
+    padding: 10px 0; 
+    display: flex; 
+    justify-content: space-around; 
+    border-top: 1px solid var(--border-color);
+    z-index: 21000; /* ✅ تم رفعه ليكون فوق كل شيء */
+    transition: transform 0.4s ease; 
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+}
 
+#bottomNav.hidden { transform: translateY(100%); }
+
+.nav-btn { 
+    background: none; 
+    border: none; 
+    color: var(--text-secondary); 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 5px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
+
+.nav-btn i { font-size: 20px; opacity: 0.7; }
+.nav-btn span { font-size: 10px; font-weight: 600; opacity: 0.7; }
+.nav-btn.active i, .nav-btn.active span { color: var(--accent-orange); opacity: 1; }
+.nav-btn.active i { transform: translateY(-3px); }
         /* --- SECTIONS MENU --- */
+      /* --- SECTIONS MENU --- */
         #sectionsMenu {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) scale(0.9); width: 92%; max-width: 400px;
-            background: var(--glass-bg); backdrop-filter: blur(25px); border: 1px solid var(--border-color);
-            border-radius: 24px; padding: 20px; opacity: 0; pointer-events: none; transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
-            z-index: 8000; box-shadow: 0 20px 50px rgba(0,0,0,0.5); display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; max-height: 70vh; overflow-y: auto;
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%) scale(0.9); 
+            width: 92%; 
+            max-width: 400px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid var(--border-color);
+            border-radius: 24px; 
+            padding: 20px; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 22000; /* ✅ تم رفعه ليكون أعلى من الناف بار والـ Iframe */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            justify-content: center; 
+            max-height: 70vh; 
+            overflow-y: auto;
         }
-        #sectionsMenu.show { opacity: 1; transform: translateX(-50%) scale(1); pointer-events: auto; }
-        .menu-header { width: 100%; text-align: center; margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color); }
-        .menu-header span { color: var(--accent-orange); font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
-        .section-btn {
-            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
-            width: calc(50% - 6px); min-height: 110px; padding: 15px 10px; background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--border-color); border-radius: 20px; color: var(--text-primary); cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
-        }
-        .section-btn:hover { background: rgba(255, 107, 53, 0.15); border-color: var(--accent-orange); transform: translateY(-3px); }
-        .section-btn:active { transform: scale(0.96); }
-        .section-btn i { font-size: 26px; color: var(--text-secondary); transition: 0.3s; filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); }
-        .section-btn:hover i { color: var(--accent-orange); transform: scale(1.1); }
-        .section-btn span { font-size: 13px; font-weight: 600; text-align: center; line-height: 1.2; }
-        .section-btn.full-width { width: 100%; flex-direction: row; min-height: 65px; gap: 15px; padding: 10px 20px; }
-        
-        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 7000; display: none; backdrop-filter: blur(4px); transition: opacity 0.3s; }
-        #overlay.show { display: block; }
 
+        #sectionsMenu.show { 
+            opacity: 1; 
+            transform: translateX(-50%) scale(1); 
+            pointer-events: auto; 
+        }
+
+        .menu-header { 
+            width: 100%; 
+            text-align: center; 
+            margin-bottom: 10px; 
+            padding-bottom: 10px; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+
+        .menu-header span { 
+            color: var(--accent-orange); 
+            font-size: 14px; 
+            font-weight: 800; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+        }
+
+        .section-btn {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+            width: calc(50% - 6px); 
+            min-height: 110px; 
+            padding: 15px 10px; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color); 
+            border-radius: 20px; 
+            color: var(--text-primary); 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
+            overflow: hidden;
+        }
+
+        .section-btn:hover { 
+            background: rgba(255, 107, 53, 0.15); 
+            border-color: var(--accent-orange); 
+            transform: translateY(-3px); 
+        }
+
+        .section-btn:active { transform: scale(0.96); }
+
+        .section-btn i { 
+            font-size: 26px; 
+            color: var(--text-secondary); 
+            transition: 0.3s; 
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); 
+        }
+
+        .section-btn:hover i { 
+            color: var(--accent-orange); 
+            transform: scale(1.1); 
+        }
+
+        .section-btn span { 
+            font-size: 13px; 
+            font-weight: 600; 
+            text-align: center; 
+            line-height: 1.2; 
+        }
+
+        .section-btn.full-width { 
+            width: 100%; 
+            flex-direction: row; 
+            min-height: 65px; 
+            gap: 15px; 
+            padding: 10px 20px; 
+        }
+        
+        #overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 21500; /* ✅ تم رفعه ليكون تحت المنيو وفوق الناف بار */
+            display: none; 
+            backdrop-filter: blur(4px); 
+            transition: opacity 0.3s; 
+        }
+
+        #overlay.show { display: block; }
        #loadingOverlay {
     position: fixed;
     top: 0;
@@ -705,18 +856,26 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function toggleSections() {
-        document.getElementById('sectionsMenu').classList.add('show');
-        document.getElementById('overlay').classList.add('show');
-    }
+  
 
     function closeAllMenus() {
         document.getElementById('sectionsMenu').classList.remove('show');
         document.getElementById('overlay').classList.remove('show');
     }
 
-   function openLink(url) {
+function openLink(url) {
     if (!url || url === '#' || url.trim() === '') return;
+
+    // ✅ الجزء الجديد: تحديث الحالة النشطة (Active) في الناف بار
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => {
+        btn.classList.remove('active');
+        // لو الزرار جواه كود بيفتح نفس الـ url ده، خليه هو الـ active
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(url)) {
+            btn.classList.add('active');
+        }
+    });
+
     const container = document.getElementById('iframeContainer');
     const iframe = document.getElementById('embeddedFrame');
     const errorBox = document.getElementById('iframeError');
@@ -724,9 +883,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     errorBox.classList.remove('show');
     
-    // إظهار اللودر وضبط الشفافية عند فتح رابط داخلي
     if (loader) {
-        loader.style.display = 'flex'; // تأكد إنه يظهر من وضع الـ none
+        loader.style.display = 'flex';
         loader.style.opacity = '1';
         loader.classList.remove('hidden');
     }
@@ -741,7 +899,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 loader.style.opacity = '0';
                 setTimeout(() => {
                     loader.classList.add('hidden');
-                    loader.style.display = 'none'; // رجعه none بعد الاختفاء
+                    loader.style.display = 'none';
                 }, 500);
             }
             errorBox.classList.add('show');
@@ -756,7 +914,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             loader.style.opacity = '0';
             setTimeout(() => {
                 loader.classList.add('hidden');
-                loader.style.display = 'none'; // رجعه none بعد الاختفاء
+                loader.style.display = 'none';
             }, 500);
         }
     };
@@ -768,22 +926,46 @@ window.addEventListener('DOMContentLoaded', async () => {
             loader.style.opacity = '0';
             setTimeout(() => {
                 loader.classList.add('hidden');
-                loader.style.display = 'none'; // رجعه none بعد الاختفاء
+                loader.style.display = 'none';
             }, 500);
         }
         errorBox.classList.add('show'); 
         iframe.src = 'about:blank'; 
     };
 }
-    function closeIframe() {
-        document.getElementById('iframeContainer').classList.remove('show');
-        document.getElementById('iframeError').classList.remove('show');
-        setTimeout(() => { document.getElementById('embeddedFrame').src = 'about:blank'; }, 400);
-    }
 
-    function goHome() {
-        closeAllMenus(); window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+function closeIframe() {
+    document.getElementById('iframeContainer').classList.remove('show');
+    document.getElementById('iframeError').classList.remove('show');
+    setTimeout(() => { document.getElementById('embeddedFrame').src = 'about:blank'; }, 400);
+}
+
+function goHome() {
+    closeIframe(); 
+    closeAllMenus(); 
+
+    // ✅ إرجاع حالة Active لزرار الهوم
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // بنختار زرار الهوم تحديداً عشان ينور برتقالي
+    const homeBtn = document.querySelector('.nav-btn[onclick="goHome()"]');
+    if (homeBtn) homeBtn.classList.add('active');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ✅ تعديل وظيفة toggleSections عشان تنور لما تفتحها
+function toggleSections() {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    
+    const sectionsBtn = document.querySelector('.nav-btn[onclick="toggleSections()"]');
+    if (sectionsBtn) sectionsBtn.classList.add('active');
+
+    document.getElementById('sectionsMenu').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+}
 </script>
 </body>
 </html>
