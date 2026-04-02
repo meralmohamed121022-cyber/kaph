@@ -132,16 +132,20 @@
             background: linear-gradient(180deg, var(--dark-orange), var(--orange));
         }
 
-      .top-tabs {
-    position: sticky; 
-    top: 0;
-    width: 100%;
-    background: rgba(15, 23, 42, 0.98);
-    backdrop-filter: blur(15px);
-    padding: 0.6rem 0;
-    z-index: 1000;
-    border-bottom: 2px solid rgba(245, 158, 11, 0.3);
-}
+        /* Top Tab Navigation */
+        .top-tabs {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            width: 100%;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 0.8rem 0;
+            z-index: 999;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(245, 158, 11, 0.3);
+        }
+
         .tabs-container {
             display: flex;
             justify-content: center;
@@ -210,20 +214,18 @@
         .navbar-brand span {
             color: var(--orange);
         }
-.hero-section {
-    display: block; /* الحالة العادية */
-    transition: all 0.4s ease;
-}
-.hero-section.hide-hero { display: none !important; }
 
-/* تأكد إن التابات ثابتة فوق دايماً */
-.top-tabs {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: var(--dark-blue);
-    padding: 10px 0;
-}
+        /* Hero Section */
+        .hero-section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 140px;
+            padding-bottom: 50px;
+            position: relative;
+        }
+
         .hero-content {
             text-align: center;
             z-index: 10;
@@ -1107,38 +1109,40 @@
     </div>
 
   
-<div class="top-tabs">
-    <div class="tabs-container">
-        <div class="tab-box active" onclick="showTab('all', event)">
-            <i class="fas fa-home"></i>
-            <span>All</span>
-        </div>
-        <div class="tab-box" onclick="showTab('about', event)">
-            <i class="fas fa-user"></i>
-            <span>About</span>
-        </div>
-        <div class="tab-box" onclick="showTab('skills', event)">
-            <i class="fas fa-chart-bar"></i>
-            <span>Skills</span>
-        </div>
-        <div class="tab-box" onclick="showTab('education', event)">
-            <i class="fas fa-graduation-cap"></i>
-            <span>Education</span>
-        </div>
-        <div class="tab-box" onclick="showTab('experience', event)">
-            <i class="fas fa-briefcase"></i>
-            <span>Experience</span>
-        </div>
-        <div class="tab-box" onclick="showTab('projects', event)">
-            <i class="fas fa-rocket"></i>
-            <span>Projects</span>
-        </div>
-        <div class="tab-box" onclick="showTab('contact', event)">
-            <i class="fas fa-envelope"></i>
-            <span>Contact</span>
+
+    <!-- Top Tabs Navigation -->
+    <div class="top-tabs">
+        <div class="tabs-container">
+            <div class="tab-box active" onclick="showTab('all')">
+                <i class="fas fa-home"></i>
+                <span>All</span>
+            </div>
+            <div class="tab-box" onclick="showTab('about')">
+                <i class="fas fa-user"></i>
+                <span>About</span>
+            </div>
+            <div class="tab-box" onclick="showTab('skills')">
+                <i class="fas fa-chart-bar"></i>
+                <span>Skills</span>
+            </div>
+            <div class="tab-box" onclick="showTab('education')">
+                <i class="fas fa-graduation-cap"></i>
+                <span>Education</span>
+            </div>
+            <div class="tab-box" onclick="showTab('experience')">
+                <i class="fas fa-briefcase"></i>
+                <span>Experience</span>
+            </div>
+            <div class="tab-box" onclick="showTab('projects')">
+                <i class="fas fa-rocket"></i>
+                <span>Projects</span>
+            </div>
+            <div class="tab-box" onclick="showTab('contact')">
+                <i class="fas fa-envelope"></i>
+                <span>Contact</span>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Hero Section -->
     <section id="home" class="hero-section">
@@ -1149,7 +1153,10 @@
                 </div>
                 <h1 class="hero-title">Mohamed Kholeif</h1>
                 <p class="hero-subtitle">💊 Community Pharmacist</p>
-              
+                <p class="hero-description">
+                    Community Pharmacist, graduated from the Faculty of Pharmacy, Damanhour University with summa cum laude (Graduated with Honours). 
+                    I have been working in the field of pharmacy since 2013. I'm interested in technology and AI and how to use them in the field of pharmacy.
+                </p>
                 <div class="social-links">
                     <a href="https://www.facebook.com/share/1Ghv7eEw6A/" target="_blank" class="social-btn" title="Facebook">
                         <i class="fab fa-facebook-f"></i>
@@ -1812,45 +1819,73 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-  <script>
-function showTab(tabName, event) {
-    const hero = document.getElementById('home');
-    const allTabs = document.querySelectorAll('.tab-box');
-    const allContents = document.querySelectorAll('.tab-content-area');
+    <script>
+        // Tab Navigation System - Fixed to show content immediately
+        function showTab(tabName) {
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab-box').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Hide all content areas
+            document.querySelectorAll('.tab-content-area').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Show selected content
+            if (tabName === 'all') {
+                document.getElementById('all-content').classList.add('active');
+                document.querySelectorAll('.tab-box')[0].classList.add('active');
+            } else {
+                document.getElementById(tabName + '-content').classList.add('active');
+                event.target.closest('.tab-box').classList.add('active');
+            }
+        }
 
-    // 1. مسح الحالة النشطة من الجميع
-    allTabs.forEach(tab => tab.classList.remove('active'));
-    allContents.forEach(content => {
-        content.classList.remove('active');
-        content.style.display = 'none';
-    });
-
-    // 2. تحديد الزرار النشط (تعديل مهم جداً)
-    if (event && event.currentTarget) {
-        // بنستخدم closest عشان نضمن إنه يمسك الزرار حتى لو ضغطت على الأيقونة
-        event.currentTarget.closest('.tab-box').classList.add('active');
-    } else {
-        allTabs.forEach(tab => {
-            if (tab.getAttribute('onclick').includes(`'${tabName}'`)) tab.classList.add('active');
+        // Scroll animations
+        const fadeElements = document.querySelectorAll('.fade-in');
+        
+        const appearOnScroll = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.1
         });
-    }
+        
+        fadeElements.forEach(element => {
+            appearOnScroll.observe(element);
+        });
 
-    // 3. إظهار المحتوى المختار
-    if (tabName === 'all') {
-        if (hero) hero.classList.remove('hide-hero');
-        const allContent = document.getElementById('all-content');
-        if (allContent) { allContent.style.display = 'block'; allContent.classList.add('active'); }
-    } else {
-        if (hero) hero.classList.add('hide-hero');
-        const target = document.getElementById(tabName + '-content');
-        if (target) { target.style.display = 'block'; target.classList.add('active'); }
-    }
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
 
-    // 4. السكرول (مرة واحدة كفاية وشاملة)
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-}
-
+        // Smooth scrolling for anchor links (only for contact link on homepage)
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href === '#contact' || href === '#home') {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
     </script>
 </body>
 </html>
