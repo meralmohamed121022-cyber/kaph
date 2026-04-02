@@ -1827,18 +1827,9 @@ function showTab(tabName, event) {
         tab.classList.remove('active');
     });
 
-    // 2. إضافة اللون النشط للتاب (معالجة فائقة الذكاء)
-    if (event && event.currentTarget && event.currentTarget.classList.contains('tab-box')) {
-        // لو الـ event شغال تمام
+    // 2. إضافة اللون النشط للتاب اللي ضغطت عليه حالياً
+    if (event) {
         event.currentTarget.classList.add('active');
-    } else {
-        // حل احتياطي: بنور التاب اللي فيه اسم القسم في الـ onclick بتاعه
-        allTabs.forEach(tab => {
-            const clickAttr = tab.getAttribute('onclick') || "";
-            if (clickAttr.includes(`'${tabName}'`)) {
-                tab.classList.add('active');
-            }
-        });
     }
 
     // 3. إخفاء كل محتويات الأقسام
@@ -1847,17 +1838,13 @@ function showTab(tabName, event) {
         content.style.display = 'none';
     });
 
-    // 4. التحكم في الهيرو (التعريف والصورة)
+    // 4. التحكم في الهيرو (الصورة والتعريف)
     if (tabName === 'all') {
-        if (hero) hero.classList.remove('hide-hero');
-        const allContent = document.getElementById('all-content');
-        if (allContent) {
-            allContent.style.display = 'block';
-            allContent.classList.add('active');
-        }
+        hero.classList.remove('hide-hero'); // يرجع يظهر ويأخذ مكانه
+        document.getElementById('all-content').style.display = 'block';
+        document.getElementById('all-content').classList.add('active');
     } else {
-        // بنخفي الهيرو ونظهر القسم المطلوب
-        if (hero) hero.classList.add('hide-hero');
+        hero.classList.add('hide-hero'); // يختفي تماماً ويشيل مساحته من الصفحة
         const target = document.getElementById(tabName + '-content');
         if (target) {
             target.style.display = 'block';
@@ -1865,11 +1852,8 @@ function showTab(tabName, event) {
         }
     }
 
-    // 5. إجبار المتصفح على السكرول لأعلى (حل سحري لمشاكل الـ Iframe)
-    // بنجرب بكل الطرق الممكنة عشان نضمن الاستجابة
+    // 5. نطلع لأول الصفحة عشان القسم يبدأ من تحت التابات مباشرة
     window.scrollTo({ top: 0, behavior: 'instant' });
-    document.body.scrollTop = 0; 
-    document.documentElement.scrollTop = 0;
 }
 </script>
     </script>
