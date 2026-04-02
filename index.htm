@@ -529,7 +529,13 @@
         <button id="floatingBackBtn" onclick="closeIframe()">
             <div class="back-arrow"></div>
         </button>
-      <iframe id="embeddedFrame" src="about:blank" allowfullscreen allow="autoplay; fullscreen" scrolling="yes"></iframe>
+     <iframe id="embeddedFrame" 
+        src="about:blank" 
+        allowfullscreen 
+        allow="autoplay; fullscreen" 
+        scrolling="yes"
+        sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts">
+</iframe>
         <div id="iframeError">
             <i class="fas fa-exclamation-triangle"></i>
             <h3>Connection Error</h3>
