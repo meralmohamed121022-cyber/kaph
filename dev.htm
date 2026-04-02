@@ -215,17 +215,24 @@
             color: var(--orange);
         }
 
-        /* Hero Section */
-        .hero-section {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding-top: 140px;
-            padding-bottom: 50px;
-            position: relative;
-        }
+      .hero-section {
+    display: block; /* الحالة العادية */
+    transition: all 0.4s ease;
+}
 
+/* الكلاس ده هيشيل المساحة تماماً */
+.hero-section.hide-hero {
+    display: none !important; 
+}
+
+/* تأكد إن التابات ثابتة فوق دايماً */
+.top-tabs {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--dark-blue);
+    padding: 10px 0;
+}
         .hero-content {
             text-align: center;
             z-index: 10;
@@ -1153,10 +1160,7 @@
                 </div>
                 <h1 class="hero-title">Mohamed Kholeif</h1>
                 <p class="hero-subtitle">💊 Community Pharmacist</p>
-                <p class="hero-description">
-                    Community Pharmacist, graduated from the Faculty of Pharmacy, Damanhour University with summa cum laude (Graduated with Honours). 
-                    I have been working in the field of pharmacy since 2013. I'm interested in technology and AI and how to use them in the field of pharmacy.
-                </p>
+                
                 <div class="social-links">
                     <a href="https://www.facebook.com/share/1Ghv7eEw6A/" target="_blank" class="social-btn" title="Facebook">
                         <i class="fab fa-facebook-f"></i>
@@ -1821,71 +1825,106 @@
     
     <script>
         // Tab Navigation System - Fixed to show content immediately
-        function showTab(tabName) {
-            // Remove active class from all tabs
-            document.querySelectorAll('.tab-box').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Hide all content areas
-            document.querySelectorAll('.tab-content-area').forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Show selected content
-            if (tabName === 'all') {
-                document.getElementById('all-content').classList.add('active');
-                document.querySelectorAll('.tab-box')[0].classList.add('active');
-            } else {
-                document.getElementById(tabName + '-content').classList.add('active');
-                event.target.closest('.tab-box').classList.add('active');
+ function showTab(tabName, event) {
+    const hero = document.getElementById('home');
+    const allTabs = document.querySelectorAll('.tab-box');
+    const allContents = document.querySelectorAll('.tab-content-area');
+
+    // 1. مسح حالة Active من كل التابات عشان اللون يختفي
+    allTabs.forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    // 2. تلوين التاب اللي ضغطت عليه حالاً
+    if (event) {
+        event.currentTarget.classList.add('active');
+    } else if (tabName === 'all') {
+        // لو مفيش event (زي أول ما الصفحة تفتح) بنلون تاب All
+        document.querySelector('.tab-box').classList.add('active');
+    }
+
+    // 3. إخفاء كل مناطق المحتوى (عشان ميظهروش تحت بعض)
+    allContents.forEach(content => {
+        content.style.display = 'none';
+        content.classList.remove('active');
+    });
+
+    // 4. التحكم في الهيرو (الصورة والتعريف) والأقسام
+    if (tabName === 'all') {
+        // يظهر الهيرو والتعريف
+        if (hero) {
+            hero.style.display = 'flex';
+            hero.classList.remove('hide-hero');
+        }
+        const allContentArea = document.getElementById('all-content');
+        if (allContentArea) {
+            allContentArea.style.display = 'block';
+            allContentArea.classList.add('active');
+        }
+    } else {
+        // يخفي الهيرو تماماً ويشيل مساحته
+        if (hero) {
+            hero.style.display = 'none';
+            hero.classList.add('hide-hero');
+        }
+        // يظهر القسم اللي اخترته بس
+        const target = document.getElementById(tabName + '-content');
+        if (target) {
+            target.style.display = 'block';
+            target.classList.add('active');
+        }
+    }
+
+    // 5. رفع الشاشة لفوق دايماً
+    window.scrollTo({
+        top: 0,
+        behavior: 'instant'
+    });
+}
+
+// --- باقي الأكواد بتاعتك زي ما هي عشان متخربش ---
+
+// Scroll animations (Fade in)
+const fadeElements = document.querySelectorAll('.fade-in');
+const appearOnScroll = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('visible');
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.1 });
+
+fadeElements.forEach(element => { appearOnScroll.observe(element); });
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+    const navbar = document.querySelector('.navbar-custom');
+    if (navbar) {
+        if (window.scrollY > 50) {
+            navbar.classList.add('scrolled');
+        } else {
+            navbar.classList.remove('scrolled');
+        }
+    }
+});
+
+// Smooth scrolling for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href === '#contact' || href === '#home') {
+            e.preventDefault();
+            const target = document.querySelector(href);
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             }
         }
-
-        // Scroll animations
-        const fadeElements = document.querySelectorAll('.fade-in');
-        
-        const appearOnScroll = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                    observer.unobserve(entry.target);
-                }
-            });
-        }, {
-            threshold: 0.1
-        });
-        
-        fadeElements.forEach(element => {
-            appearOnScroll.observe(element);
-        });
-
-        // Navbar scroll effect
-        window.addEventListener('scroll', () => {
-            const navbar = document.getElementById('navbar');
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
-            } else {
-                navbar.classList.remove('scrolled');
-            }
-        });
-
-        // Smooth scrolling for anchor links (only for contact link on homepage)
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                const href = this.getAttribute('href');
-                if (href === '#contact' || href === '#home') {
-                    e.preventDefault();
-                    const target = document.querySelector(href);
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                }
-            });
-        });
+    });
+});
     </script>
 </body>
 </html>
