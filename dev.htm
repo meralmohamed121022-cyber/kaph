@@ -1827,15 +1827,13 @@ function showTab(tabName, event) {
         tab.classList.remove('active');
     });
 
-    // 2. إضافة اللون النشط للتاب (معالجة فائقة الذكاء)
-    if (event && event.currentTarget && event.currentTarget.classList.contains('tab-box')) {
-        // لو الـ event شغال تمام
+    // 2. إضافة اللون النشط للتاب (مع معالجة ذكية لو الـ event مش موجود)
+    if (event && event.currentTarget) {
         event.currentTarget.classList.add('active');
     } else {
-        // حل احتياطي: بنور التاب اللي فيه اسم القسم في الـ onclick بتاعه
+        // لو مفيش event (زي ما بيحصل في بعض المتصفحات جوه Iframe) بنور التاب يدوياً
         allTabs.forEach(tab => {
-            const clickAttr = tab.getAttribute('onclick') || "";
-            if (clickAttr.includes(`'${tabName}'`)) {
+            if (tab.getAttribute('onclick').includes(`'${tabName}'`)) {
                 tab.classList.add('active');
             }
         });
@@ -1847,7 +1845,7 @@ function showTab(tabName, event) {
         content.style.display = 'none';
     });
 
-    // 4. التحكم في الهيرو (التعريف والصورة)
+    // 4. التحكم في الهيرو (الصورة والتعريف)
     if (tabName === 'all') {
         if (hero) hero.classList.remove('hide-hero');
         const allContent = document.getElementById('all-content');
@@ -1856,7 +1854,6 @@ function showTab(tabName, event) {
             allContent.classList.add('active');
         }
     } else {
-        // بنخفي الهيرو ونظهر القسم المطلوب
         if (hero) hero.classList.add('hide-hero');
         const target = document.getElementById(tabName + '-content');
         if (target) {
@@ -1865,10 +1862,10 @@ function showTab(tabName, event) {
         }
     }
 
-    // 5. إجبار المتصفح على السكرول لأعلى (حل سحري لمشاكل الـ Iframe)
-    // بنجرب بكل الطرق الممكنة عشان نضمن الاستجابة
-    window.scrollTo({ top: 0, behavior: 'instant' });
-    document.body.scrollTop = 0; 
+    // 5. نطلع لأول الصفحة (تعديل لضمان العمل جوه Iframe)
+    // بنستخدم scrollTo(0,0) وكمان بنحرك الـ body لزيادة التأكيد
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 }
 </script>
