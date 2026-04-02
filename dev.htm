@@ -214,11 +214,7 @@
     display: block; /* الحالة العادية */
     transition: all 0.4s ease;
 }
-
-/* الكلاس ده هيشيل المساحة تماماً */
-.hero-section.hide-hero {
-    display: none !important; 
-}
+.hero-section.hide-hero { display: none !important; }
 
 /* تأكد إن التابات ثابتة فوق دايماً */
 .top-tabs {
@@ -1822,40 +1818,39 @@ function showTab(tabName, event) {
     const allTabs = document.querySelectorAll('.tab-box');
     const allContents = document.querySelectorAll('.tab-content-area');
 
-    // 1. إزالة اللون النشط من كل التابات
-    allTabs.forEach(tab => {
-        tab.classList.remove('active');
-    });
-
-    // 2. إضافة اللون النشط للتاب اللي ضغطت عليه حالياً
-    if (event) {
-        event.currentTarget.classList.add('active');
-    }
-
-    // 3. إخفاء كل محتويات الأقسام
+    // 1. مسح الحالة النشطة من الجميع
+    allTabs.forEach(tab => tab.classList.remove('active'));
     allContents.forEach(content => {
         content.classList.remove('active');
         content.style.display = 'none';
     });
 
-    // 4. التحكم في الهيرو (الصورة والتعريف)
-    if (tabName === 'all') {
-        hero.classList.remove('hide-hero'); // يرجع يظهر ويأخذ مكانه
-        document.getElementById('all-content').style.display = 'block';
-        document.getElementById('all-content').classList.add('active');
+    // 2. تحديد الزرار النشط (تعديل مهم جداً)
+    if (event && event.currentTarget) {
+        // بنستخدم closest عشان نضمن إنه يمسك الزرار حتى لو ضغطت على الأيقونة
+        event.currentTarget.closest('.tab-box').classList.add('active');
     } else {
-        hero.classList.add('hide-hero'); // يختفي تماماً ويشيل مساحته من الصفحة
-        const target = document.getElementById(tabName + '-content');
-        if (target) {
-            target.style.display = 'block';
-            target.classList.add('active');
-        }
+        allTabs.forEach(tab => {
+            if (tab.getAttribute('onclick').includes(`'${tabName}'`)) tab.classList.add('active');
+        });
     }
 
-    // 5. نطلع لأول الصفحة عشان القسم يبدأ من تحت التابات مباشرة
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    // 3. إظهار المحتوى المختار
+    if (tabName === 'all') {
+        if (hero) hero.classList.remove('hide-hero');
+        const allContent = document.getElementById('all-content');
+        if (allContent) { allContent.style.display = 'block'; allContent.classList.add('active'); }
+    } else {
+        if (hero) hero.classList.add('hide-hero');
+        const target = document.getElementById(tabName + '-content');
+        if (target) { target.style.display = 'block'; target.classList.add('active'); }
+    }
+
+    // 4. السكرول (مرة واحدة كفاية وشاملة)
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
 }
-</script>
+
     </script>
 </body>
 </html>
