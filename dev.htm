@@ -1,1861 +1,997 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mohamed Kholeif - Community Pharmacist Portfolio 💊</title>
-    
-    <!-- Bootstrap 5 -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>MONO SYSTEM 💊</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="icon"
+        href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
+    <link rel="apple-touch-icon"
+        href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        /* --- GLOBAL RESET & VARS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         :root {
-            --dark-blue: #0f172a;
-            --medium-blue: #1e3a8a;
-            --light-blue: #3b82f6;
-            --orange: #f59e0b;
-            --dark-orange: #ea580c;
-            --white: #ffffff;
-            --gray: #94a3b8;
-            --light-gray: #cbd5e1;
+            --bg-primary: #0a1628;
+            --bg-secondary: #1a2942;
+            --text-primary: #ffffff;
+            --text-secondary: #e0e0e0;
+            --accent-orange: #ff6b35;
+            --accent-orange-light: #ff8c42;
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --border-color: rgba(255, 255, 255, 0.2);
+            --nav-bg-start: #0d2137;
+            --nav-bg-end: #1a3a52;
+            --glass-bg: rgba(13, 33, 55, 0.85);
         }
 
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: var(--dark-blue);
-            color: var(--white);
+        body.day-mode {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --text-primary: #0d2137;
+            --text-secondary: #4a5568;
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --border-color: rgba(13, 33, 55, 0.1);
+            --nav-bg-start: #ffffff;
+            --nav-bg-end: #f7fafc;
+            --glass-bg: rgba(255, 255, 255, 0.9);
+        }
+        
+        html { scroll-behavior: smooth; }
+        
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            padding-bottom: 120px;
             overflow-x: hidden;
+            transition: background 0.3s ease, color 0.3s ease;
+            min-height: 100vh;
             position: relative;
         }
 
-        /* Animated Background */
-        .animated-bg {
+        /* --- UTILITIES --- */
+        .hidden { display: none !important; }
+        
+        /* --- TOGGLE BUTTONS --- */
+        .floating-btn {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            overflow: hidden;
-        }
-
-        .animated-bg::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.1) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: moveGrid 20s linear infinite;
-        }
-
-        @keyframes moveGrid {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
-        }
-
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(245, 158, 11, 0.15), transparent);
-            animation: float 15s infinite ease-in-out;
-        }
-
-        .shape:nth-child(1) {
-            width: 300px;
-            height: 300px;
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-        }
-
-        .shape:nth-child(2) {
-            width: 200px;
-            height: 200px;
-            top: 60%;
-            right: 10%;
-            animation-delay: 5s;
-        }
-
-        .shape:nth-child(3) {
-            width: 250px;
-            height: 250px;
-            bottom: 10%;
-            left: 50%;
-            animation-delay: 10s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) translateX(0); }
-            33% { transform: translateY(-30px) translateX(30px); }
-            66% { transform: translateY(30px) translateX(-30px); }
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--dark-blue);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: linear-gradient(180deg, var(--orange), var(--dark-orange));
-            border-radius: 10px;
-            border: 2px solid var(--dark-blue);
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(180deg, var(--dark-orange), var(--orange));
-        }
-
-      .top-tabs {
-    position: sticky; 
-    top: 0;
-    width: 100%;
-    background: rgba(15, 23, 42, 0.98);
-    backdrop-filter: blur(15px);
-    padding: 0.6rem 0;
-    z-index: 1000;
-    border-bottom: 2px solid rgba(245, 158, 11, 0.3);
-}
-        .tabs-container {
-            display: flex;
-            justify-content: center;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-            padding: 0 1rem;
-        }
-
-        .tab-box {
-            background: rgba(30, 58, 138, 0.3);
-            border: 2px solid rgba(245, 158, 11, 0.3);
-            border-radius: 10px;
-            padding: 0.6rem 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .tab-box:hover {
-            background: rgba(245, 158, 11, 0.2);
-            border-color: var(--orange);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(245, 158, 11, 0.3);
-        }
-
-        .tab-box.active {
-            background: linear-gradient(135deg, var(--orange), var(--dark-orange));
-            border-color: var(--orange);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
-        }
-
-        .tab-box i {
-            font-size: 1.1rem;
-        }
-
-        /* Navbar */
-        .navbar-custom {
-            background: rgba(15, 23, 42, 0.95);
-            backdrop-filter: blur(15px);
-            padding: 0.8rem 0;
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-            position: fixed;
-            width: 100%;
-            top: 0;
             z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .navbar-custom.scrolled {
-            background: rgba(15, 23, 42, 0.98);
-            box-shadow: 0 4px 40px rgba(0, 0, 0, 0.6);
-        }
-
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--white) !important;
-            letter-spacing: 1px;
-        }
-
-        .navbar-brand span {
-            color: var(--orange);
-        }
-.hero-section {
-    display: block; /* الحالة العادية */
-    transition: all 0.4s ease;
-}
-
-/* الكلاس ده هيشيل المساحة تماماً */
-.hero-section.hide-hero {
-    display: none !important; 
-}
-
-/* تأكد إن التابات ثابتة فوق دايماً */
-.top-tabs {
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    background: var(--dark-blue);
-    padding: 10px 0;
-}
-        .hero-content {
-            text-align: center;
-            z-index: 10;
-        }
-
-        .profile-wrapper {
-            position: relative;
-            width: 220px;
-            height: 220px;
-            margin: 0 auto 1.5rem;
-        }
-
-        .profile-wrapper::before {
-            content: '';
-            position: absolute;
-            top: -12px;
-            left: -12px;
-            right: -12px;
-            bottom: -12px;
-            background: linear-gradient(45deg, var(--orange), var(--light-blue), var(--orange));
-            border-radius: 50%;
-            animation: rotate-border 4s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes rotate-border {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .profile-image {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 5px solid var(--dark-blue);
-            box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
-            animation: float-profile 3s ease-in-out infinite;
-        }
-
-        @keyframes float-profile {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .hero-title {
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 900;
-            margin-bottom: 0.8rem;
-            background: linear-gradient(135deg, var(--white), var(--orange));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            line-height: 1.2;
-        }
-
-        .hero-subtitle {
-            font-size: clamp(1.2rem, 3vw, 1.8rem);
-            color: var(--orange);
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .hero-description {
-            font-size: clamp(0.95rem, 2vw, 1.1rem);
-            color: var(--gray);
-            max-width: 600px;
-            margin: 0 auto 1.5rem;
-            line-height: 1.6;
-            padding: 0 1rem;
-        }
-
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 0.8rem;
-            margin: 1.5rem 0;
-            flex-wrap: wrap;
-        }
-
-        .social-btn {
             width: 50px;
             height: 50px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(245, 158, 11, 0.1);
-            border: 2px solid var(--orange);
-            color: var(--orange);
-            font-size: 1.3rem;
-            transition: all 0.3s;
-            text-decoration: none;
-        }
-
-        .social-btn:hover {
-            background: var(--orange);
-            color: var(--white);
-            transform: translateY(-5px) scale(1.08);
-            box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
-        }
-
-        /* Buttons */
-        .btn-custom {
-            padding: 12px 35px;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 50px;
             border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.3s;
-            margin: 0.4rem;
-            display: inline-block;
-            text-decoration: none;
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        .floating-btn:active { transform: scale(0.9); }
+
+        .mode-toggle { top: 20px; left: 20px; background: var(--accent-orange); color: white; font-size: 20px; border: 2px solid white; }
+        .scroll-toggle { bottom: 100px; right: 20px; background: var(--nav-bg-start); color: var(--text-primary); border: 1px solid var(--border-color); }
+
+      /* 🔥 IFRAME FULLSCREEN CONTAINER - UPDATED BY GEMINI 🔥 */
+     /* 🔥 IFRAME CONTAINER - UPDATED TO KEEP NAV BAR VISIBLE 🔥 */
+        #iframeContainer {
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            /* التعديل السحري: الطول بيساوي الشاشة ناقص طول الناف بار */
+            height: calc(100% - 70px); 
+            background: var(--bg-primary); 
+            /* خليناه 20000 عشان الناف بار (21000) يغطي عليه ويفضل باين */
+            z-index: 20000; 
+            display: none; 
+            flex-direction: column; 
+            opacity: 0; 
+            transition: opacity 0.4s ease;
+            padding-bottom: 0; 
+            pointer-events: auto; 
+        }
+        
+        #iframeContainer.show { 
+            display: flex; 
+            opacity: 1; 
         }
 
-        .btn-custom::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
+        /* زرار الرجوع - خليه زي ما هو بس اتأكد إنه تحت الناف بار */
+        #iframeBackBtn {
+            background: rgba(0, 0, 0, 0.7); 
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.2); 
+            cursor: pointer; 
+            display: flex;
+            align-items: center; 
+            justify-content: center; 
+            padding: 12px; 
+            transition: 0.3s; 
+            position: absolute; 
+            top: 25px;
+            left: 20px;
+            z-index: 20005; /* أعلى من الكانتينر وأقل من الناف بار */
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
+        
+        #iframeBackBtn:active { transform: scale(0.9); }
 
-        .btn-custom:hover::before {
-            width: 300px;
-            height: 300px;
-            top: calc(50% - 150px);
-            left: calc(50% - 150px);
+        .back-arrow {
+            width: 0; 
+            height: 0; 
+            border-top: 10px solid transparent; 
+            border-bottom: 10px solid transparent;
+            border-right: 15px solid #4ade80; 
+            transition: 0.3s; 
+            filter: drop-shadow(0 2px 8px rgba(74, 222, 128, 0.4));
         }
+        
+        #iframeBackBtn:hover .back-arrow { border-right-color: #22c55e; transform: translateX(-3px); }
 
-        .btn-primary-custom {
-            background: linear-gradient(135deg, var(--orange), var(--dark-orange));
-            color: var(--white);
-            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
-        }
-
-        .btn-primary-custom:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(245, 158, 11, 0.6);
-            color: var(--white);
-        }
-
-        .btn-secondary-custom {
-            background: transparent;
-            color: var(--white);
-            border: 2px solid var(--orange);
-        }
-
-        .btn-secondary-custom:hover {
-            background: var(--orange);
-            transform: translateY(-3px);
-            color: var(--white);
-        }
-
-        /* Section Styling */
-        .section {
-            padding: 80px 0 60px;
-            position: relative;
-        }
-
-        .section-title {
-            font-size: clamp(1.8rem, 4vw, 3rem);
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-            display: inline-block;
-            width: 100%;
-        }
-
-        .section-title::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
-            background: linear-gradient(90deg, var(--orange), var(--dark-orange));
-            border-radius: 3px;
-        }
-
-        /* Tab Content Areas */
-        .tab-content-area {
-            display: none;
-            animation: fadeIn 0.4s ease-in;
-        }
-
-        .tab-content-area.active {
+        #embeddedFrame { 
+            flex: 1; 
+            width: 100%; 
+            height: 100%;
+            border: none; 
+            background: white; 
+            pointer-events: auto !important;
             display: block;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 🛡️ ERROR MESSAGE 🛡️ */
+        #iframeError {
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%);
+            text-align: center; 
+            background: var(--card-bg); 
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color); 
+            border-radius: 20px; 
+            padding: 40px 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3); 
+            display: none; 
+            z-index: 20010; 
+            max-width: 400px; 
+            width: 90%;
         }
 
-        /* Card Styling */
-        .glass-card {
-            background: rgba(30, 58, 138, 0.25);
-            backdrop-filter: blur(10px);
-            border-radius: 18px;
-            padding: 2rem;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            box-shadow: 0 8px 35px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s;
-            margin-bottom: 1.5rem;
+        /* ✅ تأكيد أخير: لازم الناف بار يكون واخد z-index عالي جداً */
+        #bottomNav {
+            z-index: 21000 !important;
+        }
+        #homePage { padding: 20px; padding-top: 90px; max-width: 800px; margin: 0 auto; }
+
+        /* --- BANNER CAROUSEL --- */
+        .banner-container {
+            position: relative; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            margin-bottom: 25px; min-height: 220px; background: var(--card-bg);
+        }
+        .banner-slide {
+            position: absolute; top:0; left:0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center; padding: 25px;
+            opacity: 0; transition: opacity 0.8s ease; cursor: pointer;
+        }
+        .banner-slide::after {
+            content: ''; position: absolute; top:0; left:0; right:0; bottom:0;
+            background: linear-gradient(to right, rgba(0,0,0,0.7), rgba(0,0,0,0.1)); z-index: 1;
+        }
+        .banner-content { position: relative; z-index: 2; color: white; }
+        .banner-slide.active { opacity: 1; z-index: 1; }
+        .banner-slide h2 { font-size: 24px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-orange); text-shadow: 1px 1px 2px black; }
+        .banner-slide p { font-size: 14px; max-width: 80%; line-height: 1.4; }
+        .banner-bg-media { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; pointer-events: none; }
+
+        /* --- CONTENT CARDS --- */
+        .content-grid { display: flex; flex-direction: column; gap: 20px; }
+        .content-card {
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px;
+            padding: 15px; overflow: visible; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .card-header h3 { color: var(--accent-orange-light); font-size: 18px; font-weight: 700; }
+
+        .media-container {
+            position: relative; width: 100%; min-height: 200px; max-height: 500px; border-radius: 12px;
+            overflow: visible; background: rgba(0,0,0,0.05); margin-bottom: 10px; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .media-container img {
+            width: 100%; height: auto; max-height: 480px; display: block; object-fit: contain;
+            border-radius: 12px; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+        }
+        .media-container video { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+        .zoom-icon {
+            position: absolute; bottom: 15px; right: 15px; background: rgba(0,0,0,0.7); color: var(--accent-orange);
+            width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            pointer-events: none; font-size: 16px; border: 1px solid rgba(255,255,255,0.2); z-index: 10;
+        }
+        .gallery-dots {
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 8px; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 20px; z-index: 10;
+        }
+        .gallery-dot { width: 8px; height: 8px; background: rgba(255,255,255,0.5); border-radius: 50%; cursor: pointer; }
+        .gallery-dot.active { background: var(--accent-orange); transform: scale(1.2); }
+        .card-desc { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-top: 10px; }
+
+        /* --- LIGHTBOX --- */
+        #lightbox {
+            position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.95); z-index: 10000;
+            display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s;
+        }
+        #lightbox.show { display: flex; opacity: 1; }
+        #lightbox img { 
+            max-width: 95%; max-height: 90%; border-radius: 5px; box-shadow: 0 0 20px rgba(255,255,255,0.1); 
+            object-fit: contain; touch-action: none; cursor: grab; transition: transform 0.1s ease-out;
+        }
+        #lightbox img:active { cursor: grabbing; }
+        .lightbox-close { position: absolute; top: 20px; right: 20px; color: white; font-size: 35px; cursor: pointer; z-index: 10001; }
+
+       /* --- NAV BAR --- */
+#bottomNav {
+    position: fixed; 
+    bottom: 0; 
+    left: 0; 
+    width: 100%; 
+    background: var(--glass-bg); 
+    backdrop-filter: blur(20px);
+    padding: 10px 0; 
+    display: flex; 
+    justify-content: space-around; 
+    border-top: 1px solid var(--border-color);
+    z-index: 21000; /* ✅ تم رفعه ليكون فوق كل شيء */
+    transition: transform 0.4s ease; 
+    padding-bottom: max(10px, env(safe-area-inset-bottom)); 
+    box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+}
+
+#bottomNav.hidden { transform: translateY(100%); }
+
+.nav-btn { 
+    background: none; 
+    border: none; 
+    color: var(--text-secondary); 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 5px; 
+    cursor: pointer; 
+    transition: 0.3s; 
+}
+
+.nav-btn i { font-size: 20px; opacity: 0.7; }
+.nav-btn span { font-size: 10px; font-weight: 600; opacity: 0.7; }
+.nav-btn.active i, .nav-btn.active span { color: var(--accent-orange); opacity: 1; }
+.nav-btn.active i { transform: translateY(-3px); }
+        /* --- SECTIONS MENU --- */
+      /* --- SECTIONS MENU --- */
+        #sectionsMenu {
+            position: fixed; 
+            bottom: 100px; 
+            left: 50%; 
+            transform: translateX(-50%) scale(0.9); 
+            width: 92%; 
+            max-width: 400px;
+            background: var(--glass-bg); 
+            backdrop-filter: blur(25px); 
+            border: 1px solid var(--border-color);
+            border-radius: 24px; 
+            padding: 20px; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            z-index: 22000; /* ✅ تم رفعه ليكون أعلى من الناف بار والـ Iframe */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 12px; 
+            justify-content: center; 
+            max-height: 70vh; 
+            overflow-y: auto;
         }
 
-        .glass-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 45px rgba(245, 158, 11, 0.3);
-            border-color: var(--orange);
+        #sectionsMenu.show { 
+            opacity: 1; 
+            transform: translateX(-50%) scale(1); 
+            pointer-events: auto; 
         }
 
-        /* About Section */
-        .about-text {
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: var(--gray);
+        .menu-header { 
+            width: 100%; 
+            text-align: center; 
+            margin-bottom: 10px; 
+            padding-bottom: 10px; 
+            border-bottom: 1px solid var(--border-color); 
         }
 
-        .about-text strong {
-            color: var(--orange);
-            font-size: 1.3rem;
-            display: block;
-            margin-bottom: 0.8rem;
+        .menu-header span { 
+            color: var(--accent-orange); 
+            font-size: 14px; 
+            font-weight: 800; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
         }
 
-        /* Skills Section */
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2.5rem;
-        }
-
-        .skill-card {
-            background: rgba(30, 58, 138, 0.25);
-            backdrop-filter: blur(10px);
-            border-radius: 18px;
-            padding: 1.8rem;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            transition: all 0.3s;
-        }
-
-        .skill-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 45px rgba(245, 158, 11, 0.3);
-            border-color: var(--orange);
-        }
-
-        .skill-name {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 1.3rem;
-            color: var(--white);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .skill-name i {
-            color: var(--orange);
-        }
-
-        .skill-bar {
-            width: 100%;
-            height: 12px;
-            background: rgba(100, 116, 139, 0.3);
-            border-radius: 10px;
+        .section-btn {
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px;
+            width: calc(50% - 6px); 
+            min-height: 110px; 
+            padding: 15px 10px; 
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color); 
+            border-radius: 20px; 
+            color: var(--text-primary); 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            position: relative; 
             overflow: hidden;
-            position: relative;
         }
 
-        .skill-progress {
-            height: 100%;
-            background: linear-gradient(90deg, var(--orange), var(--dark-orange));
-            border-radius: 10px;
-            position: relative;
-            box-shadow: 0 0 18px rgba(245, 158, 11, 0.5);
-            transition: width 1.5s ease-out;
+        .section-btn:hover { 
+            background: rgba(255, 107, 53, 0.15); 
+            border-color: var(--accent-orange); 
+            transform: translateY(-3px); 
         }
 
-        .skill-percentage {
-            position: absolute;
-            right: 8px;
-            top: -32px;
-            font-weight: 700;
-            color: var(--orange);
-            font-size: 1.1rem;
+        .section-btn:active { transform: scale(0.96); }
+
+        .section-btn i { 
+            font-size: 26px; 
+            color: var(--text-secondary); 
+            transition: 0.3s; 
+            filter: drop-shadow(0 2px 5px rgba(0,0,0,0.2)); 
         }
 
-        /* Personal Skills */
-        .personal-skills {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1.3rem;
-            margin-top: 2.5rem;
+        .section-btn:hover i { 
+            color: var(--accent-orange); 
+            transform: scale(1.1); 
         }
 
-        .personal-skill-item {
-            background: rgba(30, 58, 138, 0.25);
-            backdrop-filter: blur(10px);
-            padding: 1.8rem;
-            border-radius: 18px;
-            text-align: center;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            transition: all 0.3s;
+        .section-btn span { 
+            font-size: 13px; 
+            font-weight: 600; 
+            text-align: center; 
+            line-height: 1.2; 
         }
 
-        .personal-skill-item:hover {
-            transform: scale(1.05);
-            border-color: var(--orange);
-            box-shadow: 0 12px 35px rgba(245, 158, 11, 0.3);
+        .section-btn.full-width { 
+            width: 100%; 
+            flex-direction: row; 
+            min-height: 65px; 
+            gap: 15px; 
+            padding: 10px 20px; 
+        }
+        
+        #overlay { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 21500; /* ✅ تم رفعه ليكون تحت المنيو وفوق الناف بار */
+            display: none; 
+            backdrop-filter: blur(4px); 
+            transition: opacity 0.3s; 
         }
 
-        .personal-skill-item i {
-            font-size: 2.8rem;
-            color: var(--orange);
-            margin-bottom: 0.8rem;
-        }
-
-        .personal-skill-item h4 {
-            font-size: 1.05rem;
-            font-weight: 600;
-        }
-
-        .personal-skill-item .skill-percent {
-            font-size: 1.4rem;
-            font-weight: 700;
-            color: var(--orange);
-            margin-top: 0.4rem;
-        }
-
-        /* Timeline */
-        .timeline {
-            position: relative;
-            padding: 1.5rem 0;
-            max-width: 950px;
-            margin: 0 auto;
-        }
-
-        .timeline::before {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 3px;
-            height: 100%;
-            background: linear-gradient(180deg, var(--orange), var(--dark-orange));
-        }
-
-        .timeline-item {
-            display: flex;
-            margin-bottom: 3rem;
-            position: relative;
-        }
-
-        .timeline-item:nth-child(odd) {
-            justify-content: flex-start;
-        }
-
-        .timeline-item:nth-child(even) {
-            justify-content: flex-end;
-        }
-
-        .timeline-content {
-            width: 45%;
-            background: rgba(30, 58, 138, 0.25);
-            backdrop-filter: blur(10px);
-            padding: 1.8rem;
-            border-radius: 18px;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            position: relative;
-            transition: all 0.3s;
-        }
-
-        .timeline-content:hover {
-            border-color: var(--orange);
-            box-shadow: 0 12px 35px rgba(245, 158, 11, 0.3);
-            transform: scale(1.02);
-        }
-
-        .timeline-icon {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 55px;
-            height: 55px;
-            background: linear-gradient(135deg, var(--orange), var(--dark-orange));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            font-size: 1.4rem;
-            box-shadow: 0 0 25px rgba(245, 158, 11, 0.6);
-            border: 4px solid var(--dark-blue);
-        }
-
-        .timeline-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--orange);
-            margin-bottom: 0.4rem;
-        }
-
-        .timeline-subtitle {
-            font-size: 1.1rem;
-            color: var(--white);
-            margin-bottom: 0.8rem;
-            font-weight: 500;
-        }
-
-        .timeline-description {
-            color: var(--gray);
-            line-height: 1.6;
-            font-size: 0.98rem;
-        }
-
-        /* Contact Section */
-        .contact-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            gap: 1.2rem;
-        }
-
-        .contact-icon {
-            width: 55px;
-            height: 55px;
-            background: linear-gradient(135deg, var(--orange), var(--dark-orange));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            color: var(--white);
-            flex-shrink: 0;
-        }
-
-        .contact-info {
-            flex: 1;
-        }
-
-        .contact-label {
-            font-size: 0.9rem;
-            color: var(--gray);
-            margin-bottom: 0.3rem;
-            font-weight: 500;
-        }
-
-        .contact-value {
-            font-size: 1.1rem;
-            color: var(--white);
-            font-weight: 600;
-        }
-
-        .contact-value a {
-            color: var(--white);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .contact-value a:hover {
-            color: var(--orange);
-        }
-
-        /* Projects Section */
-        .project-card {
-            background: rgba(30, 58, 138, 0.25);
-            backdrop-filter: blur(10px);
-            border-radius: 18px;
-            padding: 2rem;
-            border: 2px solid rgba(245, 158, 11, 0.2);
-            transition: all 0.3s;
-            margin-bottom: 1.5rem;
-        }
-
-        .project-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 45px rgba(245, 158, 11, 0.4);
-            border-color: var(--orange);
-        }
-
-        .project-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: var(--orange);
-            margin-bottom: 0.8rem;
-        }
-
-        .project-description {
-            color: var(--gray);
-            font-size: 1.05rem;
-            line-height: 1.7;
-            margin-bottom: 1.3rem;
-        }
-
-        .project-links {
-            display: flex;
-            gap: 0.8rem;
-            flex-wrap: wrap;
-        }
-
-        .project-link {
-            padding: 0.7rem 1.3rem;
-            background: linear-gradient(135deg, var(--orange), var(--dark-orange));
-            color: var(--white);
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.95rem;
-        }
-
-        .project-link:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(245, 158, 11, 0.5);
-            color: var(--white);
-        }
-
-        /* Interests Section */
-        .interests-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 1.5rem;
-            margin-top: 2.5rem;
-        }
-
-        .interest-card {
-            background: rgba(30, 58, 138, 0.25);
-            backdrop-filter: blur(10px);
-            padding: 2rem;
-            border-radius: 18px;
-            text-align: center;
-            border: 1px solid rgba(245, 158, 11, 0.2);
-            transition: all 0.3s;
-        }
-
-        .interest-card:hover {
-            transform: scale(1.04);
-            border-color: var(--orange);
-            box-shadow: 0 12px 35px rgba(245, 158, 11, 0.3);
-        }
-
-        .interest-card i {
-            font-size: 3.2rem;
-            color: var(--orange);
-            margin-bottom: 1.2rem;
-        }
-
-        .interest-card h4 {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: var(--white);
-        }
-
-        /* Footer */
-        .footer {
-            background: rgba(15, 23, 42, 0.98);
-            padding: 2rem 0;
-            text-align: center;
-            border-top: 2px solid rgba(245, 158, 11, 0.3);
-        }
-
-        .footer-text {
-            color: var(--gray);
-            font-size: 1.05rem;
-            font-weight: 500;
-        }
-
-        .footer-text span {
-            color: var(--orange);
-            font-weight: 700;
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            body {
-                font-size: 15px;
-            }
-
-            .container {
-                max-width: 100% !important;
-                padding: 0 1.8rem !important;
-            }
-
-            .glass-card {
-                padding: 1.5rem !important;
-                margin-bottom: 1.5rem;
-            }
-
-            .section {
-                padding: 60px 0 50px !important;
-            }
-
-            .hero-section {
-                padding-top: 130px !important;
-                padding-bottom: 30px !important;
-                min-height: auto !important;
-            }
-
-            .top-tabs {
-                top: 60px;
-                padding: 0.6rem 0;
-            }
-
-            .tabs-container {
-                gap: 0.4rem;
-                padding: 0 0.8rem;
-            }
-
-            .tab-box {
-                padding: 0.5rem 0.9rem;
-                font-size: 0.85rem;
-                gap: 0.4rem;
-            }
-
-            .tab-box i {
-                font-size: 1rem;
-            }
-
-            .navbar-custom {
-                padding: 0.6rem 0;
-            }
-
-            .navbar-brand {
-                font-size: 1.3rem;
-            }
-
-            .profile-wrapper {
-                width: 180px;
-                height: 180px;
-                margin-bottom: 1.2rem;
-            }
-
-            .hero-description {
-                font-size: 0.95rem;
-                padding: 0 0.5rem;
-                margin-bottom: 1.2rem;
-            }
-
-            .social-btn {
-                width: 45px;
-                height: 45px;
-                font-size: 1.2rem;
-            }
-
-            .btn-custom {
-                padding: 10px 25px;
-                font-size: 0.95rem;
-                margin: 0.3rem;
-            }
-
-            .section-title {
-                font-size: 1.8rem !important;
-                margin-bottom: 2rem !important;
-            }
-
-            .timeline::before {
-                left: 25px;
-            }
-
-            .timeline-item {
-                justify-content: flex-end !important;
-                margin-bottom: 2.5rem;
-            }
-
-            .timeline-content {
-                width: calc(100% - 80px);
-                padding: 1.5rem;
-            }
-
-            .timeline-icon {
-                left: 25px;
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
-
-            .timeline-title {
-                font-size: 1.3rem;
-            }
-
-            .timeline-subtitle {
-                font-size: 1rem;
-            }
-
-            .timeline-description {
-                font-size: 0.92rem;
-            }
-
-            .skills-grid, .personal-skills, .interests-grid {
-                grid-template-columns: 1fr;
-                gap: 1.2rem;
-            }
-
-            .skill-card, .personal-skill-item, .interest-card {
-                padding: 1.5rem;
-            }
-
-            .contact-item {
-                margin-bottom: 1.3rem;
-            }
-
-            .contact-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.3rem;
-            }
-
-            .project-card {
-                padding: 1.5rem;
-            }
-
-            .project-title {
-                font-size: 1.5rem;
-            }
-
-            .about-text {
-                font-size: 0.98rem;
-            }
-
-            .about-text strong {
-                font-size: 1.2rem;
-            }
-        }
-
-        /* Fade In Animation */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(25px);
-            transition: opacity 0.7s ease, transform 0.7s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        /* Top Tabs Navigation */
-.top-tabs {
+        #overlay.show { display: block; }
+       #loadingOverlay {
     position: fixed;
-    top: 60px;          /* كانت 70 أو 80 – نزلناها فوق شوية */
+    top: 0;
     left: 0;
     width: 100%;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(15px);
-    padding: 0.4rem 0;  /* قللنا الارتفاع */
-    z-index: 999;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-    border-bottom: 2px solid rgba(245, 158, 11, 0.3);
-}
-
-.tabs-container {
-    display: flex;
-    justify-content: center;
-    gap: 0.4rem;
-    flex-wrap: wrap;
-    padding: 0 0.6rem;
-    max-width: 100%;
-}
-
-.tab-box {
-    background: rgba(30, 58, 138, 0.35);
-    border: 2px solid rgba(245, 158, 11, 0.4);
-    border-radius: 10px;
-    padding: 0.35rem 0.9rem;   /* أصغر */
-    cursor: pointer;
-    transition: all 0.3s;
-    font-weight: 600;
-    font-size: 0.8rem;         /* تصغير الفونت */
-    color: var(--white);
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    white-space: nowrap;
-}
-
-/* Hero Section (صورة البروفايل والمسافة تحت التابات) */
-.hero-section {
-    min-height: 100vh;
-    display: flex;
+    height: 100%;
+    background: var(--bg-primary);
+    z-index: 20000;
+    display: none; /* تم التغيير من flex إلى none ليكون مخفي في البداية */
     align-items: center;
     justify-content: center;
-    padding-top: 200px;   /* زودنا المسافة تحت التابات */
-    padding-bottom: 50px;
-    position: relative;
+    flex-direction: column;
+    gap: 20px;
+    transition: opacity 0.5s;
+    opacity: 0;
 }
+        
+        /* NEW LOADING HAND CSS */
+        .🤚 {
+          --skin-color: #E4C560;
+          --tap-speed: 0.6s;
+          --tap-stagger: 0.1s;
+          position: relative;
+          width: 80px;
+          height: 60px;
+        }
 
-.profile-wrapper {
-    position: relative;
-    width: 200px;
-    height: 200px;
-    margin: 0 auto 1.2rem;
-}
+        .🤚:before {
+          content: '';
+          display: block;
+          width: 180%;
+          height: 75%;
+          position: absolute;
+          top: 70%;
+          right: 20%;
+          background-color: black;
+          border-radius: 40px 10px;
+          filter: blur(10px);
+          opacity: 0.3;
+        }
 
-/* موبايل */
-@media (max-width: 768px) {
-    body {
-        font-size: 14px;
-    }
+        .🌴 {
+          display: block;
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          background-color: var(--skin-color);
+          border-radius: 10px 40px;
+        }
 
-    .navbar-custom {
-        padding: 0.5rem 0;
-    }
+        .👍 {
+          position: absolute;
+          width: 120%;
+          height: 38px;
+          background-color: var(--skin-color);
+          bottom: -18%;
+          right: 1%;
+          transform-origin: calc(100% - 20px) 20px;
+          transform: rotate(-20deg);
+          border-radius: 30px 20px 20px 10px;
+          border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+          border-left: 2px solid rgba(0, 0, 0, 0.1);
+        }
 
-    .top-tabs {
-        top: 40px;          /* أبعد عن الهيدر */
-        padding: 0.3rem 0;
-    }
+        .👍:after {
+          width: 20%;
+          height: 60%;
+          content: '';
+          background-color: rgba(255, 255, 255, 0.3);
+          position: absolute;
+          bottom: -8%;
+          left: 5px;
+          border-radius: 60% 10% 10% 30%;
+          border-right: 2px solid rgba(0, 0, 0, 0.05);
+        }
 
-    .tabs-container {
-        gap: 0.3rem;
-        padding: 0 0.4rem;
-    }
+        .👉 {
+          position: absolute;
+          width: 80%;
+          height: 35px;
+          background-color: var(--skin-color);
+          bottom: 32%;
+          right: 64%;
+          transform-origin: 100% 20px;
+          animation-duration: calc(var(--tap-speed) * 2);
+          animation-timing-function: ease-in-out;
+          animation-iteration-count: infinite;
+          transform: rotate(10deg);
+        }
 
-    .tab-box {
-        padding: 0.3rem 0.7rem;
-        font-size: 0.75rem;
-    }
+        .👉:before {
+          content: '';
+          position: absolute;
+          width: 140%;
+          height: 30px;
+          background-color: var(--skin-color);
+          bottom: 8%;
+          right: 65%;
+          transform-origin: calc(100% - 20px) 20px;
+          transform: rotate(-60deg);
+          border-radius: 20px;
+        }
 
-    .hero-section {
-        padding-top: 190px;  /* مسافة أكبر بين البوكسات والصورة */
-        padding-bottom: 30px;
-        min-height: auto;
-    }
+        .👉:nth-child(1) {
+          animation-delay: 0;
+          filter: brightness(70%);
+          animation-name: tap-upper-1;
+        }
 
-    .profile-wrapper {
-        width: 170px;
-        height: 170px;
-        margin-bottom: 1rem;
-    }
+        .👉:nth-child(2) {
+          animation-delay: var(--tap-stagger);
+          filter: brightness(80%);
+          animation-name: tap-upper-2;
+        }
 
-    .hero-description {
-        font-size: 0.9rem;
-        padding: 0 0.4rem;
-    }
-}
-/* تعديل عشان البار يثبت في الصفحة وماينزلش معاك */
-.top-tabs {
-    position: absolute;  /* كان fixed وخليناه absolute */
-    top: 30px;          /* المسافة من فوق زي ما تحب */
-    left: 0;
-    width: 100%;
-    background: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(15px);
-    padding: 0.4rem 0;
-    z-index: 999;
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
-    border-bottom: 2px solid rgba(245, 158, 11, 0.3);
-}
+        .👉:nth-child(3) {
+          animation-delay: calc(var(--tap-stagger) * 2);
+          filter: brightness(90%);
+          animation-name: tap-upper-3;
+        }
 
-/* لو عايز اللوجو كمان يثبت فوق وماينزلش، غير دي كمان */
-.navbar-custom {
-    position: absolute; /* كان fixed */
-    /* باقي الكود زي ما هو */
-}
+        .👉:nth-child(4) {
+          animation-delay: calc(var(--tap-stagger) * 3);
+          filter: brightness(100%);
+          animation-name: tap-upper-4;
+        }
 
+        @keyframes tap-upper-1 {
+          0%, 50%, 100% { transform: rotate(10deg) scale(0.4); }
+          40% { transform: rotate(50deg) scale(0.4); }
+        }
+
+        @keyframes tap-upper-2 {
+          0%, 50%, 100% { transform: rotate(10deg) scale(0.6); }
+          40% { transform: rotate(50deg) scale(0.6); }
+        }
+
+        @keyframes tap-upper-3 {
+          0%, 50%, 100% { transform: rotate(10deg) scale(0.8); }
+          40% { transform: rotate(50deg) scale(0.8); }
+        }
+
+        @keyframes tap-upper-4 {
+          0%, 50%, 100% { transform: rotate(10deg) scale(1); }
+          40% { transform: rotate(50deg) scale(1); }
+        }
+        
+        #floatingBackBtn {
+            position: fixed; top: 60px; left: 10px; z-index: 20000; background: rgba(13, 33, 55, 0.7); backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: 0.3s;
+        }
+        #floatingBackBtn:hover { transform: scale(1.1); background: var(--accent-orange); }
+        #floatingBackBtn .back-arrow { margin-right: -4px; border-right-color: #4ade80; }
     </style>
 </head>
 <body>
-    <!-- Animated Background -->
-    <div class="animated-bg">
-        <div class="floating-shapes">
-            <div class="shape"></div>
-            <div class="shape"></div>
-            <div class="shape"></div>
+<div id="iframeContainer">
+        <button id="floatingBackBtn" onclick="closeIframe()">
+            <div class="back-arrow"></div>
+        </button>
+     <iframe id="embeddedFrame" 
+        src="about:blank" 
+        allowfullscreen 
+        allow="autoplay; fullscreen" 
+        scrolling="yes"
+        sandbox="allow-forms allow-modals allow-popups allow-presentation allow-same-origin allow-scripts">
+</iframe>
+        <div id="iframeError">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h3>Connection Error</h3>
+            <p>Unable to load the requested content. Please check your internet connection and try again.</p>
         </div>
     </div>
 
-  
-<div class="top-tabs">
-    <div class="tabs-container">
-        <div class="tab-box active" onclick="showTab('all', event)">
-            <i class="fas fa-home"></i>
-            <span>All</span>
-        </div>
-        <div class="tab-box" onclick="showTab('about', event)">
-            <i class="fas fa-user"></i>
-            <span>About</span>
-        </div>
-        <div class="tab-box" onclick="showTab('skills', event)">
-            <i class="fas fa-chart-bar"></i>
-            <span>Skills</span>
-        </div>
-        <div class="tab-box" onclick="showTab('education', event)">
-            <i class="fas fa-graduation-cap"></i>
-            <span>Education</span>
-        </div>
-        <div class="tab-box" onclick="showTab('experience', event)">
-            <i class="fas fa-briefcase"></i>
-            <span>Experience</span>
-        </div>
-        <div class="tab-box" onclick="showTab('projects', event)">
-            <i class="fas fa-rocket"></i>
-            <span>Projects</span>
-        </div>
-        <div class="tab-box" onclick="showTab('contact', event)">
-            <i class="fas fa-envelope"></i>
-            <span>Contact</span>
-        </div>
-    </div>
-</div>
-
-    <!-- Hero Section -->
-    <section id="home" class="hero-section">
-        <div class="container">
-            <div class="hero-content">
-                <div class="profile-wrapper">
-                    <img src="https://i.postimg.cc/zvyWYg4x/1764427549948.jpg" alt="Mohamed Kholeif" class="profile-image" onerror="this.src='https://i.imgur.com/4gpjOjK.png'">
-                </div>
-                <h1 class="hero-title">Mohamed Kholeif</h1>
-                <p class="hero-subtitle">💊 Community Pharmacist</p>
-              
-                <div class="social-links">
-                    <a href="https://www.facebook.com/share/1Ghv7eEw6A/" target="_blank" class="social-btn" title="Facebook">
-                        <i class="fab fa-facebook-f"></i>
-                    </a>
-                    <a href="mailto:Muhammedkhulif@yahoo.com" class="social-btn" title="Email">
-                        <i class="fas fa-envelope"></i>
-                    </a>
-                    <a href="tel:+966541932559" class="social-btn" title="Phone">
-                        <i class="fas fa-phone"></i>
-                    </a>
-                    <a href="https://wa.me/966541932559" target="_blank" class="social-btn" title="WhatsApp">
-                        <i class="fab fa-whatsapp"></i>
-                    </a>
-                </div>
-                <div class="mt-4">
-                    <a href="#contact" class="btn-custom btn-primary-custom">Get In Touch</a>
-                    <a href="https://monopharm-75ad2.web.app/" target="_blank" class="btn-custom btn-secondary-custom">View My App</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- All Content (Default View) -->
-    <div id="all-content" class="tab-content-area active">
-        
-        <!-- About Section -->
-        <section id="about" class="section">
-            <div class="container">
-                <h2 class="section-title fade-in">About Me 👨‍⚕️</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="glass-card fade-in">
-                            <p class="about-text">
-                                <strong>Hello! I'm Mohamed Kholeif 👋</strong>
-                                Community Pharmacist, graduated from the Faculty of Pharmacy, Damanhour University with summa cum laude (Graduated with Honours).
-                                <br><br>
-                                I have been working in the field of pharmacy since 2013. I'm interested in technology and AI and how to use them in the field of pharmacy. 
-                                I currently work in Al-Dawaa Pharmacy, where I combine my pharmaceutical expertise with modern technology to provide the best service to patients.
-                                <br><br>
-                                I learned self-reliance, good management and planning, how to deal and adapt to changes. I'm still learning and growing every day in this amazing field.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Skills Section -->
-        <section id="skills" class="section">
-            <div class="container">
-                <h2 class="section-title fade-in">Professional Skills 🎯</h2>
-                
-                <div class="skills-grid">
-                    <div class="skill-card fade-in">
-                        <div class="skill-name">
-                            <i class="fas fa-robot"></i> AI in Pharmacy
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-progress="95" style="width: 95%;">
-                                <span class="skill-percentage">95%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="skill-card fade-in">
-                        <div class="skill-name">
-                            <i class="fas fa-graduation-cap"></i> Self Learning
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-progress="90" style="width: 90%;">
-                                <span class="skill-percentage">90%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="skill-card fade-in">
-                        <div class="skill-name">
-                            <i class="fas fa-paint-brush"></i> Design
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-progress="80" style="width: 80%;">
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="skill-card fade-in">
-                        <div class="skill-name">
-                            <i class="fas fa-user-circle"></i> Profile Development
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" data-progress="80" style="width: 80%;">
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 class="text-center mt-5 mb-4 fade-in" style="font-size: 2.2rem; color: var(--orange); font-weight: 800;">Personal Skills ✨</h3>
-                <div class="personal-skills">
-                    <div class="personal-skill-item fade-in">
-                        <i class="fas fa-lightbulb"></i>
-                        <h4>Creativity</h4>
-                        <div class="skill-percent">95%</div>
-                    </div>
-                    <div class="personal-skill-item fade-in">
-                        <i class="fas fa-users"></i>
-                        <h4>Teamwork</h4>
-                        <div class="skill-percent">90%</div>
-                    </div>
-                    <div class="personal-skill-item fade-in">
-                        <i class="fas fa-crown"></i>
-                        <h4>Leadership</h4>
-                        <div class="skill-percent">80%</div>
-                    </div>
-                    <div class="personal-skill-item fade-in">
-                        <i class="fas fa-puzzle-piece"></i>
-                        <h4>Problem Solving</h4>
-                        <div class="skill-percent">90%</div>
-                    </div>
-                </div>
-
-                <h3 class="text-center mt-5 mb-4 fade-in" style="font-size: 2.2rem; color: var(--orange); font-weight: 800;">Interests 🌟</h3>
-                <div class="interests-grid">
-                    <div class="interest-card fade-in">
-                        <i class="fas fa-brain"></i>
-                        <h4>AI with Knowledge</h4>
-                    </div>
-                    <div class="interest-card fade-in">
-                        <i class="fas fa-palette"></i>
-                        <h4>Design</h4>
-                    </div>
-                    <div class="interest-card fade-in">
-                        <i class="fas fa-camera"></i>
-                        <h4>Photography</h4>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Education Section -->
-        <section id="education" class="section">
-            <div class="container">
-                <h2 class="section-title fade-in">Education 🎓</h2>
-                <div class="timeline">
-                    <div class="timeline-item fade-in">
-                        <div class="timeline-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Bachelor's Degree in Pharmaceutical Sciences</h3>
-                            <h4 class="timeline-subtitle">Damanhour University | 2011-2017</h4>
-                            <p class="timeline-description">
-                                I graduated summa cum laude (Graduated with Honours) from the Faculty of Pharmacy, Damanhour University. 
-                                During my studies, I gained comprehensive knowledge in pharmaceutical sciences, pharmacology, and clinical pharmacy practice.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Experience Section -->
-        <section id="experience" class="section">
-            <div class="container">
-                <h2 class="section-title fade-in">Work Experience 💼</h2>
-                <div class="timeline">
-                    <div class="timeline-item fade-in">
-                        <div class="timeline-icon">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Community Pharmacist</h3>
-                            <h4 class="timeline-subtitle">Aldawaa Pharmacies | From 2019 till now</h4>
-                            <p class="timeline-description">
-                                Currently working at Al-Dawaa Pharmacy in Saudi Arabia, providing comprehensive pharmaceutical care services. 
-                                I'm still learning and developing my skills in integrating technology and AI in pharmacy practice.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item fade-in">
-                        <div class="timeline-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Shift Manager</h3>
-                            <h4 class="timeline-subtitle">El-Nile Pharmacy | From 2014 to 2018</h4>
-                            <p class="timeline-description">
-                                Managed pharmacy operations and led the team at El-Nile pharmacy in Egypt. 
-                                Developed strong leadership and management skills while ensuring high-quality pharmaceutical services.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item fade-in">
-                        <div class="timeline-icon">
-                            <i class="fas fa-pills"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Pharmacist</h3>
-                            <h4 class="timeline-subtitle">El-Nile Pharmacies | Egypt, from 2013 to 2018</h4>
-                            <p class="timeline-description">
-                                Started my professional career at El-Nile pharmacies, where I gained valuable experience in community pharmacy practice, 
-                                patient counseling, and pharmaceutical care services.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 class="text-center mt-5 mb-4 fade-in" style="font-size: 2.2rem; color: var(--orange); font-weight: 800;">Professional Memberships 🏅</h3>
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="glass-card fade-in">
-                            <div class="about-text">
-                                <p style="margin-bottom: 1.2rem;">
-                                    <strong style="font-size: 1.2rem;">Member of CGP</strong>
-                                    Care Givers Professionals
-                                </p>
-                                <p style="margin-bottom: 1.2rem;">
-                                    <strong style="font-size: 1.2rem;">Pharma Committee</strong>
-                                    Active member contributing to pharmaceutical practice development
-                                </p>
-                                <p style="margin-bottom: 0;">
-                                    <strong style="font-size: 1.2rem;">Health & Wellness Committee</strong>
-                                    Dedicated to promoting health and wellness in the community
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section id="projects" class="section">
-            <div class="container">
-                <h2 class="section-title fade-in">Projects 🚀</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="project-card fade-in">
-                            <h3 class="project-title">Mono Pharm App</h3>
-                            <p class="project-description">
-                                Developed a comprehensive pharmaceutical mobile application that provides drug monographs, 
-                                medication information, and clinical pharmacy resources. The app helps healthcare professionals 
-                                and students access accurate pharmaceutical information quickly and efficiently.
-                            </p>
-                            <div class="project-links">
-                                <a href="https://monopharm-75ad2.web.app/" target="_blank" class="project-link">
-                                    <i class="fas fa-globe"></i>
-                                    Visit Website
-                                </a>
-                                <a href="https://play.google.com/store/apps/details?id=com.monopharm.monograph" target="_blank" class="project-link">
-                                    <i class="fab fa-google-play"></i>
-                                    Download on Play Store
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Contact Section -->
-        <section id="contact" class="section">
-            <div class="container">
-                <h2 class="section-title fade-in">Get In Touch 📞</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="glass-card fade-in">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fas fa-phone"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">Phone (Saudi Arabia)</div>
-                                            <div class="contact-value">
-                                                <a href="tel:+966541932559">+966 541 932 559</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fab fa-whatsapp"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">WhatsApp</div>
-                                            <div class="contact-value">
-                                                <a href="https://wa.me/966541932559" target="_blank">+966 541 932 559</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">Email</div>
-                                            <div class="contact-value">
-                                                <a href="mailto:Muhammedkhulif@yahoo.com">Muhammedkhulif@yahoo.com</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fab fa-facebook"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">Facebook</div>
-                                            <div class="contact-value">
-                                                <a href="https://www.facebook.com/share/1Ghv7eEw6A/" target="_blank">Mohamed Kholeif</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
+    <div id="lightbox" onclick="closeLightbox(event)">
+        <span class="lightbox-close">&times;</span>
+        <img id="lightboxImg" src="" alt="Zoomed">
     </div>
 
-    <!-- Individual Tab Contents -->
-    <div id="about-content" class="tab-content-area">
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">About Me 👨‍⚕️</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="glass-card">
-                            <p class="about-text">
-                                <strong>Hello! I'm Mohamed Kholeif 👋</strong>
-                                Community Pharmacist, graduated from the Faculty of Pharmacy, Damanhour University with summa cum laude (Graduated with Honours).
-                                <br><br>
-                                I have been working in the field of pharmacy since 2013. I'm interested in technology and AI and how to use them in the field of pharmacy. 
-                                I currently work in Al-Dawaa Pharmacy, where I combine my pharmaceutical expertise with modern technology to provide the best service to patients.
-                                <br><br>
-                                I learned self-reliance, good management and planning, how to deal and adapt to changes. I'm still learning and growing every day in this amazing field.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <button class="floating-btn mode-toggle" id="modeToggle" onclick="toggleMode()"><i class="fas fa-moon"></i></button>
+    <button class="floating-btn scroll-toggle" id="scrollBtn" onclick="toggleNavAndScroll()"><i class="fas fa-arrow-down"></i></button>
+
+    <div id="homePage">
+        <div class="banner-container" id="bannerContainer"></div>
+        <div class="content-grid" id="contentGrid"></div>
     </div>
 
-    <div id="skills-content" class="tab-content-area">
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">Professional Skills 🎯</h2>
-                
-                <div class="skills-grid">
-                    <div class="skill-card">
-                        <div class="skill-name">
-                            <i class="fas fa-robot"></i> AI in Pharmacy
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" style="width: 95%;">
-                                <span class="skill-percentage">95%</span>
-                            </div>
-                        </div>
-                    </div>
+    <nav id="bottomNav">
+        <button class="nav-btn" onclick="toggleSections()"><i class="fas fa-th-large"></i> <span>Sections</span></button>
+        <button class="nav-btn active" onclick="goHome()"><i class="fas fa-home"></i> <span>Home</span></button>
+        <button class="nav-btn" onclick="openLink('https://offers-ce75e.web.app/')"><i class="fas fa-tags"></i> <span>Offers</span></button>
+        <button class="nav-btn" onclick="openLink('dev.htm')"><i class="fas fa-user-tie"></i> <span>Dev</span></button>
+    </nav>
 
-                    <div class="skill-card">
-                        <div class="skill-name">
-                            <i class="fas fa-graduation-cap"></i> Self Learning
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" style="width: 90%;">
-                                <span class="skill-percentage">90%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="skill-card">
-                        <div class="skill-name">
-                            <i class="fas fa-paint-brush"></i> Design
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" style="width: 80%;">
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="skill-card">
-                        <div class="skill-name">
-                            <i class="fas fa-user-circle"></i> Profile Development
-                        </div>
-                        <div class="skill-bar">
-                            <div class="skill-progress" style="width: 80%;">
-                                <span class="skill-percentage">80%</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 class="text-center mt-5 mb-4" style="font-size: 2.2rem; color: var(--orange); font-weight: 800;">Personal Skills ✨</h3>
-                <div class="personal-skills">
-                    <div class="personal-skill-item">
-                        <i class="fas fa-lightbulb"></i>
-                        <h4>Creativity</h4>
-                        <div class="skill-percent">95%</div>
-                    </div>
-                    <div class="personal-skill-item">
-                        <i class="fas fa-users"></i>
-                        <h4>Teamwork</h4>
-                        <div class="skill-percent">90%</div>
-                    </div>
-                    <div class="personal-skill-item">
-                        <i class="fas fa-crown"></i>
-                        <h4>Leadership</h4>
-                        <div class="skill-percent">80%</div>
-                    </div>
-                    <div class="personal-skill-item">
-                        <i class="fas fa-puzzle-piece"></i>
-                        <h4>Problem Solving</h4>
-                        <div class="skill-percent">90%</div>
-                    </div>
-                </div>
-
-                <h3 class="text-center mt-5 mb-4" style="font-size: 2.2rem; color: var(--orange); font-weight: 800;">Interests 🌟</h3>
-                <div class="interests-grid">
-                    <div class="interest-card">
-                        <i class="fas fa-brain"></i>
-                        <h4>AI with Knowledge</h4>
-                    </div>
-                    <div class="interest-card">
-                        <i class="fas fa-palette"></i>
-                        <h4>Design</h4>
-                    </div>
-                    <div class="interest-card">
-                        <i class="fas fa-camera"></i>
-                        <h4>Photography</h4>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <div id="sectionsMenu">
+        <div class="menu-header"><span>Select Mode</span></div>
+       <button class="section-btn" onclick="window.open('https://moduty.vercel.app/', '_blank')">
+    <i class="fas fa-briefcase-medical"></i> <span>Duty Mode</span>
+</button>
+        <button class="section-btn" onclick="openLink('mwazna.htm')"><i class="fas fa-balance-scale"></i> <span>Mwazna</span></button>
+        <button class="section-btn" onclick="openLink('./cgp.htm')">
+    <i class="fas fa-book-medical"></i> <span>CGP Mode</span>
+</button>
+        <button class="section-btn full-width" onclick="openLink('links.htm')"><i class="fas fa-link"></i> <span>Links / Resources Mode</span></button>
     </div>
 
-    <div id="education-content" class="tab-content-area">
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">Education 🎓</h2>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-icon">
-                            <i class="fas fa-graduation-cap"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Bachelor's Degree in Pharmaceutical Sciences</h3>
-                            <h4 class="timeline-subtitle">Damanhour University | 2011-2017</h4>
-                            <p class="timeline-description">
-                                I graduated summa cum laude (Graduated with Honours) from the Faculty of Pharmacy, Damanhour University. 
-                                During my studies, I gained comprehensive knowledge in pharmaceutical sciences, pharmacology, and clinical pharmacy practice.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
+    <div id="overlay" onclick="closeAllMenus()"></div>
 
-    <div id="experience-content" class="tab-content-area">
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">Work Experience 💼</h2>
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-icon">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Community Pharmacist</h3>
-                            <h4 class="timeline-subtitle">Aldawaa Pharmacies | From 2019 till now</h4>
-                            <p class="timeline-description">
-                                Currently working at Al-Dawaa Pharmacy in Saudi Arabia, providing comprehensive pharmaceutical care services. 
-                                I'm still learning and developing my skills in integrating technology and AI in pharmacy practice.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Shift Manager</h3>
-                            <h4 class="timeline-subtitle">El-Nile Pharmacy | From 2014 to 2018</h4>
-                            <p class="timeline-description">
-                                Managed pharmacy operations and led the team at El-Nile pharmacy in Egypt. 
-                                Developed strong leadership and management skills while ensuring high-quality pharmaceutical services.
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-icon">
-                            <i class="fas fa-pills"></i>
-                        </div>
-                        <div class="timeline-content">
-                            <h3 class="timeline-title">Pharmacist</h3>
-                            <h4 class="timeline-subtitle">El-Nile Pharmacies | Egypt, from 2013 to 2018</h4>
-                            <p class="timeline-description">
-                                Started my professional career at El-Nile pharmacies, where I gained valuable experience in community pharmacy practice, 
-                                patient counseling, and pharmaceutical care services.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                <h3 class="text-center mt-5 mb-4" style="font-size: 2.2rem; color: var(--orange); font-weight: 800;">Professional Memberships 🏅</h3>
-                <div class="row justify-content-center">
-                    <div class="col-lg-8">
-                        <div class="glass-card">
-                            <div class="about-text">
-                                <p style="margin-bottom: 1.2rem;">
-                                    <strong style="font-size: 1.2rem;">Member of CGP</strong>
-                                    Care Givers Professionals
-                                </p>
-                                <p style="margin-bottom: 1.2rem;">
-                                    <strong style="font-size: 1.2rem;">Pharma Committee</strong>
-                                    Active member contributing to pharmaceutical practice development
-                                </p>
-                                <p style="margin-bottom: 0;">
-                                    <strong style="font-size: 1.2rem;">Health & Wellness Committee</strong>
-                                    Dedicated to promoting health and wellness in the community
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <div id="projects-content" class="tab-content-area">
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">Projects 🚀</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="project-card">
-                            <h3 class="project-title">Mono Pharm App</h3>
-                            <p class="project-description">
-                                Developed a comprehensive pharmaceutical mobile application that provides drug monographs, 
-                                medication information, and clinical pharmacy resources. The app helps healthcare professionals 
-                                and students access accurate pharmaceutical information quickly and efficiently.
-                            </p>
-                            <div class="project-links">
-                                <a href="https://monopharm-75ad2.web.app/" target="_blank" class="project-link">
-                                    <i class="fas fa-globe"></i>
-                                    Visit Website
-                                </a>
-                                <a href="https://play.google.com/store/apps/details?id=com.monopharm.monograph" target="_blank" class="project-link">
-                                    <i class="fab fa-google-play"></i>
-                                    Download on Play Store
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <div id="contact-content" class="tab-content-area">
-        <section class="section">
-            <div class="container">
-                <h2 class="section-title">Get In Touch 📞</h2>
-                <div class="row justify-content-center">
-                    <div class="col-lg-10">
-                        <div class="glass-card">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fas fa-phone"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">Phone (Saudi Arabia)</div>
-                                            <div class="contact-value">
-                                                <a href="tel:+966541932559">+966 541 932 559</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fab fa-whatsapp"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">WhatsApp</div>
-                                            <div class="contact-value">
-                                                <a href="https://wa.me/966541932559" target="_blank">+966 541 932 559</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fas fa-envelope"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">Email</div>
-                                            <div class="contact-value">
-                                                <a href="mailto:Muhammedkhulif@yahoo.com">Muhammedkhulif@yahoo.com</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <div class="contact-item">
-                                        <div class="contact-icon">
-                                            <i class="fab fa-facebook"></i>
-                                        </div>
-                                        <div class="contact-info">
-                                            <div class="contact-label">Facebook</div>
-                                            <div class="contact-value">
-                                                <a href="https://www.facebook.com/share/1Ghv7eEw6A/" target="_blank">Mohamed Kholeif</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <p class="footer-text">
-                Made with <span>❤️</span> by Mohamed Kholeif | Community Pharmacist 💊
-            </p>
+    <div id="loadingOverlay">
+        <div class="🤚">
+            <div class="👉"></div>
+            <div class="👉"></div>
+            <div class="👉"></div>
+            <div class="👉"></div>
+            <div class="🌴"></div>		
+            <div class="👍"></div>
         </div>
-    </footer>
+        <div style="color:white; font-weight:bold; margin-top: 15px;">Loading Content...</div>
+    </div>
+<!-- ✅ الرابط الصح والموثوق -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+    'use strict';
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    
-  <script>
-function showTab(tabName, event) {
-    const hero = document.getElementById('home');
-    const allTabs = document.querySelectorAll('.tab-box');
-    const allContents = document.querySelectorAll('.tab-content-area');
+    /* 🔐 SUPABASE CONNECTION */
+    const supabaseUrl = 'https://jwbcopyafwheyljvjexo.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp3YmNvcHlhZndoZXlsanZqZXhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ5NzcwNDcsImV4cCI6MjA5MDU1MzA0N30.muFXB6elv60C_gxe_2e2Wix_gfQxQ0VGQnZFqlh9dnw';
+    const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // 1. إزالة اللون النشط من كل التابات
-    allTabs.forEach(tab => {
-        tab.classList.remove('active');
-    });
+    /* 📝 DYNAMIC DATA CONTAINER */
+    let APP_DATA = { banners: [], content: [] };
 
-    // 2. إضافة اللون النشط للتاب اللي ضغطت عليه حالياً
-    if (event) {
-        event.currentTarget.classList.add('active');
+window.addEventListener('DOMContentLoaded', async () => {
+    // بنخلي اللودر مخفي تماماً في أول فتح للكود
+    const loader = document.getElementById('loadingOverlay');
+    if (loader) {
+        loader.style.display = 'none';
     }
 
-    // 3. إخفاء كل محتويات الأقسام
-    allContents.forEach(content => {
-        content.classList.remove('active');
-        content.style.display = 'none';
-    });
+    try {
+        await fetchActiveData();
+        renderBanners();
+        renderContent();
+        loadTheme();
+    } catch (err) {
+        console.error("Connection Error:", err);
+        // إظهار رسالة خطأ للمستخدم بدلاً من تعليق الشاشة
+        document.getElementById('contentGrid').innerHTML = '<h3 style="text-align:center; color:#ff6b35;">حدث خطأ في تحميل البيانات. يرجى التأكد من اتصالك بالإنترنت.</h3>';
+    }
+    // شيلنا جزء الـ finally عشان اللودر ما يظهرش ويختفي في البداية خالص
+});
+    async function fetchActiveData() {
+        const now = new Date().toISOString();
 
-    // 4. التحكم في الهيرو (الصورة والتعريف)
-    if (tabName === 'all') {
-        hero.classList.remove('hide-hero'); // يرجع يظهر ويأخذ مكانه
-        document.getElementById('all-content').style.display = 'block';
-        document.getElementById('all-content').classList.add('active');
-    } else {
-        hero.classList.add('hide-hero'); // يختفي تماماً ويشيل مساحته من الصفحة
-        const target = document.getElementById(tabName + '-content');
-        if (target) {
-            target.style.display = 'block';
-            target.classList.add('active');
+        const [bannersRes, contentsRes] = await Promise.all([
+            supabaseClient.from('banners').select('*').gte('expires_at', now),
+            supabaseClient.from('contents').select('*').gte('expires_at', now)
+        ]);
+
+        // معالجة حالة إذا كانت الجداول فارغة تماماً (لتجنب الأخطاء)
+        if (bannersRes.data && Array.isArray(bannersRes.data) && bannersRes.data.length > 0) {
+            APP_DATA.banners = bannersRes.data.map(b => ({
+                title: b.title || "",
+                desc: b.description || "",
+                link: b.link || "#",
+                imageUrl: (b.media_url && b.media_url.match(/\.(jpeg|jpg|gif|png|webp)/i)) ? b.media_url : "",
+                videoUrl: (b.media_url && b.media_url.match(/\.(mp4|webm)/i)) ? b.media_url : "",
+                color: b.color || "linear-gradient(135deg, #1a2942 0%, #2d4a77 100%)"
+            }));
+        } else {
+            APP_DATA.banners = []; // جدول فارغ
+        }
+
+        if (contentsRes.data && Array.isArray(contentsRes.data) && contentsRes.data.length > 0) {
+            APP_DATA.content = contentsRes.data.map(c => ({
+                type: c.type || "image",
+                title: c.title || "",
+                desc: c.description || "",
+                images: c.type === 'image' && c.media_url ? [c.media_url] : [],
+                videoUrl: c.type === 'video' && c.media_url ? c.media_url : "",
+                height: "auto"
+            }));
+        } else {
+            APP_DATA.content = []; // جدول فارغ
         }
     }
 
-    // 5. نطلع لأول الصفحة عشان القسم يبدأ من تحت التابات مباشرة
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    function renderBanners() {
+        const container = document.getElementById('bannerContainer');
+        if (!APP_DATA.banners || APP_DATA.banners.length === 0) {
+            container.style.display = 'none';
+            return;
+        }
+
+        let html = '';
+        let visibleBanners = 0;
+
+        APP_DATA.banners.forEach((banner) => {
+            const hasImage = banner.imageUrl && banner.imageUrl.trim() !== '';
+            const hasVideo = banner.videoUrl && banner.videoUrl.trim() !== '';
+            const hasColor = banner.color && banner.color.trim() !== '';
+
+            if (!hasImage && !hasVideo && !hasColor) return;
+
+            const activeClass = visibleBanners === 0 ? 'active' : '';
+            let mediaHTML = '';
+            
+            if (hasVideo) {
+                mediaHTML = `<video class="banner-bg-media" autoplay muted loop playsinline><source src="${banner.videoUrl}" type="video/mp4"></video>`;
+            } else if (hasImage) {
+                mediaHTML = `<img class="banner-bg-media" src="${banner.imageUrl}" alt="${banner.title}">`;
+            }
+
+            const bgStyle = (hasImage || hasVideo) ? '' : `background: ${banner.color}`;
+
+            html += `
+                <div class="banner-slide ${activeClass}" style="${bgStyle}" onclick="openLink('${banner.link}')">
+                    ${mediaHTML}
+                    <div class="banner-content">
+                        <h2>${banner.title}</h2>
+                        <p>${banner.desc}</p>
+                    </div>
+                </div>
+            `;
+            visibleBanners++;
+        });
+
+        if (visibleBanners === 0) {
+            container.style.display = 'none';
+        } else {
+            container.style.display = 'block';
+            container.innerHTML = html;
+            if (visibleBanners > 1) startBannerRotation();
+        }
+    }
+
+    function renderContent() {
+        const grid = document.getElementById('contentGrid');
+        grid.innerHTML = ''; 
+        
+        if (!APP_DATA.content || APP_DATA.content.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; color:var(--text-secondary); margin-top:20px;">لا توجد إضافات جديدة حالياً.</p>';
+            return;
+        }
+
+        APP_DATA.content.forEach((item, idx) => {
+            if (item.type === 'video' && (!item.videoUrl || item.videoUrl.trim() === '')) return; 
+
+            const card = document.createElement('div');
+            card.className = 'content-card';
+            let mediaHTML = '';
+            
+            if (item.type === 'image') {
+                const imgs = item.images || [];
+                let imgSlides = '';
+                let dots = '';
+                if (imgs.length > 0) {
+                    imgs.forEach((url, i) => {
+                        const display = i === 0 ? 'block' : 'none';
+                        imgSlides += `<img src="${url}" style="display:${display}" class="gallery-img-${idx} zoomable-img" data-card-idx="${idx}" onclick="openLightbox('${url}')">`;
+                        if(imgs.length > 1) dots += `<div class="gallery-dot ${i===0?'active':''}" onclick="changeGallerySlide(${idx}, ${i})"></div>`;
+                    });
+                    mediaHTML = `<div class="media-container" style="height: ${item.height || 'auto'}">${imgSlides}<div class="zoom-icon"><i class="fas fa-search-plus"></i></div><div class="gallery-dots" id="dots-${idx}" style="display: ${imgs.length > 1 ? 'flex' : 'none'}">${dots}</div></div>`;
+                }
+            } else if (item.type === 'video') {
+                mediaHTML = `<div class="media-container" style="height: 220px"><video controls poster="${item.poster || ''}"><source src="${item.videoUrl}" type="video/mp4"></video></div>`;
+            }
+            card.innerHTML = `<div class="card-header"><h3>${item.title}</h3></div>${mediaHTML}<p class="card-desc">${item.desc}</p>`;
+            grid.appendChild(card);
+        });
+
+        setTimeout(() => {
+            const allImages = document.querySelectorAll('.zoomable-img');
+            allImages.forEach(img => { enablePinchZoomOnImage(img); });
+        }, 100);
+    }
+
+    function changeGallerySlide(cardIdx, imgIdx) {
+        const images = document.querySelectorAll(`.gallery-img-${cardIdx}`);
+        images.forEach(img => img.style.display = 'none');
+        if(images[imgIdx]) images[imgIdx].style.display = 'block';
+        const dots = document.getElementById(`dots-${cardIdx}`).children;
+        Array.from(dots).forEach(d => d.classList.remove('active'));
+        if(dots[imgIdx]) dots[imgIdx].classList.add('active');
+    }
+
+    function openLightbox(url) {
+        const lb = document.getElementById('lightbox');
+        const img = document.getElementById('lightboxImg');
+        img.src = url;
+        enablePinchZoomOnImage(img);
+        lb.style.display = 'flex';
+        setTimeout(() => lb.classList.add('show'), 10);
+    }
+
+    function closeLightbox(event) {
+        if (event && event.target.id === 'lightboxImg') return;
+        const lb = document.getElementById('lightbox');
+        const img = document.getElementById('lightboxImg');
+        lb.classList.remove('show');
+        setTimeout(() => {
+            lb.style.display = 'none';
+            img.style.transform = '';
+            img.style.transition = '';
+        }, 300);
+    }
+
+    function enablePinchZoomOnImage(imageElement) {
+        if (!imageElement) return;
+        let imageScale = 1; let lastScale = 1; let startData = {};
+        const getDistance = (event) => Math.hypot(event.touches[0].pageX - event.touches[1].pageX, event.touches[0].pageY - event.touches[1].pageY);
+
+        imageElement.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 2) {
+                event.preventDefault();
+                startData.x = (event.touches[0].pageX + event.touches[1].pageX) / 2;
+                startData.y = (event.touches[0].pageY + event.touches[1].pageY) / 2;
+                startData.distance = getDistance(event);
+                lastScale = imageScale;
+            }
+        }, { passive: false });
+
+        imageElement.addEventListener('touchmove', (event) => {
+            if (event.touches.length === 2) {
+                event.preventDefault(); event.stopPropagation();
+                let scale = event.scale ? event.scale : getDistance(event) / startData.distance;
+                imageScale = Math.min(Math.max(1, lastScale * scale), 5);
+                const deltaX = (((event.touches[0].pageX + event.touches[1].pageX) / 2) - startData.x);
+                const deltaY = (((event.touches[0].pageY + event.touches[1].pageY) / 2) - startData.y);
+                const transform = `translate(${deltaX}px, ${deltaY}px) scale(${imageScale})`;
+                imageElement.style.transform = transform; imageElement.style.WebkitTransform = transform;
+                imageElement.style.zIndex = "99999"; imageElement.style.transition = "none";
+            }
+        }, { passive: false });
+
+        imageElement.addEventListener('touchend', (event) => {
+            if (event.touches.length < 2 && imageScale <= 1.1) {
+                setTimeout(() => {
+                    imageElement.style.transform = ""; imageElement.style.WebkitTransform = "";
+                    imageElement.style.transition = "transform 0.3s ease"; imageElement.style.zIndex = "";
+                    imageScale = 1; lastScale = 1;
+                }, 100);
+            }
+        }, { passive: false });
+
+        let lastTap = 0;
+        imageElement.addEventListener('touchend', (event) => {
+            const currentTime = new Date().getTime();
+            const tapLength = currentTime - lastTap;
+            if (tapLength < 300 && tapLength > 0) {
+                event.preventDefault();
+                imageElement.style.transform = ""; imageElement.style.WebkitTransform = "";
+                imageElement.style.transition = "transform 0.3s ease"; imageElement.style.zIndex = "";
+                imageScale = 1; lastScale = 1;
+            }
+            lastTap = currentTime;
+        });
+    }
+
+    function startBannerRotation() {
+        const slides = document.querySelectorAll('.banner-slide');
+        if (slides.length < 2) return;
+        let current = 0;
+        setInterval(() => {
+            slides[current].classList.remove('active');
+            current = (current + 1) % slides.length;
+            slides[current].classList.add('active');
+        }, 4000);
+    }
+
+    function toggleMode() {
+        document.body.classList.toggle('day-mode');
+        localStorage.setItem('theme', document.body.classList.contains('day-mode') ? 'day' : 'night');
+        document.querySelector('#modeToggle i').className = document.body.classList.contains('day-mode') ? 'fas fa-sun' : 'fas fa-moon';
+    }
+
+    function loadTheme() {
+        if (localStorage.getItem('theme') === 'day') {
+            document.body.classList.add('day-mode');
+            document.querySelector('#modeToggle i').className = 'fas fa-sun';
+        }
+    }
+
+    function toggleNavAndScroll() {
+        const nav = document.getElementById('bottomNav');
+        const icon = document.querySelector('#scrollBtn i');
+        if (!nav.classList.contains('hidden')) {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            nav.classList.add('hidden'); icon.className = 'fas fa-arrow-up';
+        } else {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            nav.classList.remove('hidden'); icon.className = 'fas fa-arrow-down';
+        }
+    }
+
+    
+
+    function closeAllMenus() {
+        document.getElementById('sectionsMenu').classList.remove('show');
+        document.getElementById('overlay').classList.remove('show');
+    }
+
+function openLink(url) {
+    if (!url || url === '#' || url.trim() === '') return;
+
+    // ✅ السطر ده بيقفل قائمة السكاشن والـ Overlay فوراً أول ما تضغط على أي اختيار
+    closeAllMenus();
+
+    // تحديث الحالة النشطة (Active) في الناف بار
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(url)) {
+            btn.classList.add('active');
+        }
+    });
+
+    const container = document.getElementById('iframeContainer');
+    const iframe = document.getElementById('embeddedFrame');
+    const errorBox = document.getElementById('iframeError');
+    const loader = document.getElementById('loadingOverlay');
+
+    errorBox.classList.remove('show');
+    
+    if (loader) {
+        loader.style.display = 'flex';
+        loader.style.opacity = '1';
+        loader.classList.remove('hidden');
+    }
+    
+    container.classList.add('show');
+    iframe.src = url;
+
+    let hasLoaded = false;
+    let loadTimeout = setTimeout(() => {
+        if (!hasLoaded) {
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    loader.style.display = 'none';
+                }, 500);
+            }
+            errorBox.classList.add('show');
+            iframe.src = 'about:blank';
+        }
+    }, 10000);
+
+    iframe.onload = function() { 
+        hasLoaded = true; 
+        clearTimeout(loadTimeout); 
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }, 500);
+        }
+    };
+
+    iframe.onerror = function() { 
+        hasLoaded = true; 
+        clearTimeout(loadTimeout); 
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => {
+                loader.classList.add('hidden');
+                loader.style.display = 'none';
+            }, 500);
+        }
+        errorBox.classList.add('show'); 
+        iframe.src = 'about:blank'; 
+    };
+}
+function closeIframe() {
+    document.getElementById('iframeContainer').classList.remove('show');
+    document.getElementById('iframeError').classList.remove('show');
+    setTimeout(() => { document.getElementById('embeddedFrame').src = 'about:blank'; }, 400);
+}
+
+function goHome() {
+    closeIframe(); 
+    closeAllMenus(); 
+
+    // ✅ إرجاع حالة Active لزرار الهوم
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    
+    // بنختار زرار الهوم تحديداً عشان ينور برتقالي
+    const homeBtn = document.querySelector('.nav-btn[onclick="goHome()"]');
+    if (homeBtn) homeBtn.classList.add('active');
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ✅ تعديل وظيفة toggleSections عشان تنور لما تفتحها
+function toggleSections() {
+    const navButtons = document.querySelectorAll('.nav-btn');
+    navButtons.forEach(btn => btn.classList.remove('active'));
+    
+    const sectionsBtn = document.querySelector('.nav-btn[onclick="toggleSections()"]');
+    if (sectionsBtn) sectionsBtn.classList.add('active');
+
+    document.getElementById('sectionsMenu').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
 }
 </script>
-    </script>
 </body>
 </html>
