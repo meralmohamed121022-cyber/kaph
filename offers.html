@@ -19558,7 +19558,46 @@ createMagazineModeToggle();
 // 5. جلب المنتجات من سوبابيز (عشان تكون جاهزة لما نختار فترة)
 // ملحوظة: fetchProductsFromSupabase هي اللي بتعمل applyFilters في آخرها
 fetchProductsFromSupabase(); 
+// ====== 🛡️ نظام أمان شاشة التحميل (Mo Safe Mode) ======
 
+function hideInitialLoader() {
+    const loader = document.getElementById('loaderScreen');
+    if (loader) {
+        loader.style.opacity = '0';
+        loader.style.pointerEvents = 'none'; // عشان ما تمنعش الضغط تحتها
+        
+        setTimeout(() => {
+            loader.style.display = 'none';
+            // نرجع السكرول للصفحة
+            document.body.style.overflow = 'auto';
+        }, 800); // وقت الأنيميشن
+    }
+}
+
+// 1️⃣ إخفاء تلقائي عند اكتمال تحميل الصفحة
+window.addEventListener('load', () => {
+    // بنستنى ثانية واحدة بس عشان المستخدم يستمتع بالأنيميشن
+    setTimeout(hideInitialLoader, 1000); 
+});
+
+// 2️⃣ إخفاء إجباري بعد 5 ثوانٍ (حتى لو الصفحة لسه بتحمل) - نظام طوارئ
+setTimeout(hideInitialLoader, 5000);
+
+// 3️⃣ إخفاء عند الضغط على زر Escape (سكسيب)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        hideInitialLoader();
+    }
+});
+
+// 4️⃣ إخفاء عند الضغط في أي مكان على شاشة اللودر (برا الصورة)
+document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('loaderScreen');
+    if (loader) {
+        loader.style.cursor = 'pointer'; // عشان المستخدم يعرف إنه يقدر يقفلها
+        loader.onclick = hideInitialLoader;
+    }
+});
 console.log('✅ Gateway & Data Ready!');
 </script>
 
