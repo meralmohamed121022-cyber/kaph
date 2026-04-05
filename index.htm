@@ -685,9 +685,58 @@
     width: 20px; /* تطويل النقطة النشطة زي الأبلكيشنز التقيلة */
     border-radius: 10px;
 }
+/* Admin Panel Floating Box */
+        .admin-box {
+            position: fixed;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--accent-orange);
+            color: white;
+            padding: 15px 10px;
+            border-radius: 15px 0 0 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            z-index: 20000;
+            box-shadow: -2px 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-right: none;
+        }
+
+        .admin-box:hover {
+            padding-right: 20px;
+            background: var(--accent-orange-light);
+        }
+
+        .admin-box i {
+            font-size: 20px;
+        }
+
+        .admin-box span {
+            writing-mode: vertical-rl;
+            text-orientation: mixed;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        /* إخفاء البوكس لو الـ Iframe مفتوح عشان ميزحمش الشاشة */
+        #iframeContainer.show ~ .admin-box {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <a href="https://kaph-admin.vercel.app/" target="_blank" class="admin-box">
+        <i class="fas fa-user-shield"></i>
+        <span>ADMIN</span>
+    </a>
 <div id="iframeContainer">
         <button id="floatingBackBtn" onclick="closeIframe()">
             <div class="back-arrow"></div>
