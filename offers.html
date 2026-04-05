@@ -6,7 +6,7 @@
 <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
 
 
-<meta name="viewport" content="width=900, initial-scale=0.4, maximum-scale=4.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>ALDAWAA OFFERS-MONO</title>
 <link rel="icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
@@ -3912,35 +3912,41 @@ body > div:has(> label[for="codesFileInput"]),
     }
 }
 /* ====== 📱 نظام السلايد الاحترافي للموبايل ====== */
-@media (max-width: 600px) {
-    /* 1. الحاوية اللي شيلة الكروت */
+/* الحاوية الرئيسية للكروت */
+.products-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important; /* إجبارهم يبقوا في صف واحد دايماً */
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scroll-snap-type: x mandatory;
+    gap: 15px !important;
+    padding: 10px 10px 25px 10px !important;
+    -webkit-overflow-scrolling: touch; /* سكرول ناعم جداً للأيفون */
+}
+
+/* إخفاء السكرول بار المقرف */
+.products-grid::-webkit-scrollbar { display: none; }
+
+/* الكارت نفسه */
+.product-card {
+    flex: 0 0 165px !important; /* تثبيت العرض في كل الأوضاع */
+    min-width: 165px !important;
+    scroll-snap-align: start;
+    background: white; /* تأكد إن الخلفية مش شفافة */
+    border-radius: 12px;
+}
+
+/* لو الشاشة كبيرة (كمبيوتر) نرجعهم نظام شبكة عادي عشان ميبقاش سلايد طويل */
+@media (min-width: 992px) {
     .products-grid {
-        display: flex !important; /* تحويل الشبكة لصف واحد */
-        overflow-x: auto !important; /* السماح بالسحب يمين وشمال */
-        scroll-snap-type: x mandatory; /* بيخلي الكارت يثبت في مكانه لما تسحب */
-        gap: 15px !important; /* مسافة مريحة بين الكروت */
-        padding: 10px 5px 20px 5px !important;
-        scrollbar-width: none; /* إخفاء شريط السكرول في فيرفوكس */
-        -ms-overflow-style: none; /* إخفاء شريط السكرول في إيدج */
+        display: grid !important;
+        grid-template-columns: repeat(4, 1fr) !important;
+        flex-wrap: wrap !important;
+        overflow-x: visible !important;
     }
-
-    /* إخفاء شريط السكرول في كروم وسفاري عشان الشكل يبقا نضيف */
-    .products-grid::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* 2. الكارت نفسه */
     .product-card {
-        flex: 0 0 160px !important; /* تثبيت عرض الكارت (160 بيكسل مناسب جداً) */
-        min-width: 160px !important;
-        scroll-snap-align: start; /* يخلي الكارت يبدأ من أول الشاشة لما تسحب */
-        height: auto !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
-    }
-    
-    /* 3. حاوية البراند (لو موجودة) */
-    .offer-group-container {
-        overflow: hidden; /* عشان ميبوظش شكل السلايد */
+        flex: unset !important;
+        min-width: unset !important;
     }
 }
 </style>
