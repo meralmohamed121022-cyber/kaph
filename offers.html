@@ -18724,6 +18724,27 @@ async function openUploadedPrintModal() {
   
   console.log(`✅ تم إرسال ${productsToPrint.length} منتج إلى الطابعة.`);
 }
+// ============================================================
+// 🔔 Wake Up Server قبل أي طلب PDF
+// ============================================================
+async function wakeUpServer() {
+  try {
+    console.log("⏳ جاري تشغيل السيرفر...");
+    const res = await fetch("https://pdfextract-ci4b.onrender.com/health", {
+      method: "GET",
+      signal: AbortSignal.timeout(60000)
+    });
+    console.log("✅ السيرفر جاهز:", res.status);
+    return true;
+  } catch (err) {
+    console.warn("⚠️ السيرفر مش رادّ:", err.message);
+    return false;
+  }
+}
+
+// ============================================================
+// 📥 Handle Codes File Upload
+// ============================================================
 async function handleCodesFileUpload(event) {
   console.log("📥 file input change fired", event);
 
@@ -18735,7 +18756,26 @@ async function handleCodesFileUpload(event) {
 
   const fileName = file.name.toLowerCase();
   const statusDiv = document.getElementById('codesFileStatus');
-  
+
+  // ✅ لو PDF → صحّي السيرفر الأول
+  if (fileName.endsWith('.pdf')) {
+    statusDiv.innerHTML = `
+      <div style="display:flex; align-items:center; gap:10px; color:#f59e0b; font-weight:bold;">
+        <div class="spinner" style="width:15px; height:15px; border:2px solid #f59e0b; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
+        <span>⏳ جاري تشغيل السيرفر، استنى ثواني...</span>
+      </div>`;
+
+    const isAwake = await wakeUpServer();
+
+    if (!isAwake) {
+      statusDiv.innerHTML = `
+        <div style="padding:10px; background:#fee2e2; color:#ef4444; border-radius:8px; border:1px solid #fecaca;">
+          ❌ السيرفر مش رادّ حالياً، حاول تاني بعد شوية.
+        </div>`;
+      return;
+    }
+  }
+
   statusDiv.innerHTML = `
     <div style="display:flex; align-items:center; gap:10px; color:#3b82f6; font-weight:bold;">
       <div class="spinner" style="width:15px; height:15px; border:2px solid #3b82f6; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
@@ -18822,7 +18862,7 @@ async function handleCodesFileUpload(event) {
       uploadedBrandsFilter = extractedBrands;
     }
 
-    // ======= حساب الإحصائيات زي الكود القديم =======
+    // ======= حساب الإحصائيات =======
     const codesWithOffers = [];
     const codesWithoutOffers = [];
     const brandsSet = new Set();
@@ -18847,7 +18887,6 @@ async function handleCodesFileUpload(event) {
         }
       }
     } else {
-      // fallback لو مفيش productsDB، نعتبر كل الأكواد No Offers
       for (const code of uploadedCodesFilter) {
         const cleanCode = String(code).trim().replace(/\s+/g, '');
         if (!/^\d+$/.test(cleanCode)) continue;
@@ -18860,15 +18899,13 @@ async function handleCodesFileUpload(event) {
     const noOffers = codesWithoutOffers.length;
     const exclusiveBrands = brandsWithExclusiveOffers.size;
 
-    // نخزن الفلاتر للاستعمال في الطباعة
     uploadedCodesFilter = codesWithOffers;
     uploadedBrandsFilter = [...brandsWithExclusiveOffers];
 
-    // ✅ خزن الأكواد بدون عروض في global variable
     window.currentNoOfferCodes = codesWithoutOffers;
     window.currentNoOffersCount = noOffers;
 
-    // ======= عرض الـ Dashboard + زر Print + زر Show + زر Reset =======
+    // ======= Dashboard =======
     statusDiv.innerHTML = `
       <div style="
         display: grid; 
@@ -18910,15 +18947,10 @@ async function handleCodesFileUpload(event) {
       <div style="display:flex; flex-wrap:wrap; gap:10px; width:100%;">
         
         <button onclick="showUploadedProducts()" style="
-          flex:1;
-          padding: 12px 24px;
+          flex:1; padding: 12px 24px;
           background: linear-gradient(135deg, #3b82f6, #2563eb);
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-weight: 700;
-          font-size: 14px;
-          cursor: pointer;
+          color: white; border: none; border-radius: 8px;
+          font-weight: 700; font-size: 14px; cursor: pointer;
           box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
           transition: all 0.3s ease;
         " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(59, 130, 246, 0.5)';" 
@@ -18927,33 +18959,25 @@ async function handleCodesFileUpload(event) {
         </button>
 
         <button onclick="openUploadedPrintModal()" style="
-          flex:1;
-          padding: 12px 24px;
+          flex:1; padding: 12px 24px;
           background: linear-gradient(135deg, #10b981, #059669);
-          color: white;
-          border: none;
-          border-radius: 8px;
-          font-weight: 700;
-          font-size: 14px;
-          cursor: pointer;
+          color: white; border: none; border-radius: 8px;
+          font-weight: 700; font-size: 14px; cursor: pointer;
           box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
           transition: all 0.3s ease;
-        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.5)';" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
+        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.5)';" 
+          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
           🖨️ طباعة العروض
         </button>
 
         <button onclick="resetUploadedFilters()" style="
-          flex:0 0 auto;
-          padding: 12px 16px;
-          background: #f3f4f6;
-          color: #111827;
-          border: 1px solid #d1d5db;
-          border-radius: 8px;
-          font-weight: 600;
-          font-size: 13px;
-          cursor: pointer;
+          flex:0 0 auto; padding: 12px 16px;
+          background: #f3f4f6; color: #111827;
+          border: 1px solid #d1d5db; border-radius: 8px;
+          font-weight: 600; font-size: 13px; cursor: pointer;
           transition: all 0.2s ease;
-        " onmouseover="this.style.background='#e5e7eb';" onmouseout="this.style.background='#f3f4f6';">
+        " onmouseover="this.style.background='#e5e7eb';" 
+          onmouseout="this.style.background='#f3f4f6';">
           🔄 Reset
         </button>
       </div>
@@ -18968,7 +18992,6 @@ async function handleCodesFileUpload(event) {
     `;
   }
 }
-
 // ✅ دالة التحميل (ضيفها مرة واحدة في السكريبت)
 function downloadNoOffersExcel() {
   const codes = window.currentNoOfferCodes || [];
