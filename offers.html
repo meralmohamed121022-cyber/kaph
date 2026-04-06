@@ -4978,15 +4978,12 @@ setInterval(() => {
 
 // ✅ إضافة الـ Listeners بأمان (بعد التأكد من وجود العناصر)
 if (profileImage) {
-    profileImage.style.cursor = 'pointer'; // عشان المستخدم يعرف إنها قابلة للضغط
+    profileImage.style.cursor = 'pointer';
     profileImage.addEventListener('click', toggleInfoBox);
 }
-
 if (infoBox) {
     infoBox.addEventListener('click', toggleInfoBox);
 }
-profileImage.addEventListener('click', toggleInfoBox);
-infoBox.addEventListener('click', toggleInfoBox);
 </script>
 
 <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
@@ -5044,92 +5041,101 @@ async function fetchProductsFromSupabase() {
         } catch(e) { console.warn('Cache save failed (storage full?):', e.message); }
     }
 
-    function applyData(data) {
-        productsDB = data;
-        initOffersMap();
-        if (typeof buildSearchCache  === 'function') buildSearchCache();
-        if (typeof clearAllFilters   === 'function') clearAllFilters();
-        initializeFilters();
-        applyFilters();
+   function applyData(data) {
+    productsDB = data;
+    initOffersMap();
+    if (typeof buildSearchCache  === 'function') buildSearchCache();
+    if (typeof clearAllFilters   === 'function') clearAllFilters();
+    initializeFilters();
+    applyFilters();
+}
+
+// ─── 1. INSTANT CACHE HIT ───
+const cached = loadFromCache();
+if (cached && cached.length > 0) {
+    console.log(`⚡ من الكاش: ${cached.length} منتج (فوري)`);
+    applyData(cached);
+    if (loader) loader.style.display = "none";
+    // Refresh cache in background silently
+    setTimeout(() => fetchAndCacheInBackground(), 500);
+    return;
+}
+
+// ─── 2. FRESH FETCH (no cache) ───
+if (container) container.innerHTML = '';
+productsDB = [];
+
+try {
+    const codesToFetch = new Set();
+    if (typeof offersDB !== 'undefined') {
+        offersDB.forEach(offer => {
+            if (offer.codes && Array.isArray(offer.codes)) {
+                offer.codes.forEach(code => {
+                    const clean = String(code).trim();
+                    if (clean) codesToFetch.add(clean);
+                });
+            }
+        });
     }
 
-    // ─── 1. INSTANT CACHE HIT ───
-    const cached = loadFromCache();
-    if (cached && cached.length > 0) {
-        console.log(`⚡ من الكاش: ${cached.length} منتج (فوري)`);
-        applyData(cached);
-        if (loader) loader.style.display = "none";
-        // Refresh cache in background silently
-        setTimeout(() => fetchAndCacheInBackground(), 500);
-        return;
+    const uniqueCodes = Array.from(codesToFetch);
+    console.log(`📡 جلب ${uniqueCodes.length} كود من Supabase (بالتسلسل)...`);
+
+    const CHUNK_SIZE = 500;
+    const chunks = [];
+    for (let i = 0; i < uniqueCodes.length; i += CHUNK_SIZE) {
+        chunks.push(uniqueCodes.slice(i, i + CHUNK_SIZE));
     }
-    // ─── 2. FRESH FETCH (no cache) ───
-    if (container) container.innerHTML = '';
-    productsDB = [];
 
-    try {
-        const codesToFetch = new Set();
-        if (typeof offersDB !== 'undefined') {
-            offersDB.forEach(offer => {
-                if (offer.codes && Array.isArray(offer.codes)) {
-                    offer.codes.forEach(code => {
-                        const clean = String(code).trim();
-                        if (clean) codesToFetch.add(clean);
-                    });
-                }
-            });
-        }
-
-        const uniqueCodes = Array.from(codesToFetch);
-        console.log(`📡 جلب ${uniqueCodes.length} كود من Supabase (بالتوازي)...`);
-
-        const CHUNK_SIZE = 500;
-        const chunks = [];
-        for (let i = 0; i < uniqueCodes.length; i += CHUNK_SIZE) {
-            chunks.push(uniqueCodes.slice(i, i + CHUNK_SIZE));
-        }
-
-        // ─── PARALLEL FETCH ───
-        const results = await Promise.all(
-            chunks.map(chunk => {
-                const numericChunk = chunk.map(c => parseInt(c)).filter(n => !isNaN(n));
-                return supabaseClient
+    // ─── SEQUENTIAL FETCH WITH RETRY ───
+    let allFetchedData = [];
+    for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const numericChunk = chunk.map(c => parseInt(c)).filter(n => !isNaN(n));
+        let success = false;
+        for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+                const { data, error } = await supabaseClient
                     .from('products')
                     .select('code,item_description,brand,manufacture,category_level_a,category_level_b,category_level_c,category_level_d,unit_price,itemurl')
                     .in('code', numericChunk)
                     .limit(500);
-            })
-        );
-
-        let allFetchedData = [];
-        results.forEach(({ data, error }, idx) => {
-            if (error) { console.error(`❌ chunk ${idx}:`, error.message); return; }
-            if (data) allFetchedData = allFetchedData.concat(data);
-        });
-
-        const mapped = allFetchedData.map(p => ({
-            ...p,
-            "Code":             String(p.code).trim(),
-            "Item Description": p.item_description || '',
-            "Brand":            p.brand || '',
-            "Manufacture":      p.manufacture || '',
-            "Category Level A": p.category_level_a || '',
-            "Category Level B": p.category_level_b || '',
-            "Category Level C": p.category_level_c || '',
-            "Category Level D": p.category_level_d || '',
-            "Unit Price":       p.unit_price || 0,
-            "itemurl":          p.itemurl || ''
-        }));
-
-        console.log(`✅ تم تحميل: ${mapped.length} منتج`);
-        saveToCache(mapped);
-        applyData(mapped);
-
-    } catch (err) {
-        console.error('❌ خطأ في fetchProductsFromSupabase:', err.message);
-    } finally {
-        if (loader) loader.style.display = "none";
+                if (error) throw new Error(error.message);
+                if (data) allFetchedData = allFetchedData.concat(data);
+                console.log(`✅ chunk ${i}: ${data?.length} منتج`);
+                success = true;
+                break;
+            } catch (err) {
+                console.warn(`⚠️ chunk ${i} محاولة ${attempt + 1} فشلت: ${err.message}`);
+                if (attempt < 2) await new Promise(r => setTimeout(r, 2000 * (attempt + 1)));
+            }
+        }
+        if (!success) console.error(`❌ chunk ${i} فشل نهائياً بعد 3 محاولات`);
     }
+
+    const mapped = allFetchedData.map(p => ({
+        ...p,
+        "Code":             String(p.code).trim(),
+        "Item Description": p.item_description || '',
+        "Brand":            p.brand || '',
+        "Manufacture":      p.manufacture || '',
+        "Category Level A": p.category_level_a || '',
+        "Category Level B": p.category_level_b || '',
+        "Category Level C": p.category_level_c || '',
+        "Category Level D": p.category_level_d || '',
+        "Unit Price":       p.unit_price || 0,
+        "itemurl":          p.itemurl || ''
+    }));
+
+    console.log(`✅ تم تحميل: ${mapped.length} منتج`);
+    saveToCache(mapped);
+    applyData(mapped);
+
+} catch (err) {
+    console.error('❌ خطأ في fetchProductsFromSupabase:', err.message);
+} finally {
+    if (loader) loader.style.display = "none";
+}
 }
 
 // Background refresh without blocking UI
