@@ -10,7 +10,7 @@
 <link rel="icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
 <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 
 </head>
 <body>
@@ -3803,32 +3803,19 @@ body > div:has(> label[for="codesFileInput"]),
 }
 /* ====== 📱 نظام السلايد الاحترافي للموبايل ====== */
 /* ======= 🔥 THE ULTIMATE CARDS REFIX - Mo Edition 🔥 ======= */
+/* ======= 🔥 THE ULTIMATE CARDS REFIX - Mo Edition - v2.0 🔥 ======= */
 
-/* حاوية الكروت للموبايل */
+/* حاوية الكروت الأساسية (تتعامل كـ Grid افتراضياً لضمان ظهور كل المنتجات) */
 .products-grid {
-    display: flex !important;
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    scroll-snap-type: x mandatory !important;
-    scroll-behavior: smooth !important;
-    -webkit-overflow-scrolling: touch !important;
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
     gap: 20px !important;
-    padding: 20px 10vw !important; /* الهوامش اللي بتخلي الكروت تتسنتر */
-    direction: ltr !important; /* عشان السحب يبقى من اليمين للشمال صح */
+    padding: 20px !important;
+    overflow: visible !important;
 }
 
-/* إخفاء السكرول بار */
-.products-grid::-webkit-scrollbar {
-    display: none !important;
-}
-
-/* تنسيق الكارت ليكون 80% من الشاشة */
+/* تعديل الكارت ليكون مرن */
 .product-card {
-    flex: 0 0 80vw !important;
-    min-width: 80vw !important;
-    max-width: 320px !important;
-    scroll-snap-align: center !important;
     background: var(--card-bg) !important;
     border-radius: 20px !important;
     box-shadow: 0 10px 25px var(--card-shadow) !important;
@@ -3836,91 +3823,107 @@ body > div:has(> label[for="codesFileInput"]),
     flex-direction: column !important;
     align-items: center !important;
     padding: 20px !important;
-    margin: 0 !important;
     border: 1px solid rgba(255,255,255,0.1) !important;
-    direction: rtl !important; /* محتوى الكارت نفسه عربي */
+    direction: rtl !important;
+    min-height: 400px;
 }
 
-/* 🎯 السحر هنا: لو كارت واحد بس، خليه في نص الشاشة بالظبط */
-.products-grid:has(> .product-card:only-child),
-.products-grid:has(> div:only-child) {
-    justify-content: center !important;
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-}
-
-/* تظبيط الصورة */
+/* تظبيط الصورة وإجبارها على الظهور */
 .product-card img {
     width: 100% !important;
     height: 180px !important;
     object-fit: contain !important;
     margin-bottom: 15px !important;
+    opacity: 1 !important; /* لضمان الظهور في الديسكتوب فيو */
 }
 
-/* ديسكتوب - ارجع نظام الشبكة */
-@media (min-width: 1024px) {
+/* وضع الموبايل الحقيقي (السليدر الأفقي) */
+@media (max-width: 768px) {
     .products-grid {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-        flex-wrap: wrap !important;
-        overflow-x: visible !important;
-        padding: 20px !important;
-        gap: 25px !important;
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        scroll-snap-type: x mandatory !important;
+        -webkit-overflow-scrolling: touch !important;
+        gap: 15px !important;
+        padding: 20px 5vw !important;
+        direction: ltr !important; 
+    }
+
+    .product-card {
+        flex: 0 0 80vw !important; /* الكارت بياخد 80% من الشاشة عشان السحب يبان */
+        min-width: 80vw !important;
+        scroll-snap-align: center !important;
+    }
+
+    /* لو كارت واحد بس، خليه في النص، لو أكتر خليهم يبدأوا من الشمال عادي عشان الباقي يبان */
+    .products-grid:has(> .product-card:only-child) {
         justify-content: center !important;
     }
-    .product-card {
-        flex: unset !important;
-        width: 100% !important;
-        min-width: unset !important;
-        max-width: none !important;
-    }
 }
 
-/* ====== MOBILE HORIZONTAL SLIDER ====== */
+/* إخفاء السكرول بار المزعج */
+.products-grid::-webkit-scrollbar {
+    display: none !important;
+}
+/* ====== MOBILE HORIZONTAL SLIDER (Offers Row) ====== */
 @media (max-width: 768px) {
+
+  /* 1. Row wrapper - سكرول أفقي بدون wrap */
   .offer-row-wrapper {
+    display: flex !important;
+    flex-wrap: nowrap !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
-    flex-wrap: nowrap !important;
     -webkit-overflow-scrolling: touch !important;
-    scrollbar-width: thin !important;
-    scrollbar-color: #667eea rgba(102,126,234,0.1) !important;
-    padding: 4px 8px 12px 8px !important;
-    gap: 12px !important;
+    padding: 10px 5px 15px 5px !important;
+    gap: 10px !important;
+    scrollbar-width: none !important;
   }
   .offer-row-wrapper::-webkit-scrollbar {
-    height: 4px !important;
-    display: block !important;
+    display: none !important;
   }
-  .offer-row-wrapper::-webkit-scrollbar-track {
-    background: rgba(102,126,234,0.12) !important;
-    border-radius: 2px !important;
-    margin: 0 8px !important;
-  }
-  .offer-row-wrapper::-webkit-scrollbar-thumb {
-    background: linear-gradient(90deg,#667eea,#764ba2) !important;
-    border-radius: 2px !important;
-  }
+
+  /* 2. كل brand cluster - عرض ثابت مناسب بدل 75vw */
   .brand-cluster-card {
-    flex: 0 0 75vw !important;
-    width: 75vw !important;
-    min-width: 75vw !important;
-    max-width: 75vw !important;
-    overflow: hidden !important;
-    border: none !important;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    flex: 0 0 160px !important;
+    min-width: 160px !important;
+    width: 160px !important;
+    flex-shrink: 0 !important;
     border-radius: 16px !important;
+    overflow: visible !important;
   }
-  .riyal-symbol {
-    width: 0.75em !important;
-    height: 0.75em !important;
-    margin-left: 0.1em !important;
+
+  /* 3. ⭐ الإصلاح الحاسم: إلغاء 80vw من product-card جوّا الـ cluster */
+  .brand-cluster-card .product-card {
+    flex: unset !important;
+    min-width: unset !important;
+    width: 100% !important;
+    min-height: 260px !important;
+    scroll-snap-align: unset !important;
   }
-  img.riyal-symbol-img {
-    width: 11px !important;
-    height: 11px !important;
-    margin-right: 2px !important;
-    margin-bottom: 2px !important;
+
+  /* 4. تصغير الصورة جوّا الكارد */
+  .brand-cluster-card .product-card > div:first-child {
+    height: 110px !important;
+  }
+
+  /* 5. الـ grid لو أكثر من منتج في نفس البراند */
+  .cluster-grid {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    gap: 8px !important;
+    scrollbar-width: none !important;
+  }
+  .cluster-grid::-webkit-scrollbar {
+    display: none !important;
+  }
+  .cluster-grid .product-card {
+    flex: 0 0 155px !important;
+    min-width: 155px !important;
   }
 }
 
@@ -3949,6 +3952,7 @@ body > div:has(> label[for="codesFileInput"]),
     animation: fadeInPageMobile 0.4s ease !important;
   }
 }
+
 /* ===== HERO BANNER PERSONAL IMAGE MOBILE FIX ===== */
 @media (max-width: 768px) {
   .hero-banner {
@@ -4008,7 +4012,6 @@ body > div:has(> label[for="codesFileInput"]),
     font-size: 32px !important;
   }
 }
-
 
 /* ===== MAGAZINE MOBILE MULTI-CARD FIX ===== */
 @media (max-width: 768px) {
@@ -4116,7 +4119,32 @@ body > div:has(> label[for="codesFileInput"]),
     align-self: center !important;
   }
 }
+/* ===== FIX: MOBILE NORMAL MODE CARDS ===== */
+@media (max-width: 768px) {
+  /* السماح بالالتفاف بدل الضغط */
+  .offer-row-wrapper {
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+  }
 
+  /* كل cluster card يأخذ نص الشاشة كحد أدنى */
+  .brand-cluster-card {
+    min-width: calc(50% - 5px) !important;
+    flex: 1 1 calc(50% - 5px) !important;
+    width: auto !important;
+    box-sizing: border-box !important;
+  }
+
+  /* شبكة الكروت الداخلية تكون عمودين على موبايل */
+  .cluster-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  /* تصغير ارتفاع صورة الكارد قليلاً على موبايل */
+  .product-card > div:first-child {
+    height: 150px !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -4990,54 +5018,57 @@ if (infoBox) {
 <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
 <script>   
 // 1. إعدادات سوبابيز
-const supabaseUrl = 'https://vyvtoaplrdnjskomnoou.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dnRvYXBscmRuanNrb21ub291Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMzEwNjksImV4cCI6MjA5MDgwNzA2OX0.yTMKiK-zjYM36YvZ8U-yFQDW5NH4Xdi0Cju80mi1B7E';
-
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey, {
-    realtime: { params: { eventsPerSecond: -1 } },
-    auth: { persistSession: false, autoRefreshToken: false },
-    db: { schema: 'public' },
-    global: {
-        headers: { 'X-Client-Info': 'mono-offers/1.0' },
-        fetch: (url, options = {}) => {
-            return fetch(url, {
-                ...options,
-                cache: 'no-store',
-                keepalive: true
-            });
-        }
-    }
-});
-// ❌ قطع WebSocket فورًا — بيحل مشكلة البطء على شبكات الشركات والمكتب
-try { supabaseClient.realtime.disconnect(); } catch(e) {}
-
-let productsDB = [];
+// ========== DATA ==========
+let productsDB = [
+    {
+    "Code": 219105,
+    "Item Description": "ANIVAGENE COND RESURUCTURING HAIR 125 ML",
+    "أسم المنتج": "انيفاجين بلسم لجميع انواع الشعر 125 مل",
+    "Category Level A": "BEAUTY CARE",
+    "Category Level B": null,
+    "Category Level C": null,
+    "Category Level D": "HAIR-MED",
+    "Category Level E": "HAIR-MED-COND",
+    "Unit Price": 120.0,
+    "Brand": "ANIVAGENE",
+    "Manufacture": null,
+    "itemurl": "https://stgprevapi.al-dawaa.com/medias/Anivagene-Conditioner-Restructuring-Hair-125-Ml_0_1200.webp?context=bWFzdGVyfGltYWdlc3w0MjgxMTR8aW1hZ2Uvd2VicHxhREZoTDJnME5DODVOVE15TnpNeE9EVXdOemd5THpJeE9URXdOVjh3WDJWdVh6RXlNREJYZURFeU1EQklYMWRGUWxBdWQyVmljQXxmYjhmOTE5ZjcyNmU5Y2I2YzZlZThiY2JiNzE1YWM0ODgyYjEyYTA1YjMwZDU4YmQ5MTViMzU3MjY2ZjhlMTE4"
+  },
+   {
+    "Code": 225991,
+    "Item Description": "ANIVAGENE HAIR MASK 125 ML",
+    "أسم المنتج": "انيفاجين ماسك للشعر 125 مل",
+    "Category Level A": "BEAUTY CARE",
+    "Category Level B": null,
+    "Category Level C": null,
+    "Category Level D": "HAIR-MED",
+    "Category Level E": "HAIR-MED-MASK",
+    "Unit Price": 98.0,
+    "Brand": "ANIVAGENE",
+    "Manufacture": null,
+    "itemurl": "https://stgprevapi.al-dawaa.com/medias/Anivagene-Hair-Repairing-Mask-125-Ml_0_1200.webp?context=bWFzdGVyfGltYWdlc3w0MTQ1MjB8aW1hZ2Uvd2VicHxhRGt3TDJnMU5TODVOVE15TnpNMk9EazNNRFUwTHpJeU5UazVNVjh3WDJWdVh6RXlNREJYZURFeU1EQklYMWRGUWxBdWQyVmljQXxkODcwMjZjYjU4Zjc0MDI3YzcxYzMxODQ4Y2RmZDU1NWE2MDM2MTgwOWQ0NDFiODBjMDIwNWZmYWE5OTA4MDI3"
+  },
+   {
+    "Code": 219101,
+    "Item Description": "ANIVAGENE SHAMPOO FORTIFYING MAN 200 ML",
+    "أسم المنتج": "انيفاجين شامبو تساقط للرجال 200 مل",
+    "Category Level A": "BEAUTY CARE",
+    "Category Level B": null,
+    "Category Level C": null,
+    "Category Level D": "HAIR-MED",
+    "Category Level E": "HAIR-MED-SHAMPOO MAN",
+    "Unit Price": 120.0,
+    "Brand": "ANIVAGENE",
+    "Manufacture": null,
+    "itemurl": "https://stgprevapi.al-dawaa.com/medias/Anivagene-Fortifying-Shampoo-for-Man-200-Ml_0_1200.webp?context=bWFzdGVyfGltYWdlc3wxNDIxOTh8aW1hZ2Uvd2VicHxhR1ZqTDJnMU1TODVOVE15TnpJNE5qTTVOVEU0THpJeE9URXdNVjh3WDJWdVh6RXlNREJYZURFeU1EQklYMWRGUWxBdWQyVmljQXwyNzQxNzQ4ZmVkZDNkODkyMDdmYmJhNGE1NDBlOTUyN2JjYzE2MDNmODlhMzA2NGJmMTRhNjIzMzFhOGU3NGU5"
+  }
+ 
+];
 
 async function fetchProductsFromSupabase() {
     const loader = document.getElementById("loadingIndicator");
     const container = document.getElementById("productsContainer");
     if (loader) loader.style.display = "block";
-
-    // ─── CACHE CONFIG ───
-    const CACHE_KEY    = 'productsDB_cache_v2';
-    const CACHE_TS_KEY = 'productsDB_cache_ts';
-    const CACHE_TTL    = 30 * 60 * 1000; // 30 دقيقة
-
-    function loadFromCache() {
-        try {
-            const ts = parseInt(localStorage.getItem(CACHE_TS_KEY) || '0');
-            if (Date.now() - ts > CACHE_TTL) return null;
-            const raw = localStorage.getItem(CACHE_KEY);
-            return raw ? JSON.parse(raw) : null;
-        } catch(e) { return null; }
-    }
-
-    function saveToCache(data) {
-        try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify(data));
-            localStorage.setItem(CACHE_TS_KEY, String(Date.now()));
-        } catch(e) { console.warn('Cache save failed (storage full?):', e.message); }
-    }
 
     function applyData(data) {
         productsDB = data;
@@ -5048,179 +5079,42 @@ async function fetchProductsFromSupabase() {
         applyFilters();
     }
 
-    // ─── TIMEOUT WRAPPER ───
-    function withTimeout(promise, ms = 20000) {
-        return Promise.race([
-            promise,
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms)
-            )
-        ]);
-    }
-
-    // ─── 1. INSTANT CACHE HIT ───
-    const cached = loadFromCache();
-    if (cached && cached.length > 0) {
-        console.log(`⚡ من الكاش: ${cached.length} منتج (فوري)`);
-        applyData(cached);
-        if (loader) loader.style.display = "none";
-        // Refresh cache in background silently
-        setTimeout(() => fetchAndCacheInBackground(), 500);
-        return;
-    }
-
-    // ─── 2. FRESH FETCH (no cache) ───
-    if (container) container.innerHTML = '';
-    productsDB = [];
-
     try {
-        const codesToFetch = new Set();
-        if (typeof offersDB !== 'undefined') {
-            offersDB.forEach(offer => {
-                if (offer.codes && Array.isArray(offer.codes)) {
-                    offer.codes.forEach(code => {
-                        const clean = String(code).trim();
-                        if (clean && /^\d+$/.test(clean)) codesToFetch.add(clean);
-                    });
-                }
-            });
-        }
-
-        const uniqueCodes = Array.from(codesToFetch);
-        const numericCodes = uniqueCodes.map(c => parseInt(c)).filter(n => !isNaN(n));
-        console.log(`📡 جلب ${numericCodes.length} كود من Supabase (بالتسلسل)...`);
-
-        const CHUNK_SIZE = 300;
-        let allFetchedData = [];
-        let failedChunks = 0;
-
-        for (let i = 0; i < numericCodes.length; i += CHUNK_SIZE) {
-            const chunk = numericCodes.slice(i, i + CHUNK_SIZE);
-            let chunkSuccess = false;
-
-            for (let attempt = 1; attempt <= 3; attempt++) {
-                try {
-                    const { data, error } = await withTimeout(
-                        supabaseClient
-                            .from('products')
-                            .select('code,item_description,brand,manufacture,category_level_a,category_level_b,category_level_c,category_level_d,unit_price,itemurl')
-                            .in('code', chunk),
-                        20000
-                    );
-
-                    if (error) throw new Error(error.message);
-                    if (data && data.length > 0) {
-                        allFetchedData = allFetchedData.concat(data);
-                    }
-                    console.log(`✅ chunk ${Math.floor(i/CHUNK_SIZE)+1}: ${data?.length || 0} منتج`);
-                    chunkSuccess = true;
-                    break;
-
-                } catch (chunkErr) {
-                    console.warn(`⚠️ chunk ${Math.floor(i/CHUNK_SIZE)+1} محاولة ${attempt}: ${chunkErr.message}`);
-                    if (attempt < 3) {
-                        await new Promise(r => setTimeout(r, 3000 * attempt));
-                    }
-                }
-            }
-
-            if (!chunkSuccess) {
-                failedChunks++;
-                console.error(`❌ chunk ${Math.floor(i/CHUNK_SIZE)+1} فشل نهائياً بعد 3 محاولات`);
-            }
-
-            // انتظر قليلاً بين كل chunk عشان ما يضغطش على الـ proxy
-            await new Promise(r => setTimeout(r, 200));
-        }
-
-        if (allFetchedData.length === 0) {
-            console.warn('⚠️ مفيش داتا اتجابت — جاري عرض الصفحة بدون منتجات');
+        if (!productsDB || productsDB.length === 0) {
+            console.warn('⚠️ productsDB فاضية — تأكد إنك حطيت الداتا في الملف');
             applyData([]);
             return;
         }
 
-        const mapped = allFetchedData.map(p => ({
+        // تأكد إن كل الأكواد string متسقة
+        const mapped = productsDB.map(p => ({
             ...p,
-            "Code":             String(p.code || '').trim(),
-            "Item Description": p.item_description || '',
-            "Brand":            p.brand || '',
-            "Manufacture":      p.manufacture || '',
-            "Category Level A": p.category_level_a || '',
-            "Category Level B": p.category_level_b || '',
-            "Category Level C": p.category_level_c || '',
-            "Category Level D": p.category_level_d || '',
-            "Unit Price":       p.unit_price || 0,
-            "itemurl":          p.itemurl || ''
+            "Code":             String(p["Code"] || p.code || '').trim(),
+            "Item Description": p["Item Description"] || p.item_description || '',
+            "Brand":            p["Brand"] || p.brand || '',
+            "Manufacture":      p["Manufacture"] || p.manufacture || '',
+            "Category Level A": p["Category Level A"] || p.category_level_a || '',
+            "Category Level B": p["Category Level B"] || p.category_level_b || '',
+            "Category Level C": p["Category Level C"] || p.category_level_c || '',
+            "Category Level D": p["Category Level D"] || p.category_level_d || '',
+            "Unit Price":       p["Unit Price"] ?? p.unit_price ?? 0,
+            "itemurl":          p["itemurl"] || p.itemurl || ''
         }));
 
-        console.log(`✅ تم تحميل: ${mapped.length} منتج${failedChunks > 0 ? ` (${failedChunks} chunks فشلت)` : ''}`);
-        saveToCache(mapped);
+        console.log(`✅ تم تحميل ${mapped.length} منتج من الملف`);
         applyData(mapped);
 
     } catch (err) {
-        console.error('❌ خطأ عام في fetchProductsFromSupabase:', err.message);
+        console.error('❌ خطأ في تحميل productsDB:', err.message);
         applyData([]);
     } finally {
         if (loader) loader.style.display = "none";
     }
 }
 
-// Background refresh without blocking UI
+// دالة فاضية — محتاجها بس عشان أي كود تاني بيناديها ما يكسرش
 async function fetchAndCacheInBackground() {
-    try {
-        const codesToFetch = new Set();
-        if (typeof offersDB !== 'undefined') {
-            offersDB.forEach(offer => {
-                if (offer.codes && Array.isArray(offer.codes)) {
-                    offer.codes.forEach(code => {
-                        const clean = String(code).trim();
-                        if (clean && /^\d+$/.test(clean)) codesToFetch.add(clean);
-                    });
-                }
-            });
-        }
-
-        const uniqueCodes = Array.from(codesToFetch);
-        const numericCodes = uniqueCodes.map(c => parseInt(c)).filter(n => !isNaN(n));
-
-        const CHUNK_SIZE = 300;
-        let allFetchedData = [];
-
-        for (let i = 0; i < numericCodes.length; i += CHUNK_SIZE) {
-            const chunk = numericCodes.slice(i, i + CHUNK_SIZE);
-            try {
-                const { data, error } = await supabaseClient
-                    .from('products')
-                    .select('code,item_description,brand,manufacture,category_level_a,category_level_b,category_level_c,category_level_d,unit_price,itemurl')
-                    .in('code', chunk);
-                if (!error && data) allFetchedData = allFetchedData.concat(data);
-            } catch(e) {
-                console.warn(`Background chunk ${Math.floor(i/CHUNK_SIZE)+1} failed:`, e.message);
-            }
-            await new Promise(r => setTimeout(r, 200));
-        }
-
-        if (allFetchedData.length > 0) {
-            const mapped = allFetchedData.map(p => ({
-                ...p,
-                "Code":             String(p.code || '').trim(),
-                "Item Description": p.item_description || '',
-                "Brand":            p.brand || '',
-                "Manufacture":      p.manufacture || '',
-                "Category Level A": p.category_level_a || '',
-                "Category Level B": p.category_level_b || '',
-                "Category Level C": p.category_level_c || '',
-                "Category Level D": p.category_level_d || '',
-                "Unit Price":       p.unit_price || 0,
-                "itemurl":          p.itemurl || ''
-            }));
-            localStorage.setItem('productsDB_cache_v2', JSON.stringify(mapped));
-            localStorage.setItem('productsDB_cache_ts', String(Date.now()));
-            console.log('🔄 كاش محدث في الخلفية:', mapped.length, 'منتج');
-        }
-    } catch(e) {
-        console.warn('Background refresh failed:', e.message);
-    }
+    // مش محتاجها — الداتا موجودة في الملف مباشرةً
 }
 
     // ========== IMAGES DB (New Structure) ==========
@@ -5267,6 +5161,12 @@ const categoryImagesDB = {
     "SPORTS & FITTNESS":      { icon: "img", hero: "img" },
     "TOPICAL PREPARATION":    { icon: "img", hero: "img" }
 };
+
+
+
+
+
+
 // 1. مخزن كل فترات العروض
 const ALL_PERIODS_OFFERS = [
     {
@@ -15115,15 +15015,9 @@ function processRenderQueue() {
                     brandCluster.appendChild(clusterHeader);
 
                     // Grid للكروت
-                    const clusterGrid = document.createElement('div');
-                    clusterGrid.style.cssText = `
-                        display: grid;
-                        grid-template-columns: repeat(${count}, 1fr);
-                        gap: 10px;
-                        padding: 10px;
-                        flex: 1;
-                    `;
-
+                   const clusterGrid = document.createElement('div');
+clusterGrid.className = 'cluster-grid';
+clusterGrid.style.cssText = `display: grid; grid-template-columns: repeat(${count}, 1fr); gap: 10px; padding: 10px; flex: 1`;
                     productsInThisCluster.forEach(product => {
                         const offer = getOffer(product.Code);
                         const original = parseFloat(product["Unit Price"] || product.Price || 0);
@@ -15312,44 +15206,71 @@ function initSmartImageLoader() {
       if (entry.isIntersecting) {
         const img = entry.target;
         const code = img.dataset.code;
-        const brand = img.dataset.brand;
-        // ✅ قراءة رابط الداتا بيز المباشر
-        const dbUrl = img.dataset.itemurl; 
+        const brand = img.dataset.brand || 'Generic';
+        const dbUrl = img.dataset.itemurl;
 
-        // دالة fallback (في حالة فشل الرابط أو عدم وجوده)
         const loadFallback = () => {
-             // بما أنك شلت الوركر، هنروح علطول للوجو البراند
-             tryLoadBrandLogoSmart(brand, img);
+          tryLoadBrandLogoSmart(brand, img);
         };
 
-        // ✅ المنطق الجديد:
-        if (dbUrl && dbUrl !== "null" && dbUrl.trim() !== "") {
-            // 1. لو في رابط في الداتا بيز، جربه
-            img.src = dbUrl;
-            
-            img.onload = () => {
-                img.style.opacity = '1';
-                // تأكيد نجاح التحميل
-            };
-            
-            img.onerror = () => {
-                // لو الرابط موجود بس بايظ (404)، شغل البديل
-                console.warn(`Link broken for ${code}, loading fallback...`);
-                loadFallback();
-            };
-        } else {
-            // 2. لو مفيش رابط، شغل البديل علطول
+        // ✅ FIX 1: تحقق من "undefined" و "1" وسواهم
+        const isValidUrl = dbUrl 
+          && dbUrl !== "null" 
+          && dbUrl !== "undefined" 
+          && dbUrl.trim() !== "" 
+          && dbUrl.trim() !== "1"
+          && dbUrl.startsWith("http");
+
+        if (isValidUrl) {
+          img.src = dbUrl;
+          img.onload = () => { img.style.opacity = '1'; };
+          img.onerror = () => {
+            console.warn(`Link broken for ${code}, loading fallback...`);
             loadFallback();
+          };
+        } else {
+          loadFallback();
         }
-        
+
         obs.unobserve(img);
       }
     });
-  }, { rootMargin: '300px' }); 
+  // ✅ FIX 2: rootMargin أكبر عشان يحمل الصور قبل الوصول ليها
+  }, { rootMargin: '800px', threshold: 0 });
 
   document.querySelectorAll('img.smart-lazy-img').forEach(img => observer.observe(img));
-}
 
+  // ✅ FIX 3: Fallback إجباري بعد ثانيتين لحالة Desktop View على الموبايل
+  // لأن الـ IntersectionObserver بيفشل أحياناً لما الـ viewport يتغير
+  setTimeout(() => {
+    document.querySelectorAll('img.smart-lazy-img').forEach(img => {
+      const isNotLoaded = !img.src 
+        || img.src === window.location.href 
+        || img.src === '' 
+        || parseFloat(img.style.opacity) === 0;
+
+      if (isNotLoaded) {
+        const brand = img.dataset.brand || 'Generic';
+        const dbUrl = img.dataset.itemurl;
+
+        const isValidUrl = dbUrl 
+          && dbUrl !== "null" 
+          && dbUrl !== "undefined" 
+          && dbUrl.trim() !== "" 
+          && dbUrl.trim() !== "1"
+          && dbUrl.startsWith("http");
+
+        if (isValidUrl) {
+          img.src = dbUrl;
+          img.onload = () => { img.style.opacity = '1'; };
+          img.onerror = () => { tryLoadBrandLogoSmart(brand, img); };
+        } else {
+          tryLoadBrandLogoSmart(brand, img);
+        }
+      }
+    });
+  }, 2000);
+}
 // ==========================================
 // 3️⃣ دالة محاولة تحميل اللوجو ثم الفيكتور
 // ==========================================
