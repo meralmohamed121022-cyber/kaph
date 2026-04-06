@@ -4123,7 +4123,7 @@ body > div:has(> label[for="codesFileInput"]),
 <div id="loaderScreen">
 
     <div id="loaderScreen">
-    <img src="https://github.com/meralmohamed121022-cyber/photos/blob/main/Gemini_Generated_Image_vg9ttgvg9ttgvg9t%20(1).png?raw=true" alt="Loading...">
+   <img src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/Gemini_Generated_Image_vg9ttgvg9ttgvg9t%20(1).png" alt="Loading...">
 </div>
 
     </div>
@@ -4993,17 +4993,29 @@ infoBox.addEventListener('click', toggleInfoBox);
 <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
 <script>   
 // 1. إعدادات سوبابيز
-// 1️⃣ تأكد إن التعريف فوق خالص كده
 const supabaseUrl = 'https://vyvtoaplrdnjskomnoou.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ5dnRvYXBscmRuanNrb21ub291Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUyMzEwNjksImV4cCI6MjA5MDgwNzA2OX0.yTMKiK-zjYM36YvZ8U-yFQDW5NH4Xdi0Cju80mi1B7E';
+
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey, {
     realtime: { params: { eventsPerSecond: -1 } },
-    auth: { persistSession: false, autoRefreshToken: false }
+    auth: { persistSession: false, autoRefreshToken: false },
+    db: { schema: 'public' },
+    global: {
+        headers: { 'X-Client-Info': 'mono-offers/1.0' },
+        fetch: (url, options = {}) => {
+            return fetch(url, {
+                ...options,
+                cache: 'no-store',
+                keepalive: true
+            });
+        }
+    }
 });
+
 // ❌ قطع WebSocket فورًا — بيحل مشكلة البطء على شبكات الشركات والمكتب
 try { supabaseClient.realtime.disconnect(); } catch(e) {}
 
-let productsDB = []; 
+let productsDB = [];
 
 
 async function fetchProductsFromSupabase() {
@@ -5012,9 +5024,9 @@ async function fetchProductsFromSupabase() {
     if (loader) loader.style.display = "block";
 
     // ─── CACHE CONFIG ───
-    const CACHE_KEY   = 'productsDB_cache_v2';
+    const CACHE_KEY    = 'productsDB_cache_v2';
     const CACHE_TS_KEY = 'productsDB_cache_ts';
-    const CACHE_TTL   = 30 * 60 * 1000; // 30 دقيقة
+    const CACHE_TTL    = 30 * 60 * 1000; // 30 دقيقة
 
     function loadFromCache() {
         try {
@@ -5051,7 +5063,6 @@ async function fetchProductsFromSupabase() {
         setTimeout(() => fetchAndCacheInBackground(), 500);
         return;
     }
-
     // ─── 2. FRESH FETCH (no cache) ───
     if (container) container.innerHTML = '';
     productsDB = [];
