@@ -5090,20 +5090,24 @@ async function fetchProductsFromSupabase() {
     const loader = document.getElementById("loadingIndicator");
     if (loader) loader.style.display = "block";
 
-    // 🔗 الروابط المباشرة لملفات الـ JSON الخاصة بك
-    const url1 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/offerstestgit/refs/heads/main/products1.json";
-    const url2 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/offerstestgit/refs/heads/main/products2.json";
+    // 🔒 الروابط مشفرة هنا عشان متظهرش في البحث العادي (Base64)
+    const _u1 = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21lcmFsbW9oYW1lZDEyMTAyMi1jeWJlci9vZmZlcnN0ZXN0Z2l0L3JlZnMvaGVhZHMvbWFpbi9wcm9kdWN0czEuanNvbg==";
+    const _u2 = "aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21lcmFsbW9oYW1lZDEyMTAyMi1jeWJlci9vZmZlcnN0ZXN0Z2l0L3JlZnMvaGVhZHMvbWFpbi9wcm9kdWN0czIuanNvbg==";
 
     try {
-        console.log("⏳ جاري تحميل قاعدة بيانات الأدوية من GitHub...");
-        
+        console.log("⏳ جاري تحميل قاعدة بيانات الأدوية...");
+
+        // فك التشفير وقت الاستخدام فقط
+        const url1 = atob(_u1);
+        const url2 = atob(_u2);
+
         // سحب الملفين في نفس الوقت لضمان السرعة (Parallel Fetch)
         const [res1, res2] = await Promise.all([
             fetch(url1),
             fetch(url2)
         ]);
 
-        if (!res1.ok || !res2.ok) throw new Error("فشل في تحميل أحد الملفات من GitHub");
+        if (!res1.ok || !res2.ok) throw new Error("فشل في الوصول لمصدر البيانات");
 
         const data1 = await res1.json();
         const data2 = await res2.json();
@@ -5130,13 +5134,13 @@ async function fetchProductsFromSupabase() {
 
         // 🚀 تشغيل المحركات (الفلاتر، البحث، خريطة العروض)
         initOffersMap();
-        if (typeof buildSearchCache  === 'function') buildSearchCache();
-        if (typeof clearAllFilters   === 'function') clearAllFilters();
+        if (typeof buildSearchCache === 'function') buildSearchCache();
+        if (typeof clearAllFilters === 'function') clearAllFilters();
         initializeFilters();
         applyFilters();
 
     } catch (err) {
-        console.error('❌ فشل تحميل الداتا:', err.message);
+        console.error('❌ مشكلة في تحميل البيانات');
         // في حالة الفشل نترك المصفوفة فارغة لمنع انهيار الكود
         productsDB = []; 
     } finally {
