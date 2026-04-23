@@ -692,7 +692,18 @@ async function doLogin() {
         requestNotificationPermission();
 
         try {
-            await supabaseClient.from('login_logs').insert([{ pharmacy_number: currentPharmacy }]);
+            // التعديل هنا: استخدام upsert بدل insert
+            // بنبعت البيانات ونحدد إننا مش عايزين تكرار في pharmacy_number
+            await supabaseClient
+                .from('login_logs')
+                .upsert({ 
+                    pharmacy_number: currentPharmacy,
+                    login_time: new Date().toISOString() 
+                }, { 
+                    onConflict: 'pharmacy_number' 
+                });
+                
+            console.log("Login tracked or updated successfully.");
         } catch (e) {
             console.error("Failed to log login:", e);
         }
@@ -702,7 +713,6 @@ async function doLogin() {
         alert("يرجى إدخال رقم الصيدلية!");
     }
 }
-
 function logout() {
     document.getElementById('logoutModal').style.display = 'flex';
 }
