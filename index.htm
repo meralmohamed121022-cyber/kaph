@@ -862,37 +862,6 @@ async function stopAlarm() {
     }
 }
 
-async function stopAlarm() {
-    const reminderId = document.getElementById('currentReminderId').value;
-    const audio = document.getElementById('offerAlarmSound');
-
-    // 1. إيقاف الصوت فوراً
-    audio.pause();
-    audio.currentTime = 0;
-
-    // 2. إلغاء أي "غفوة تلقائية" أو "إيقاف تلقائي" كان متجدول
-    clearTimeout(autoSnoozeTimeout);
-    clearTimeout(stopAudioTimeout);
-
-    // 3. إخفاء المودال
-    document.getElementById('alarmActionModal').style.display = 'none';
-
-    if (reminderId) {
-        // 4. تحديث الحالة في سوبابيز لـ completed عشان الـ Realtime ما يبعتوش تاني
-        const { error } = await supabaseClient
-            .from('reminders')
-            .update({ status: 'completed' })
-            .eq('id', reminderId);
-
-        if (error) {
-            console.error("Error stopping alarm:", error);
-        } else {
-            console.log("Alarm stopped and marked completed.");
-            // مسح الـ ID عشان نضمن إنه مش هيتكرر
-            document.getElementById('currentReminderId').value = "";
-        }
-    }
-}
 async function snoozeAlarm(isAuto = false) {
     const id = document.getElementById('currentReminderId').value;
     const snoozeVal = document.getElementById('snoozeSelect').value;
@@ -1206,7 +1175,7 @@ function closeAllMenus() {
 function openLink(url) {
     if (!url || url.trim() === '#') return;
     closeAllMenus();
-    
+
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         btn.classList.remove('active');
@@ -1220,8 +1189,10 @@ function openLink(url) {
     const errorBox = document.getElementById('iframeError');
     const loader = document.getElementById('loadingOverlay');
 
+    // إخفاء أي error قديم
     errorBox.classList.remove('show');
-    
+
+    // إظهار اللودر
     if (loader) {
         loader.style.display = 'flex';
         loader.style.opacity = '1';
@@ -1229,32 +1200,46 @@ function openLink(url) {
     }
 
     container.classList.add('show');
-    iframe.src = url;
 
-    let hasLoaded = false;
-    let loadTimeout = setTimeout(() => {
-        if (!hasLoaded) {
+    // ✅ مسح الـ handlers القديمة أولاً لمنع التعارض
+    iframe.onload = null;
+    iframe.onerror = null;
+
+    // ✅ تحميل الـ iframe بعد delay صغير عشان about:blank ما يطلقش onload
+    setTimeout(() => {
+        let hasLoaded = false;
+
+        // ✅ Timeout مرفوع لـ 15 ثانية
+        let loadTimeout = setTimeout(() => {
+            if (!hasLoaded) {
+                hideLoaderFast(loader);
+                errorBox.classList.add('show');
+            }
+        }, 15000);
+
+        iframe.onload = function() {
+            // ✅ تجاهل about:blank و عدم الاعتبار كـ load ناجح
+            try {
+                const frameSrc = iframe.contentWindow.location.href;
+                if (frameSrc === 'about:blank') return;
+            } catch(e) {
+                // cross-origin: يعني الصفحة اتحملت بنجاح
+            }
+            hasLoaded = true;
+            clearTimeout(loadTimeout);
+            hideLoaderFast(loader);
+        };
+
+        iframe.onerror = function() {
+            hasLoaded = true;
+            clearTimeout(loadTimeout);
             hideLoaderFast(loader);
             errorBox.classList.add('show');
-            iframe.src = 'about:blank';
-        }
-    }, 5000); 
+        };
 
-    iframe.onload = function() {
-        hasLoaded = true;
-        clearTimeout(loadTimeout);
-        hideLoaderFast(loader);
-    };
-
-    iframe.onerror = function() {
-        hasLoaded = true;
-        clearTimeout(loadTimeout);
-        hideLoaderFast(loader);
-        errorBox.classList.add('show');
-        iframe.src = 'about:blank';
-    };
+        iframe.src = url;
+    }, 50);
 }
-
 function hideLoaderFast(loader) {
     if (loader) {
         loader.style.opacity = '0';
