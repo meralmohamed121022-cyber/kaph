@@ -41600,22 +41600,22 @@ clusterGrid.style.cssText = `display: grid; grid-template-columns: repeat(${coun
                                     ${shortOfferType}
                                 </div>
 
-                                <img 
-                                    data-code="${product.Code}" 
-                                    data-brand="${product.Brand || 'Generic'}" 
-                                    data-itemurl="${product.itemurl || ''}" 
-                                    class="product-image smart-lazy-img" 
-                                    style="
-                                        max-width: 100%; 
-                                        max-height: 100%; 
-                                        object-fit: contain; 
-                                        opacity: 0; 
-                                        transition: opacity 0.3s;
-                                    " 
-                                    alt="${product["Item Description"]}"
-                                />
-                            </div>
-
+                             <img 
+    data-code="${product.Code}" 
+    data-brand="${product.Brand || 'Generic'}" 
+    data-itemurl="${product.itemurl || ''}" 
+    class="product-image smart-lazy-img" 
+    style="
+        max-width: 100%; 
+        max-height: 100%; 
+        object-fit: contain; 
+        opacity: 0; 
+        transition: opacity 0.3s;
+    " 
+    alt="${product["Item Description"]}"
+/>
+${getWaImageBtnHTML(product)}
+</div>
                             <div style="
                                 flex: 1; 
                                 padding: 15px; 
@@ -46248,7 +46248,86 @@ createMagazineModeToggle();
 // ملحوظة: fetchProductsFromSupabase هي اللي بتعمل applyFilters في آخرها
 fetchProductsFromSupabase(); 
 // ====== 🛡️ نظام أمان شاشة التحميل (Mo Safe Mode) ======
+// ====== 🟢 إضافة زر الواتساب للصور المفقودة (متوافق 100% مع وضع المجلة) 🟢 ======
 
+setInterval(() => {
+    // 1. استهداف جميع الكروت في وضع المجلة أو العادي
+    const allCards = document.querySelectorAll('.magazine-product-card, .product-card');
+
+    allCards.forEach(card => {
+        // منع التكرار: إذا تم وضع الزر، تجاهل الكارت
+        if (card.dataset.whatsappBtnAdded === "true") return;
+
+        // 2. البحث عن الصورة
+        const img = card.querySelector('img.magazine-lazy-img, img.product-image, img.stack-img');
+        if (!img) return;
+
+        // 3. التحقق من مسار الصورة الحالي
+        const currentSrc = img.getAttribute('src') || '';
+        
+        // هل مسار الصورة عبارة عن Placeholder SVG المولد من الدالة الخاصة بك؟
+        // أو هل يوجد كلاس needs-worker (الذي تضيفه أنت عند الفشل onerror)؟
+        if (currentSrc.includes('data:image/svg') || img.classList.contains('needs-worker') || currentSrc.includes('No Image')) {
+            
+            // تم رصد صورة مفقودة أو Placeholder -> إضافة الزر
+            card.dataset.whatsappBtnAdded = "true";
+
+            // 4. استخراج البيانات (الكود واسم المنتج)
+            const code = img.getAttribute('data-code') || "Unknown";
+            
+            let name = "";
+            const brandEl = card.querySelector('.magazine-brand-name');
+            const nameEl = card.querySelector('.magazine-item-name, .product-title');
+            
+            if (brandEl) name += brandEl.innerText.trim() + " - ";
+            if (nameEl) name += nameEl.innerText.trim();
+
+            // 5. بناء الزر الأخضر
+            const waButton = document.createElement('button');
+            waButton.innerHTML = '📸 أرفق صورة';
+            waButton.style.cssText = `
+                position: absolute;
+                bottom: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                background-color: #25D366;
+                color: #FFF;
+                border: 2px solid #FFF;
+                border-radius: 20px;
+                padding: 4px 12px;
+                font-family: 'Cairo', sans-serif;
+                font-weight: bold;
+                font-size: 11px;
+                cursor: pointer;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+                z-index: 100;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                white-space: nowrap;
+            `;
+
+            // 6. إضافة وظيفة فتح الواتساب عند الضغط
+            waButton.onclick = (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // لمنع الكارت من النقر (مثل فتح الرابط)
+                const msg = encodeURIComponent(`مرحباً، أرفق صورة لهذا الصنف من فضلك:\nالكود: ${code}\nالاسم: ${name}`);
+                window.open(`https://wa.me/966541932559?text=${msg}`, '_blank');
+            };
+
+            // 7. تثبيت الزر داخل الكارت
+            // البحث عن الغلاف المحيط بالصورة (لتكون الـ absolute صحيحة)
+            const wrapper = card.querySelector('.magazine-product-image-wrapper, .magazine-images-stack') || img.parentElement;
+            
+            if (wrapper) {
+                if(window.getComputedStyle(wrapper).position === 'static') {
+                    wrapper.style.position = 'relative';
+                }
+                wrapper.appendChild(waButton);
+            }
+        }
+    });
+}, 800); // التشغيل كل 800 جزء من الثانية لاصطياد الكروت أثناء التقليب
 function hideInitialLoader() {
     const loader = document.getElementById('loaderScreen');
     if (loader) {
@@ -46288,6 +46367,26 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 console.log('✅ Gateway & Data Ready!');
+function getWaImageBtnHTML(product) {
+  const imgUrl = product.itemurl || product.ItemURL;
+  if (imgUrl && imgUrl !== "null" && imgUrl.trim() !== "") {
+    return ""; 
+  }
+  
+  const itemName = product["Item Description"] || "Unknown Item";
+  const itemCode = product.Code || "بدون كود";
+  
+  const msg = encodeURIComponent(`مرحباً يا Mo، أود إرفاق صورة لهذا الصنف:\nالكود: ${itemCode}\nالاسم: ${itemName}`);
+  const waLink = `https://wa.me/966541932559?text=${msg}`;
+  
+  return `
+  <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 100; width: 85%; text-align: center;">
+    <a href="${waLink}" target="_blank" style="display: flex; align-items: center; justify-content: center; gap: 5px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); color: white; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-weight: 800; font-family: 'Cairo', sans-serif; font-size: 12px; box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4); transition: transform 0.2s ease;">
+      📸 أرفق صورة للصنف
+    </a>
+  </div>
+  `;
+}
 </script>
 
 
