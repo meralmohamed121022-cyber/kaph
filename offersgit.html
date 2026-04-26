@@ -5324,17 +5324,18 @@ function initFuzzySearch() {
 }
 
 function buildSearchCache() {
+  // 🔥 تصفير الكاش تماماً في بداية الدالة لمنع تراكم بيانات الفترات السابقة
+  searchCache = []; 
+
   const targetDB = (typeof productsDB !== 'undefined') ? productsDB : window.productsDB;
   
   if (!targetDB || targetDB.length === 0) {
     return;
   }
   
-  searchCache = [];
-  
   // 🔍 استخراج كل الأكواد التي عليها عرض في الفترة المفتوحة الحالية
   const activeOffersMap = new Map();
-  if (typeof offersDB !== 'undefined') {
+  if (typeof offersDB !== 'undefined' && offersDB && offersDB.length > 0) {
       offersDB.forEach(offer => {
           if (offer.codes) {
               offer.codes.forEach(code => {
@@ -5373,7 +5374,6 @@ function buildSearchCache() {
   
   console.log(`🎯 Search Cache Built: ${searchCache.length} Products with ACTIVE OFFERS ONLY.`);
 }
-
 function handleSearchInput() {
   const searchInput = document.getElementById('globalSearch');
   if (!searchInput) return;
@@ -38513,7 +38513,89 @@ const ALL_PERIODS_OFFERS = [
   }
 ],
         exclusive: []
+    },
+{
+  "id": "p4",
+  "label": "24 apr to 03 may OFFERS",
+  "start": "2026-04-24",
+  "end": "2026-05-03",
+  "offers": [
+    {
+      "offerType": "Buy 2 BLEMIL PLUS Get 1 @ SAR 275.00",
+      "offerTypeAR": "Buy 2 BLEMIL PLUS Get 1 @ SAR 275.00",
+      "codes": [
+        "BLEMIL PLUS"
+      ],
+      "styleClass": "buy-2-get-1",
+      "badgeClass": "buy-2-get-1",
+      "offerPrice": {
+        "price": "275.00"
+      }
+    },
+    {
+      "offerType": "25% Off on 2nd Pc.",
+      "offerTypeAR": "خصم ٢٥ على الحبة الثانية",
+      "codes": [
+        "300173"
+      ],
+      "styleClass": "second-piece-offer",
+      "badgeClass": "second-piece-offer",
+      "offerPrice": {}
+    },
+    {
+      "offerType": "30% Off on 2nd Pc.",
+      "offerTypeAR": "خصم ٣٠ على الحبة الثانية",
+      "codes": [
+        "300268"
+      ],
+      "styleClass": "second-piece-offer",
+      "badgeClass": "second-piece-offer",
+      "offerPrice": {}
+    },
+    {
+      "offerType": "3+1 Free",
+      "offerTypeAR": "مجانا ٣",
+      "codes": [
+        "300122"
+      ],
+      "styleClass": "free-items-offer",
+      "badgeClass": "free-items-offer",
+      "offerPrice": {}
+    },
+    {
+      "offerType": "2+1 Free",
+      "offerTypeAR": "مجانا ۱۲",
+      "codes": [
+        "300292"
+      ],
+      "styleClass": "free-items-offer",
+      "badgeClass": "free-items-offer",
+      "offerPrice": {}
+    },
+    {
+      "offerType": "10% Discount",
+      "offerTypeAR": "خصم ۱۰",
+      "codes": [
+        "300803",
+        "301173"
+      ],
+      "styleClass": "discount-offer",
+      "badgeClass": "discount-offer",
+      "offerPrice": {}
+    },
+    {
+      "offerType": "1+1 Free",
+      "offerTypeAR": "مجانا ١+",
+      "codes": [
+        "214167"
+      ],
+      "styleClass": "free-items-offer",
+      "badgeClass": "free-items-offer",
+      "offerPrice": {}
     }
+  ],
+  "exclusive": []
+}
 ];
 
 // 2. دالة جلب بيانات الفترة الحالية بناءً على التاريخ
@@ -38960,14 +39042,26 @@ function createPlaceholderSVG(code) {
 const offersMap = new Map();
 
 function initOffersMap() {
-    if(typeof offersDB !== 'undefined') {
+    // 🔥 الخطوة رقم 1: تصفير الخريطة تماماً قبل البدء
+    // ده بيضمن إن أي أكواد من فترات سابقة تتمسح وما تظهرش في الفترة الجديدة
+    if (typeof offersMap !== 'undefined' && offersMap.clear) {
+        offersMap.clear();
+    }
+
+    if(typeof offersDB !== 'undefined' && offersDB && offersDB.length > 0) {
         offersDB.forEach(offer => {
             if(offer.codes) {
-                offer.codes.forEach(code => offersMap.set(code.toString(), offer));
+                offer.codes.forEach(code => {
+                    // تحويل الكود لنص لضمان المطابقة الدقيقة في البحث
+                    offersMap.set(code.toString(), offer);
+                });
             }
         });
+        console.log(`✅ Offers mapped: ${offersMap.size} products for the current period.`);
+    } else {
+        // لو الفترة اللي اخترتها فاضية، الخريطة هتفضل فاضية وده المطلوب
+        console.log("⚠️ This period has no offers. OffersMap is now empty.");
     }
-    console.log(`✅ Offers mapped: ${offersMap.size} products`);
 }
 initOffersMap();
 
