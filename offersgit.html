@@ -5135,7 +5135,6 @@ if (infoBox) {
     infoBox.addEventListener('click', toggleInfoBox);
 }
 </script>
-
 <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
 <script>   
@@ -5145,14 +5144,12 @@ async function fetchProductsFromSupabase() {
     const loader = document.getElementById("loadingIndicator");
     if (loader) loader.style.display = "block";
 
-    // 🔗 الروابط المباشرة لملفات الـ JSON الخاصة بك
     const url1 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/offerstestgit/refs/heads/main/products1.json";
     const url2 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/offerstestgit/refs/heads/main/products2.json";
 
     try {
         console.log("⏳ جاري تحميل قاعدة بيانات الأدوية من GitHub...");
         
-        // سحب الملفين في نفس الوقت لضمان السرعة (Parallel Fetch)
         const [res1, res2] = await Promise.all([
             fetch(url1),
             fetch(url2)
@@ -5163,10 +5160,8 @@ async function fetchProductsFromSupabase() {
         const data1 = await res1.json();
         const data2 = await res2.json();
 
-        // 🤝 دمج البيانات من الملفين في مصفوفة واحدة
         const combinedData = [...data1, ...data2];
 
-        // 🛠️ معالجة البيانات وتوحيد مفاتيح العناصر (Mapping)
         productsDB = combinedData.map(p => ({
             ...p,
             "Code":             String(p["Code"] || p.code || '').trim(),
@@ -5183,23 +5178,25 @@ async function fetchProductsFromSupabase() {
 
         console.log(`✅ نجاح: تم تحميل ${productsDB.length} منتج ودمجهم.`);
 
-        // 🚀 تشغيل المحركات (الفلاتر، البحث، خريطة العروض)
         initOffersMap();
         if (typeof buildSearchCache  === 'function') buildSearchCache();
         if (typeof clearAllFilters   === 'function') clearAllFilters();
         initializeFilters();
+        
+        // ✅ تشغيل تهيئة محرك البحث
+        initFuzzySearch();
+        
         applyFilters();
 
     } catch (err) {
         console.error('❌ فشل تحميل الداتا:', err.message);
-        // في حالة الفشل نترك المصفوفة فارغة لمنع انهيار الكود
         productsDB = []; 
     } finally {
         if (loader) loader.style.display = "none";
     }
 }
 
-    // ========== IMAGES DB (New Structure) ==========
+// ========== IMAGES DB ==========
 const categoryImagesDB = {
     "APHRODISIAC":            { icon: "img", hero: "img" },
     "BABY DIAPERS":           { icon: "", hero: "img" },
@@ -5244,10 +5241,369 @@ const categoryImagesDB = {
     "TOPICAL PREPARATION":    { icon: "img", hero: "img" }
 };
 
+// ====== 🔍 FUZZY SEARCH (CURRENT PERIOD OFFERS ONLY - ENGLISH & CODES) ======
+var searchCache = []; 
+var suggestionsBox = null;
+var searchTimeout = null;
 
+function initFuzzySearch() {
+  const originalSearchInput = document.getElementById('globalSearch');
+  if (!originalSearchInput) return;
+  
+  const searchContainer = originalSearchInput.parentElement;
+  
+  const mainContainer = document.getElementById('mainOffersContainer');
+  if (mainContainer) mainContainer.style.setProperty('overflow', 'visible', 'important');
+  
+  searchContainer.style.setProperty('position', 'relative', 'important');
+  searchContainer.style.setProperty('z-index', '99999', 'important');
+  searchContainer.style.setProperty('overflow', 'visible', 'important');
 
+  let existingBox = document.getElementById('searchSuggestions');
+  if (existingBox) existingBox.remove();
+  
+  suggestionsBox = document.createElement('div');
+  suggestionsBox.id = 'searchSuggestions';
+  
+  // 🔥 ستايل احترافي جداً للقائمة (Glassmorphism + Animations)
+  suggestionsBox.style.cssText = `
+    position: absolute !important;
+    top: calc(100% + 10px) !important;
+    left: 0 !important;
+    width: 100% !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    backdrop-filter: blur(15px) !important;
+    border: 1px solid rgba(102, 126, 234, 0.3) !important;
+    border-radius: 16px !important;
+    max-height: 380px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    z-index: 9999999 !important;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.15), 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+    display: none !important;
+    flex-direction: column !important;
+    transition: all 0.3s ease !important;
+    transform-origin: top center !important;
+  `;
+  searchContainer.appendChild(suggestionsBox);
+  
+  const searchInput = originalSearchInput.cloneNode(true);
+  originalSearchInput.parentNode.replaceChild(searchInput, originalSearchInput);
+  
+  searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(handleSearchInput, 100); 
+  });
+  
+  searchInput.addEventListener('focus', function() {
+    if (this.value.trim().length > 0) handleSearchInput();
+    searchContainer.style.boxShadow = "0 0 0 3px rgba(102, 126, 234, 0.3)";
+  });
 
+  searchInput.addEventListener('blur', function() {
+    searchContainer.style.boxShadow = "none";
+  });
+  
+  searchInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      hideSuggestions();
+      if (typeof applyFilters === 'function') applyFilters();
+    }
+    if (e.key === 'Escape') {
+      hideSuggestions();
+      this.blur();
+    }
+  });
+  
+  document.addEventListener('click', function(e) {
+    if (!searchContainer.contains(e.target)) hideSuggestions();
+  });
+  
+  console.log('✅ Premium Search initialized (Current Period Offers Only) 🎯');
+}
 
+function buildSearchCache() {
+  const targetDB = (typeof productsDB !== 'undefined') ? productsDB : window.productsDB;
+  
+  if (!targetDB || targetDB.length === 0) {
+    return;
+  }
+  
+  searchCache = [];
+  
+  // 🔍 استخراج كل الأكواد التي عليها عرض في الفترة المفتوحة الحالية
+  const activeOffersMap = new Map();
+  if (typeof offersDB !== 'undefined') {
+      offersDB.forEach(offer => {
+          if (offer.codes) {
+              offer.codes.forEach(code => {
+                  activeOffersMap.set(code.toString(), offer);
+              });
+          }
+      });
+  }
+
+  targetDB.forEach(product => {
+    const productCode = String(product.Code || '').trim();
+    const activeOffer = activeOffersMap.get(productCode);
+    
+    // 🔥 استبعاد أي منتج لا يوجد عليه عرض في الفترة المفتوحة حالياً 🔥
+    if (!activeOffer) return; 
+
+    // إجبار نوع العرض ليكون باللغة الإنجليزية
+    let englishOfferType = activeOffer.offerType || activeOffer.offerTypeEN;
+    if (!englishOfferType || englishOfferType === "") {
+        englishOfferType = "Special Offer"; 
+    }
+
+    searchCache.push({
+      code: productCode.toLowerCase(),
+      name: String(product["Item Description"] || "").toLowerCase(),
+      brand: String(product.Brand || "").toLowerCase(),
+      
+      originalCode: productCode,
+      originalName: String(product["Item Description"] || ""),
+      originalBrand: String(product.Brand || ""),
+      
+      offerType: englishOfferType, // إنجليزي حصراً
+      fullProduct: product
+    });
+  });
+  
+  console.log(`🎯 Search Cache Built: ${searchCache.length} Products with ACTIVE OFFERS ONLY.`);
+}
+
+function handleSearchInput() {
+  const searchInput = document.getElementById('globalSearch');
+  if (!searchInput) return;
+
+  const query = searchInput.value.trim().toLowerCase();
+  
+  if (query.length === 0) {
+    hideSuggestions();
+    if (typeof applyFilters === 'function') applyFilters(); 
+    return;
+  }
+
+  if (searchCache.length === 0) {
+     const targetDB = (typeof productsDB !== 'undefined') ? productsDB : window.productsDB;
+     if (targetDB && targetDB.length > 0) {
+         buildSearchCache();
+     } else {
+         showWaitingMessage();
+         return; 
+     }
+  }
+
+  const results = fuzzySearchProducts(query);
+  
+  if (results.length > 0) {
+    showSuggestions(results.slice(0, 15), query); 
+  } else {
+    showNoResults();
+  }
+}
+
+function fuzzySearchProducts(query) {
+    if (!searchCache || searchCache.length === 0) return [];
+    const results = [];
+    
+    searchCache.forEach(item => {
+        let score = 0;
+        if (item.code === query) score = 1000; 
+        else if (item.code.includes(query)) score = 500; 
+        else if (item.name.includes(query)) score = 100; 
+        else if (item.brand.includes(query)) score = 50; 
+
+        if (score > 0) {
+            results.push({ ...item, score });
+        }
+    });
+
+    return results.sort((a, b) => b.score - a.score);
+}
+
+function highlightMatchText(text, query) {
+    const lowerText = text.toLowerCase();
+    const matchIndex = lowerText.indexOf(query);
+    if (matchIndex !== -1 && query) {
+        const before = text.substring(0, matchIndex);
+        const match = text.substring(matchIndex, matchIndex + query.length);
+        const after = text.substring(matchIndex + query.length);
+        return `
+          <span style="color:inherit!important;">${before}</span><mark style="background: linear-gradient(120deg, #f6d365 0%, #fda085 100%) !important; color:#000!important; padding:0 3px!important; border-radius:3px!important; font-weight:900!important; box-shadow: 0 1px 3px rgba(0,0,0,0.1)!important;">${match}</mark><span style="color:inherit!important;">${after}</span>
+        `;
+    }
+    return text;
+}
+
+function showSuggestions(results, query) {
+  if (!suggestionsBox) return;
+  
+  suggestionsBox.innerHTML = '';
+  suggestionsBox.style.setProperty('display', 'flex', 'important');
+  suggestionsBox.style.setProperty('animation', 'slideDown 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards', 'important');
+  
+  if(!document.getElementById('searchKeyframes')) {
+      const style = document.createElement('style');
+      style.id = 'searchKeyframes';
+      style.innerHTML = `
+        @keyframes slideDown {
+            0% { opacity: 0; transform: translateY(-10px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes pulseOffer {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.4); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 6px rgba(255, 75, 43, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+        }
+      `;
+      document.head.appendChild(style);
+  }
+
+  const header = document.createElement('div');
+  header.style.cssText = `
+    padding: 10px 15px !important;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%) !important;
+    color: white !important;
+    font-weight: 800 !important;
+    font-size: 12px !important;
+    border-radius: 15px 15px 0 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    letter-spacing: 0.5px !important;
+  `;
+  header.innerHTML = `
+    <span style="display:flex; align-items:center; gap:5px;">
+        <span style="font-size:16px;">🎯</span> ${results.length} Active Period Offers
+    </span>
+    <span style="font-size:10px; background:rgba(255,255,255,0.2); padding:2px 8px; border-radius:10px;">Select & Press Enter</span>
+  `;
+  suggestionsBox.appendChild(header);
+  
+  results.forEach((result) => {
+    const item = document.createElement('div');
+    item.style.cssText = `
+      padding: 15px !important;
+      border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+      cursor: pointer !important;
+      display: flex !important;
+      flex-direction: column !important;
+      background: transparent !important;
+      gap: 8px !important;
+      direction: ltr !important;
+      transition: all 0.2s ease !important;
+    `;
+    
+    // 🔥 فصل الكود واسم المنتج وتلوينهم بشكل مستقل
+    const highlightedCode = highlightMatchText(result.originalCode, query);
+    const highlightedName = highlightMatchText(result.originalName, query);
+    
+    item.innerHTML = `
+      <div style="display: flex !important; align-items: center !important; gap: 10px !important;">
+        <!-- 🟢 بادج الكود الأزرق -->
+        <span style="font-size: 13px !important; font-weight: 900 !important; color: #4338ca !important; background: #e0e7ff !important; padding: 4px 8px !important; border-radius: 6px !important; border: 1px solid #c7d2fe !important; white-space: nowrap !important;">
+            🔢 ${highlightedCode}
+        </span>
+        
+        <!-- 🔘 اسم المنتج الرمادي الداكن -->
+        <span style="font-size: 14px !important; font-weight: 800 !important; color: #334155 !important; line-height: 1.4 !important; flex: 1 !important; text-align: left !important;">
+            ${highlightedName}
+        </span>
+      </div>
+
+      <div style="display: flex !important; align-items: center !important; justify-content: space-between !important; flex-wrap: nowrap !important; margin-top: 4px !important;">
+        <span style="font-size: 11px !important; color: #64748b !important; font-weight: 700 !important; background: #f1f5f9 !important; padding: 4px 8px !important; border-radius: 6px !important;">
+            🏢 ${result.originalBrand || 'No Brand'}
+        </span>
+        <span style="background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%) !important; padding: 4px 10px !important; border-radius: 8px !important; font-size: 11px !important; font-weight: 900 !important; color: white !important; box-shadow: 0 4px 10px rgba(255, 75, 43, 0.3) !important; animation: pulseOffer 2s infinite !important; letter-spacing: 0.5px !important;">
+            🔥 ${result.offerType}
+        </span>
+      </div>
+    `;
+    
+    item.addEventListener('mouseenter', () => {
+        item.style.setProperty('background', 'rgba(102, 126, 234, 0.08)', 'important');
+        item.style.setProperty('padding-left', '20px', 'important'); 
+    });
+    item.addEventListener('mouseleave', () => {
+        item.style.setProperty('background', 'transparent', 'important');
+        item.style.setProperty('padding-left', '15px', 'important');
+    });
+    
+    item.addEventListener('click', () => {
+      const searchInput = document.getElementById('globalSearch');
+      if (searchInput) {
+          searchInput.value = result.originalCode; 
+      }
+      hideSuggestions();
+      if (typeof applyFilters === 'function') applyFilters(); 
+    });
+    
+    suggestionsBox.appendChild(item);
+  });
+}
+
+function showNoResults() {
+  if (!suggestionsBox) return;
+  suggestionsBox.innerHTML = `
+    <div style="padding: 40px 20px !important; text-align: center !important; background: transparent !important; display: flex!important; flex-direction:column!important; align-items:center!important; justify-content:center!important; gap:15px!important;">
+      <div style="font-size: 50px !important; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1))!important;">👻</div>
+      <div style="font-size: 16px !important; font-weight: 900 !important; color: #475569 !important; background: #f1f5f9!important; padding: 10px 20px!important; border-radius: 20px!important;">
+        No Active Offers Found For This Code/Name
+      </div>
+    </div>
+  `;
+  suggestionsBox.style.setProperty('display', 'flex', 'important');
+  suggestionsBox.style.setProperty('animation', 'slideDown 0.3s ease forwards', 'important');
+}
+
+function showWaitingMessage() {
+  if (!suggestionsBox) return;
+  suggestionsBox.innerHTML = `
+    <div style="padding: 30px !important; text-align: center !important; background: transparent !important; display: flex!important; align-items:center!important; justify-content:center!important; gap: 10px!important;">
+      <span style="font-size: 24px!important; animation: spin 1s linear infinite!important;">⏳</span>
+      <div style="font-size: 15px !important; font-weight: 800 !important; color: #f59e0b !important;">Loading Offers Database...</div>
+    </div>
+  `;
+  suggestionsBox.style.setProperty('display', 'flex', 'important');
+}
+
+function hideSuggestions() {
+  if (suggestionsBox) {
+    suggestionsBox.style.setProperty('display', 'none', 'important');
+  }
+}
+
+// ====== 🔥🔥 تجاوز فلتر الشاشة ليعرض المنتجات ذات العروض النشطة والأكواد الإنجليزية فقط 🔥🔥 ======
+const originalMatchesFilters = window.matchesFilters;
+window.matchesFilters = function(product, filters) {
+    // 1. استخدام دالة جلب العروض النشطة في الصفحة
+    const offer = (typeof getOffer === 'function') ? getOffer(product.Code) : null;
+    
+    // إذا كنت تبحث والمنتج لا يملك عرضاً في الفترة الحالية، فلا تعرضه!
+    if (filters.searchTerm && !offer) {
+        return false; 
+    }
+
+    const baseMatch = originalMatchesFilters ? originalMatchesFilters(product, filters) : true;
+    
+    if (filters.searchTerm) {
+        const term = filters.searchTerm.toLowerCase();
+        const byCode = String(product.Code || '').toLowerCase().includes(term);
+        const byNameEn = String(product["Item Description"] || '').toLowerCase().includes(term);
+        const byBrand = String(product.Brand || '').toLowerCase().includes(term);
+
+        if (!byCode && !byNameEn && !byBrand) {
+            return false; 
+        }
+        return true; 
+    }
+    
+    return baseMatch;
+};
 
 // 1. مخزن كل فترات العروض
 const ALL_PERIODS_OFFERS = [
@@ -40171,384 +40527,6 @@ function debounce(func, wait) {
     clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
-}
-
-// ====== 🔍 FUZZY SEARCH WITH AUTOCOMPLETE ======
-let searchCache = null;
-let suggestionsBox = null;
-function initFuzzySearch() {
-  const searchInput = document.getElementById('globalSearch');
-  if (!searchInput) return;
-  
-  suggestionsBox = document.createElement('div');
-  suggestionsBox.id = 'searchSuggestions';
-  suggestionsBox.style.cssText = `
-    position: absolute !important;
-    background: var(--card-bg, #2a2a2a) !important;
-    border: 2px solid var(--border-color, #444) !important;
-    border-radius: 10px !important;
-    max-height: 400px !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    z-index: 10000 !important;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4) !important;
-    display: none !important;
-    margin-top: 5px !important;
-    width: fit-content !important;
-    min-width: 450px !important;
-    max-width: 750px !important;
-  `;
-  
-  const searchContainer = searchInput.parentElement;
-  searchContainer.style.position = 'relative';
-  searchContainer.appendChild(suggestionsBox);
-  
-  buildSearchCache();
-  
-  searchInput.addEventListener('input', debounce(handleSearchInput, 200));
-  
-  searchInput.addEventListener('focus', () => {
-    if (searchInput.value.trim().length > 0) {
-      handleSearchInput();
-    }
-  });
-  
-  searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      hideSuggestions();
-      applyFilters();
-      console.log('🔍 Search executed:', searchInput.value);
-    }
-    
-    if (e.key === 'Escape') {
-      hideSuggestions();
-      searchInput.blur();
-    }
-  });
-  
-  document.addEventListener('click', (e) => {
-    if (!searchContainer.contains(e.target)) {
-      hideSuggestions();
-    }
-  });
-  
-  console.log('✅ Fuzzy Search initialized - AUTO WIDTH 🎯');
-}
-
-function buildSearchCache() {
-    // التأكد إن فيه داتا أصلاً
-    if (!productsDB || productsDB.length === 0) {
-        console.warn('⚠️ Search cache waiting for productsDB...');
-        return;
-    }
-    
-    searchCache = productsDB.map(product => {
-        const offer = getOffer(product.Code);
-        return {
-            code: String(product.Code).trim(),
-            // دمج الاسم والبراند والكاتيجوري في حقل واحد للبحث السريع
-            name: (product["Item Description"] || "").toLowerCase(),
-            brand: (product.Brand || "").toLowerCase(),
-            category: (product["Category Level D"] || "").toLowerCase(),
-            offerType: offer ? offer.offerType : 'No Offer',
-            display: product["Item Description"] || "No Description",
-            fullProduct: product
-        };
-    });
-    
-    console.log(`🎯 Search Cache Rebuilt: ${searchCache.length} products ready.`);
-}
-
-function handleSearchInput() {
-  const searchInput = document.getElementById('globalSearch');
-  const query = searchInput.value.trim().toLowerCase();
-  
-  if (query.length === 0) {
-    hideSuggestions();
-    return;
-  }
-  
-  const results = fuzzySearchProducts(query);
-  
-  if (results.length > 0) {
-    showSuggestions(results.slice(0, 15), query);
-  } else {
-    showNoResults();
-  }
-}
-
-function fuzzySearchProducts(query) {
-  // 1. التأكد إن الكاش موجود
-  if (!searchCache || searchCache.length === 0) {
-    console.warn("⚠️ Search Cache is empty!");
-    return [];
-  }
-  
-  const results = [];
-  const queryLower = query.toString().toLowerCase().trim();
-  
-  searchCache.forEach(item => {
-    let score = 0;
-    let matchType = '';
-    
-    // تأمين الكود والاسم (تحويلهم لنصوص لضمان عدم توقف الكود)
-    const itemCode = String(item.code || '').toLowerCase();
-    const itemName = String(item.name || '').toLowerCase();
-    const itemBrand = String(item.brand || '').toLowerCase();
-    const itemCategory = String(item.category || '').toLowerCase();
-
-    // --- منطق البحث ---
-
-    // 1. البحث بالكود (أولوية قصوى)
-    if (itemCode.includes(queryLower)) {
-      score = 100;
-      matchType = 'code';
-      // ميزة إضافية: لو الكود مطابق بالظبط ارفع السكور جداً
-      if (itemCode === queryLower) score += 500; 
-    }
-    // 2. البحث بالاسم
-    else if (itemName.includes(queryLower)) {
-      score = 80;
-      matchType = 'name';
-    }
-    // 3. البحث بالبراند
-    else if (itemBrand.includes(queryLower)) {
-      score = 60;
-      matchType = 'brand';
-    }
-    // 4. البحث بالكاتيجوري
-    else if (itemCategory.includes(queryLower)) {
-      score = 40;
-      matchType = 'category';
-    }
-    // 5. البحث التقريبي (Fuzzy)
-    else if (typeof fuzzyMatch === 'function' && (fuzzyMatch(itemName, queryLower) || fuzzyMatch(itemBrand, queryLower))) {
-      score = 20;
-      matchType = 'fuzzy';
-    }
-    
-    if (score > 0) {
-      results.push({ ...item, score, matchType });
-    }
-  });
-  
-  // ترتيب النتائج: الأعلى سكور يظهر فوق
-  return results.sort((a, b) => b.score - a.score);
-}
-function fuzzyMatch(text, query) {
-  let queryIndex = 0;
-  for (let i = 0; i < text.length && queryIndex < query.length; i++) {
-    if (text[i] === query[queryIndex]) {
-      queryIndex++;
-    }
-  }
-  return queryIndex === query.length;
-}
-function showSuggestions(results, query) {
-  if (!suggestionsBox) return;
-  
-  suggestionsBox.innerHTML = '';
-  suggestionsBox.style.display = 'block';
-  
-  // Header
-  const header = document.createElement('div');
-  header.style.cssText = `
-    padding: 6px 10px !important;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    color: white !important;
-    font-weight: 600 !important;
-    font-size: 10px !important;
-    border-radius: 8px 8px 0 0 !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
-  `;
-  header.innerHTML = `
-    <span>💡 ${results.length} نتيجة</span>
-    <span style="font-size: 8px; opacity: 0.8;">اضغط Enter للبحث عن الكل</span>
-  `;
-  suggestionsBox.appendChild(header);
-  
-  // Items
-  results.forEach((result, index) => {
-    const item = document.createElement('div');
-    item.className = 'suggestion-item';
-    item.setAttribute('data-index', index);
-    item.style.cssText = `
-      padding: 7px 10px !important;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-      cursor: pointer !important;
-      transition: all 0.2s ease !important;
-      display: flex !important;
-      flex-direction: column !important;
-      width: 100% !important;
-      min-height: 48px !important;
-      opacity: 1 !important;
-      visibility: visible !important;
-      box-sizing: border-box !important;
-      background: rgba(0, 0, 0, 0.05) !important;
-      margin: 0 !important;
-      flex-shrink: 0 !important;
-      gap: 4px !important;
-    `;
-    
-    // السطر الأول - اسم المنتج فقط
-    const nameDiv = document.createElement('div');
-    nameDiv.style.cssText = `
-      font-size: 12px !important;
-      font-weight: 700 !important;
-      color: #1e3a8a !important;
-      line-height: 1.3 !important;
-      word-wrap: break-word !important;
-      display: block !important;
-      width: 100% !important;
-    `;
-    
-    // بناء الـ text مع الـ highlight
-    const text = result.display || '';
-    const lowerText = text.toLowerCase();
-    const lowerQuery = (query || '').toLowerCase();
-    const matchIndex = lowerText.indexOf(lowerQuery);
-    
-    if (matchIndex !== -1 && query) {
-      const before = text.substring(0, matchIndex);
-      const match = text.substring(matchIndex, matchIndex + query.length);
-      const after = text.substring(matchIndex + query.length);
-      
-      if (before) {
-        const beforeSpan = document.createElement('span');
-        beforeSpan.textContent = before;
-        beforeSpan.style.cssText = 'color: #1e3a8a !important;';
-        nameDiv.appendChild(beforeSpan);
-      }
-      
-      const matchSpan = document.createElement('mark');
-      matchSpan.textContent = match;
-      matchSpan.style.cssText = 'background: #fbbf24 !important; color: #1e3a8a !important; padding: 1px 2px !important; border-radius: 2px !important; font-weight: 800 !important;';
-      nameDiv.appendChild(matchSpan);
-      
-      if (after) {
-        const afterSpan = document.createElement('span');
-        afterSpan.textContent = after;
-        afterSpan.style.cssText = 'color: #1e3a8a !important;';
-        nameDiv.appendChild(afterSpan);
-      }
-    } else {
-      nameDiv.textContent = text;
-    }
-    
-    // السطر الثاني - Brand + Code + Offer Badge
-    const infoDiv = document.createElement('div');
-    infoDiv.style.cssText = `
-      display: flex !important;
-      align-items: center !important;
-      gap: 6px !important;
-      flex-wrap: wrap !important;
-      width: 100% !important;
-    `;
-    
-    // Brand & Code
-    const brandSpan = document.createElement('span');
-    brandSpan.style.cssText = `
-      font-size: 9px !important;
-      color: #64748b !important;
-      font-weight: 500 !important;
-    `;
-    brandSpan.textContent = `🏷️ ${result.brand || 'N/A'} • 📦 CODE: ${result.code || 'N/A'}`;
-    
-    // Offer Badge - inline
-    const badgeSpan = document.createElement('span');
-    badgeSpan.style.cssText = `
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      padding: 3px 7px !important;
-      border-radius: 4px !important;
-      font-size: 9px !important;
-      font-weight: 700 !important;
-      color: white !important;
-      white-space: nowrap !important;
-      display: inline-block !important;
-    `;
-    badgeSpan.textContent = convertTextNumbersToDigits(result.offerType || '');
-    
-    infoDiv.appendChild(brandSpan);
-    infoDiv.appendChild(badgeSpan);
-    
-    item.appendChild(nameDiv);
-    item.appendChild(infoDiv);
-    
-    // Hover Effects
-    item.addEventListener('mouseenter', () => {
-      item.style.background = 'rgba(102, 126, 234, 0.15) !important';
-      item.style.transform = 'translateX(3px)';
-    });
-    
-    item.addEventListener('mouseleave', () => {
-      item.style.background = 'rgba(0, 0, 0, 0.05) !important';
-      item.style.transform = 'translateX(0)';
-    });
-    
-    item.addEventListener('click', () => {
-      selectSuggestion(result);
-    });
-    
-    suggestionsBox.appendChild(item);
-  });
-  
-  console.log(`✅ ${results.length} suggestions - INLINE BADGE 🎯🔥`);
-}
-
-// ✅ Function معدلة - Highlight Match
-function highlightMatch(text, query) {
-  if (!text) return '';
-  if (!query) return `<span style="color: #ffffff !important; display: inline !important;">${text}</span>`;
-  
-  const index = text.toLowerCase().indexOf(query.toLowerCase());
-  if (index === -1) {
-    return `<span style="color: #ffffff !important; display: inline !important;">${text}</span>`;
-  }
-  
-  const before = text.substring(0, index);
-  const match = text.substring(index, index + query.length);
-  const after = text.substring(index + query.length);
-  
-  return `<span style="color: #ffffff !important; display: inline !important;">${before}</span><span style="background: #ffd700 !important; color: #000 !important; padding: 2px 4px !important; border-radius: 3px !important; font-weight: 700 !important; display: inline !important;">${match}</span><span style="color: #ffffff !important; display: inline !important;">${after}</span>`;
-}
-
-
-// ✅ Function معدلة - Show No Results
-function showNoResults() {
-  if (!suggestionsBox) return;
-  
-  suggestionsBox.innerHTML = `
-    <div style="padding: 30px !important; text-align: center !important; color: #aaaaaa !important; width: 100% !important; display: block !important;">
-      <div style="font-size: 48px !important; margin-bottom: 10px !important;">🔍</div>
-      <div style="font-size: 16px !important; font-weight: 600 !important; color: #ffffff !important;">No products found</div>
-      <div style="font-size: 12px !important; margin-top: 5px !important; color: #aaaaaa !important;">Try a different search term</div>
-    </div>
-  `;
-  suggestionsBox.style.display = 'block';
-}
-
-// ✅ Function معدلة - Hide Suggestions
-function hideSuggestions() {
-  if (suggestionsBox) {
-    suggestionsBox.style.display = 'none';
-    suggestionsBox.innerHTML = '';
-  }
-}
-
-// ✅ Function معدلة - Select Suggestion
-function selectSuggestion(result) {
-  const searchInput = document.getElementById('globalSearch');
-  if (searchInput) {
-    searchInput.value = result.display;
-  }
-  hideSuggestions();
-  applyFilters();
-  console.log(`✅ Selected: ${result.display} 🎯`);
 }
 
 
