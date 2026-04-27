@@ -4245,6 +4245,247 @@ body > div:has(> label[for="codesFileInput"]),
     transform: translateY(-2px);
     filter: brightness(1.2);
 }
+/* =========================
+   PROMO MEDIA SWIPER
+========================= */
+.promo-media-section {
+    margin: 22px auto 18px;
+    max-width: 1100px;
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.16), rgba(255,255,255,0.08));
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.22);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+}
+
+.promo-media-head {
+    text-align: center;
+    margin-bottom: 14px;
+}
+
+.promo-media-head h2 {
+    margin: 0 0 8px;
+    color: #fff;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+
+.promo-media-head p {
+    margin: 0;
+    color: rgba(255,255,255,0.88);
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.promo-media-swiper {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(280px, 340px);
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 8px 4px 12px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #d4af37 rgba(255,255,255,0.15);
+    touch-action: pan-x pinch-zoom;
+}
+
+.promo-media-swiper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.promo-media-swiper::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.12);
+    border-radius: 10px;
+}
+
+.promo-media-swiper::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #d4af37, #f5d76e);
+    border-radius: 10px;
+}
+
+.promo-media-card {
+    scroll-snap-align: start;
+    background: rgba(15,23,42,0.72);
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.promo-media-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 35px rgba(0,0,0,0.28);
+}
+
+.promo-media-title {
+    margin: 0;
+    padding: 14px 14px 10px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 800;
+    line-height: 1.4;
+    text-align: center;
+    min-height: 48px;
+}
+
+.promo-media-thumb {
+    position: relative;
+    width: 100%;
+    height: 260px;
+    display: block;
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: #0f172a;
+    cursor: pointer;
+    overflow: hidden;
+}
+
+.promo-media-thumb img,
+.promo-media-thumb video {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    background: #000;
+    transition: transform 0.35s ease;
+}
+
+.promo-media-thumb:hover img,
+.promo-media-thumb:hover video {
+    transform: scale(1.04);
+}
+
+.promo-play-badge {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.65);
+    color: #fff;
+    font-size: 18px;
+    font-weight: 900;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+    pointer-events: none;
+}
+
+/* LIGHTBOX */
+.promo-media-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 200000;
+    background: rgba(0,0,0,0.92);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.promo-media-lightbox.show {
+    display: flex;
+}
+
+.promo-media-close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    cursor: pointer;
+    z-index: 2;
+    backdrop-filter: blur(8px);
+}
+
+.promo-media-lightbox-inner {
+    width: 100%;
+    max-width: 1400px;
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.promo-media-lightbox-title {
+    color: #fff;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 800;
+    line-height: 1.5;
+}
+
+.promo-media-lightbox-inner img,
+.promo-media-lightbox-inner video {
+    max-width: 100%;
+    max-height: calc(100vh - 110px);
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 14px;
+    background: #000;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.45);
+}
+
+@media (max-width: 768px) {
+    .promo-media-section {
+        margin: 18px 10px 14px;
+        padding: 14px;
+        border-radius: 16px;
+    }
+
+    .promo-media-head h2 {
+        font-size: 20px;
+    }
+
+    .promo-media-head p {
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .promo-media-swiper {
+        grid-auto-columns: 84vw;
+        gap: 12px;
+    }
+
+    .promo-media-thumb {
+        height: 220px;
+    }
+
+    .promo-media-title {
+        font-size: 14px;
+        min-height: 42px;
+    }
+
+    .promo-media-close {
+        width: 42px;
+        height: 42px;
+        font-size: 20px;
+    }
+
+    .promo-media-lightbox-inner img,
+    .promo-media-lightbox-inner video {
+        max-height: calc(100vh - 90px);
+    }
+}
 </style>
 </head>
 <body>
@@ -4397,7 +4638,93 @@ body > div:has(> label[for="codesFileInput"]),
             </div>
         </div>
     </div>
+<!-- =========================
+     PROMO MEDIA SWIPER SECTION
+========================= -->
+<div class="promo-media-section">
+    <div class="promo-media-head">
+        <h2> PLATFORM FEATURES</h2>
+    </div>
 
+    <div class="promo-media-swiper" id="promoMediaSwiper">
+        
+       
+<article class="promo-media-card">
+    <h3 class="promo-media-title">SCAN 6 CODE ITEM AND PRINT OFFERS</h3>
+    <button class="promo-media-thumb" type="button"
+        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4')">
+        
+        <video muted playsinline preload="metadata" poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/scan%20code.jpeg">
+            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4" type="video/mp4">
+        </video>
+        
+        <span class="promo-play-badge">▶</span>
+    </button>
+</article>
+      
+<article class="promo-media-card">
+    <h3 class="promo-media-title">Sidebar Options</h3>
+    <button class="promo-media-thumb" type="button"
+        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SIDEBAR%20OPTIONS.mp4')">
+        
+        <video muted playsinline preload="metadata" poster="https://github.com/meralmohamed121022-cyber/photos/blob/main/SIDE%20BAR%20OPTIONS.jpeg?raw=true">
+            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SIDEBAR%20OPTIONS.mp4">
+        </video>
+        
+        <span class="promo-play-badge">▶</span>
+    </button>
+</article>
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">كيف تفلتر</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/FILTERS.mp4')">
+                <video muted playsinline preload="metadata">
+                    <source src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/FILTERS.mp4" type="video/mp4">
+                </video>
+                <span class="promo-play-badge">▶</span>
+            </button>
+        </article>
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">print setting</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png')">
+                <img src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png" alt="Animated Offer Banner" loading="lazy">
+            </button>
+        </article>
+ 
+     
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">PRINT OFFERS FROM FILE (pdf,excel..)</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4)">
+                <video muted playsinline preload="metadata">
+                    <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4" type="video/mp4">
+                </video>
+                <span class="promo-play-badge">▶</span>
+            </button>
+        </article>
+    
+<article class="promo-media-card">
+    <h3 class="promo-media-title">Magazine offers file</h3>
+    <button class="promo-media-thumb" type="button"
+        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/magazine%20offers%20print.mp4')">
+        
+        <video muted playsinline preload="metadata" poster="https://github.com/meralmohamed121022-cyber/photos/blob/main/magazie%20offers.jpeg?raw=true">
+            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/magazine%20offers%20print.mp4" type="video/mp4">
+        </video>
+        
+        <span class="promo-play-badge">▶</span>
+    </button>
+</article>
+       
+    </div>
+</div>
+
+<!-- FULLSCREEN LIGHTBOX -->
+<div id="promoMediaLightbox" class="promo-media-lightbox" onclick="closePromoMedia(event)">
+    <button class="promo-media-close" type="button" onclick="closePromoMedia()">✕</button>
+    <div class="promo-media-lightbox-inner" id="promoMediaStage"></div>
+</div>
    <div class="global-search-wrapper" style="display: flex; gap: 8px; align-items: center;">
     <input id="globalSearch" class="global-search-box" type="text" placeholder="Search by code or name..." style="flex: 1; margin: 0;">
     <button onclick="openBarcodeScanner()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; height: 45px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
@@ -47415,4 +47742,68 @@ function toggleScannerPrintPanel() {
     if (!panel) return;
     panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
 }
+/* =========================
+   PROMO MEDIA LIGHTBOX
+========================= */
+function openPromoMedia(type, src, title) {
+    const lightbox = document.getElementById('promoMediaLightbox');
+    const stage = document.getElementById('promoMediaStage');
+
+    if (!lightbox || !stage || !src) return;
+
+    const safeTitle = typeof escapeHtml === 'function'
+        ? escapeHtml(title || '')
+        : String(title || '');
+
+    let mediaHtml = '';
+
+    if (type === 'video') {
+        mediaHtml = `
+            <video controls autoplay playsinline>
+                <source src="${src}" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        `;
+    } else {
+        mediaHtml = `<img src="${src}" alt="${safeTitle}">`;
+    }
+
+    stage.innerHTML = `
+        <div class="promo-media-lightbox-title">${safeTitle}</div>
+        ${mediaHtml}
+    `;
+
+    lightbox.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePromoMedia(event) {
+    const lightbox = document.getElementById('promoMediaLightbox');
+    const stage = document.getElementById('promoMediaStage');
+
+    if (event && event.target && event.target !== lightbox) return;
+
+    if (stage) {
+        const video = stage.querySelector('video');
+        if (video) {
+            try {
+                video.pause();
+                video.currentTime = 0;
+            } catch (e) {}
+        }
+        stage.innerHTML = '';
+    }
+
+    if (lightbox) {
+        lightbox.classList.remove('show');
+    }
+
+    document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        closePromoMedia();
+    }
+});
 </script>
