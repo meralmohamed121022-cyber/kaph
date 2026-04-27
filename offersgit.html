@@ -1,17 +1,29 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr" data-theme="light">
 <head>
-<meta charset="UTF-8" />
+    <meta charset="UTF-8" />
 
-<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval' data: blob:; style-src * 'unsafe-inline' data:; img-src * data: blob:; connect-src * data: blob:; font-src * data:; frame-ancestors *; worker-src * blob:;">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self' https: data: blob: 'unsafe-inline' 'unsafe-eval';
+        script-src 'self' https: 'unsafe-inline' 'unsafe-eval' blob: data:;
+        style-src 'self' https: 'unsafe-inline' data:;
+        img-src 'self' https: data: blob:;
+        connect-src 'self' https: data: blob:;
+        font-src 'self' https: data:;
+        media-src 'self' https: blob: data:;
+        worker-src 'self' blob:;
+        frame-ancestors *;
+    ">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>ALDAWAA OFFERS-MONO</title>
-<link rel="icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
-<link rel="apple-touch-icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
-<script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
 
+    <title>ALDAWAA OFFERS-MONO</title>
 
+    <link rel="icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
+    <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png">
+
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 <style>
@@ -4386,10 +4398,74 @@ body > div:has(> label[for="codesFileInput"]),
         </div>
     </div>
 
-    <div class="global-search-wrapper"><input id="globalSearch" class="global-search-box" type="text" placeholder="🔍 Search by code or name..."></div>
-   <div class="filter-section">
-    <h2 class="filter-title">🔍 FILTER OFFERS</h2>
-    
+   <div class="global-search-wrapper" style="display: flex; gap: 8px; align-items: center;">
+    <input id="globalSearch" class="global-search-box" type="text" placeholder="Search by code or name..." style="flex: 1; margin: 0;">
+    <button onclick="openBarcodeScanner()" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; height: 45px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+        📷
+    </button>
+</div>
+<div id="scannerModalOverlay" style="display:none; position:fixed; inset:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:100000; flex-direction:column; align-items:center; justify-content:center; padding:8px;">
+    <div style="width:100%; max-width:520px; height:96vh; background:#1e293b; border-radius:18px; overflow:hidden; border:2px solid #667eea; position:relative; box-shadow:0 0 25px rgba(0,0,0,0.55); display:flex; flex-direction:column;">
+
+        <button onclick="closeBarcodeScanner()" style="position:absolute; right:12px; top:12px; z-index:1001; background:#ef4444; color:white; border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; font-weight:bold; font-size:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.25);">✕</button>
+
+        <div style="padding:8px 8px 0; background:#111827; border-bottom:1px solid #334155;">
+            <div style="position:relative; width:100%;">
+                <div id="reader" style="width:100%; height:clamp(240px, 40vh, 340px); min-height:240px; background:#000; border:2px solid #667eea; border-radius:18px; overflow:hidden;"></div>
+
+                <div style="pointer-events:none; position:absolute; inset:10px; border:2px solid rgba(255,255,255,0.72); border-radius:16px; box-shadow:inset 0 0 0 1px rgba(102,126,234,0.35);"></div>
+
+                <div style="pointer-events:none; position:absolute; left:0; right:0; bottom:12px; text-align:center;">
+                    <span style="display:inline-block; background:rgba(15,23,42,0.75); color:#e2e8f0; font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.14);">
+                        وجّه الباركود داخل كامل مساحة الكاميرا
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div id="latestScannedItem" style="padding:12px; background:#0f172a; color:white; text-align:right; min-height:128px; border-bottom:1px solid #334155;">
+            <div style="color:#94a3b8; font-size:14px; text-align:center;">بانتظار مسح الكود</div>
+        </div>
+
+        <div style="flex:1; overflow-y:auto; background:#1e293b; padding:10px 12px 100px; border-top:1px solid #334155;">
+            <div id="scannedItemsList" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
+
+        <div id="scannerFabWrap" style="position:absolute; left:14px; bottom:14px; z-index:1005; display:flex; flex-direction:column; align-items:flex-start; gap:10px;">
+            <div id="scannerPrintPanel" style="display:none; min-width:270px; background:rgba(15,23,42,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:12px; box-shadow:0 18px 35px rgba(0,0,0,0.35); backdrop-filter:blur(10px);">
+                
+                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:14px; margin-bottom:10px;">
+                    <label for="scannerQuantityPerCode" style="color:#fff; font-size:13px; font-weight:bold; direction:rtl; white-space:nowrap;">
+                        عدد الكروت
+                    </label>
+                    <input
+                        id="scannerQuantityPerCode"
+                        type="number"
+                        value="1"
+                        min="1"
+                        style="width:58px; height:42px; padding:0; background:#111827; border:1px solid #475569; color:#fff; border-radius:999px; text-align:center; font-weight:bold; outline:none;"
+                    />
+                </div>
+
+                <button onclick="resetScannerSession()" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
+                    مسح القائمة / Reset
+                </button>
+
+                <button onclick="toggleScannerPrintPanel(); printScannedCustom()" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
+                    طباعة نوع العرض فقط
+                </button>
+
+                <button onclick="toggleScannerPrintPanel(); printScannedFullQR()" style="width:100%; padding:12px 14px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
+                    طباعة كافة التفاصيل
+                </button>
+            </div>
+
+            <button onclick="toggleScannerPrintPanel()" style="width:62px; height:62px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); background:linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color:white; box-shadow:0 8px 20px rgba(255,75,43,0.45); cursor:pointer; font-size:26px; display:flex; align-items:center; justify-content:center;">
+                🖨️
+            </button>
+        </div>
+    </div>
+</div>
     <div class="filters-container">
         
         <div class="filter-group">
@@ -5138,6 +5214,7 @@ if (infoBox) {
 <script src="https://unpkg.com/jspdf@latest/dist/jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
 <script>   
+let productsDB = [];
 // 1. إعدادات سوبابيز
 // ========== DATA ==========
 async function fetchProductsFromSupabase() {
@@ -5149,53 +5226,86 @@ async function fetchProductsFromSupabase() {
 
     try {
         console.log("⏳ جاري تحميل قاعدة بيانات الأدوية من GitHub...");
-        
+
         const [res1, res2] = await Promise.all([
             fetch(url1),
             fetch(url2)
         ]);
 
-        if (!res1.ok || !res2.ok) throw new Error("فشل في تحميل أحد الملفات من GitHub");
+        if (!res1.ok || !res2.ok) {
+            throw new Error("فشل في تحميل أحد الملفات من GitHub");
+        }
 
-        const data1 = await res1.json();
-        const data2 = await res2.json();
+        const [data1, data2] = await Promise.all([
+            res1.json(),
+            res2.json()
+        ]);
 
-        const combinedData = [...data1, ...data2];
+        const combinedData = [
+            ...(Array.isArray(data1) ? data1 : []),
+            ...(Array.isArray(data2) ? data2 : [])
+        ];
 
         productsDB = combinedData.map(p => ({
             ...p,
-            "Code":             String(p["Code"] || p.code || '').trim(),
-            "Item Description": p["Item Description"] || p.item_description || '',
-            "Brand":            p["Brand"] || p.brand || '',
-            "Manufacture":      p["Manufacture"] || p.manufacture || '',
-            "Category Level A": p["Category Level A"] || p.category_level_a || '',
-            "Category Level B": p["Category Level B"] || p.category_level_b || '',
-            "Category Level C": p["Category Level C"] || p.category_level_c || '',
-            "Category Level D": p["Category Level D"] || p.category_level_d || '',
-            "Unit Price":       parseFloat(p["Unit Price"] ?? p.unit_price ?? 0),
-            "itemurl":          p["itemurl"] || p.itemurl || ''
-        }));
+            "Code": String(p?.["Code"] ?? p?.code ?? "").trim(),
+            "Item Description": p?.["Item Description"] ?? p?.item_description ?? p?.itemdescription ?? "",
+            "Brand": p?.["Brand"] ?? p?.brand ?? "",
+            "Manufacture": p?.["Manufacture"] ?? p?.manufacture ?? "",
+            "Category Level A": p?.["Category Level A"] ?? p?.category_level_a ?? p?.categorylevela ?? "",
+            "Category Level B": p?.["Category Level B"] ?? p?.category_level_b ?? p?.categorylevelb ?? "",
+            "Category Level C": p?.["Category Level C"] ?? p?.category_level_c ?? p?.categorylevelc ?? "",
+            "Category Level D": p?.["Category Level D"] ?? p?.category_level_d ?? p?.categoryleveld ?? "",
+            "Unit Price": parseFloat(p?.["Unit Price"] ?? p?.unit_price ?? p?.unitprice ?? 0) || 0,
+            "itemurl": p?.["itemurl"] ?? p?.itemurl ?? p?.["ItemURL"] ?? ""
+        })).filter(p => p.Code);
+
+        window.productsDB = productsDB;
 
         console.log(`✅ نجاح: تم تحميل ${productsDB.length} منتج ودمجهم.`);
+        console.log("✅ window.productsDB synced:", window.productsDB.length);
 
-        initOffersMap();
-        if (typeof buildSearchCache  === 'function') buildSearchCache();
-        if (typeof clearAllFilters   === 'function') clearAllFilters();
-        initializeFilters();
-        
-        // ✅ تشغيل تهيئة محرك البحث
-        initFuzzySearch();
-        
-        applyFilters();
+        if (typeof initOffersMap === "function") {
+            initOffersMap();
+        }
+
+        if (typeof buildSearchCache === "function") {
+            buildSearchCache();
+        }
+
+        if (typeof clearAllFilters === "function") {
+            clearAllFilters();
+        }
+
+        if (typeof initializeFilters === "function") {
+            initializeFilters();
+        }
+
+        if (typeof initFuzzySearch === "function") {
+            initFuzzySearch();
+        }
+
+        if (typeof applyFilters === "function") {
+            applyFilters();
+        }
 
     } catch (err) {
-        console.error('❌ فشل تحميل الداتا:', err.message);
-        productsDB = []; 
+        console.error("❌ فشل تحميل الداتا:", err);
+        productsDB = [];
+        window.productsDB = [];
+
+        if (typeof setLatestScannerMessage === "function") {
+            setLatestScannerMessage(`
+                <div style="color:#ef4444;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
+                    فشل تحميل قاعدة البيانات<br>
+                    ${typeof escapeHtml === "function" ? escapeHtml(err?.message || "Unknown error") : (err?.message || "Unknown error")}
+                </div>
+            `);
+        }
     } finally {
         if (loader) loader.style.display = "none";
     }
 }
-
 // ========== IMAGES DB ==========
 const categoryImagesDB = {
     "APHRODISIAC":            { icon: "img", hero: "img" },
@@ -41037,32 +41147,25 @@ function deselectAllCards() {
   console.log('❌ All cards deselected');
 }
 // ====== تحديث العداد وإظهار/إخفاء الشريط ======
-function updateSelectedCount() {
-  // حفظ التحديد الحالي
-  if (typeof saveSelections === 'function') {
-      saveSelections();
-  }
-  
-  const count = selectedProductCodes ? selectedProductCodes.size : 0;
-  const countEl = document.getElementById('selectedCount');
-  const printSelectionBar = document.getElementById('printSelectionBar');
-  
-  // تحديث النص
-  if(countEl) {
-    countEl.textContent = `${count} محدد`;
-  }
-  
-  // التحكم في ظهور الشريط
-  if (printSelectionBar) {
-      // الشرط ده بيقوله: لو العدد أكبر من صفر "و" إحنا مش في وضع الطباعة
-      if (count > 0) {
-          printSelectionBar.style.setProperty('display', 'inline-flex', 'important');
-      } else {
-          printSelectionBar.style.display = 'none';
-      }
-  }
-}
-// ====== ✅ SELECT ALL FOR SPECIFIC OFFER ======
+function updateSelectedCount(skipSave = false) {
+    if (!skipSave && typeof saveSelections === 'function') {
+        saveSelections();
+    }
+
+    const count = selectedProductCodes ? selectedProductCodes.size : 0;
+    const countEl = document.getElementById('selectedCount');
+    const printSelectionBar = document.getElementById('printSelectionBar');
+
+    if (countEl) countEl.textContent = count;
+
+    if (printSelectionBar) {
+        if (count > 0) {
+            printSelectionBar.style.setProperty('display', 'inline-flex', 'important');
+        } else {
+            printSelectionBar.style.display = 'none';
+        }
+    }
+}// ====== ✅ SELECT ALL FOR SPECIFIC OFFER ======
 function selectAllInOffer(offerType, catA, catD) {
   const allCheckboxes = document.querySelectorAll('.product-card-checkbox');
   let selectedCount = 0;
@@ -42216,38 +42319,59 @@ window.addEventListener("afterprint", restoreRiyalSymbolsAfterPrint);
 // 4) Render Logic (Grid System)
 // =====================
 function renderCustomPrint(customCards) {
-  const container = document.getElementById("printContainer");
-  const itemsPerPage = 6;
-  const fragment = document.createDocumentFragment();
+    const container = document.getElementById('printContainer');
+    const itemsPerPage = 6;
+    const fragment = document.createDocumentFragment();
 
-  for (let i = 0; i < customCards.length; i += itemsPerPage) {
-    const page = document.createElement("div");
-    page.className = "print-page";
-    page.innerHTML = '<div class="print-header-space"></div>';
+    container.innerHTML = "";
 
-    // Row 1
-    const row1 = document.createElement("div"); row1.className = "print-row";
-    for (let j = 0; j < 3; j++) {
-      if (i + j < customCards.length) row1.appendChild(createCustomPrintCard(customCards[i + j]));
-      else row1.appendChild(document.createElement('div')).className = "print-card";
+    for (let i = 0; i < customCards.length; i += itemsPerPage) {
+        const pageCards = customCards.slice(i, i + itemsPerPage);
+        const page = document.createElement('div');
+        page.className = 'print-page';
+        page.style.pageBreakAfter = (i + itemsPerPage < customCards.length) ? 'always' : 'auto';
+        page.innerHTML = '<div class="print-header-space"></div>';
+
+        const row1 = document.createElement('div');
+        row1.className = 'print-row';
+
+        for (let j = 0; j < 3; j++) {
+            if (pageCards[j]) {
+                row1.appendChild(createCustomPrintCard(pageCards[j]));
+            } else {
+                const empty = document.createElement('div');
+                empty.className = 'print-card';
+                empty.style.visibility = 'hidden';
+                row1.appendChild(empty);
+            }
+        }
+
+        page.appendChild(row1);
+
+        const spacer = document.createElement('div');
+        spacer.className = 'print-spacer';
+        page.appendChild(spacer);
+
+        const row2 = document.createElement('div');
+        row2.className = 'print-row';
+
+        for (let j = 3; j < 6; j++) {
+            if (pageCards[j]) {
+                row2.appendChild(createCustomPrintCard(pageCards[j]));
+            } else {
+                const empty = document.createElement('div');
+                empty.className = 'print-card';
+                empty.style.visibility = 'hidden';
+                row2.appendChild(empty);
+            }
+        }
+
+        page.appendChild(row2);
+        fragment.appendChild(page);
     }
-    page.appendChild(row1);
 
-    page.appendChild(document.createElement("div")).className = "print-spacer";
-
-    // Row 2
-    const row2 = document.createElement("div"); row2.className = "print-row";
-    for (let j = 0; j < 3; j++) {
-      if (i + 3 + j < customCards.length) row2.appendChild(createCustomPrintCard(customCards[i + 3 + j]));
-      else row2.appendChild(document.createElement('div')).className = "print-card";
-    }
-    page.appendChild(row2);
-
-    fragment.appendChild(page);
-  }
-  container.appendChild(fragment);
+    container.appendChild(fragment);
 }
-
 // =====================
 // 5) Create Custom Print Card - 🔥 PERFECT LAYOUT 🔥
 // =====================
@@ -44472,6 +44596,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  
   // Force fix on load
   setTimeout(forceFixDarkModeLabels, 300);
 });
@@ -46481,7 +46606,813 @@ function getWaImageBtnHTML(product) {
   </div>
   `;
 }
-</script>
+// =====================================================================
+// BARCODE SCANNER - SAFE UPDATED VERSION
+// =====================================================================
+// =====================================================
+// Scanner State
+// =====================================================
+var html5QrScanner = null;
+var scannedCodesSet = new Set();
+var scannerCardsPerCode = 1;
+var lastScannedValue = "";
+var lastScannedAt = 0;
+var scannedItemsMemory = [];
 
+// =====================================================
+// Helpers
+// =====================================================
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+}
 
+function setLatestScannerMessage(html) {
+    const latestEl = document.getElementById('latestScannedItem');
+    if (latestEl) latestEl.innerHTML = html;
+}
+
+function getScannerWaitingHtml() {
+    return `
+        <div style="color:#94a3b8;font-size:14px;text-align:center;">بانتظار مسح الكود</div>
+    `;
+}
+
+function rememberScannedItem(item) {
+    if (!item || !item.cleanCode) return;
+
+    scannedItemsMemory.push({
+        imageUrl: item.imageUrl || '',
+        nameEN: item.nameEN || '',
+        nameAR: item.nameAR || '',
+        cleanCode: item.cleanCode || '',
+        offerLabel: item.offerLabel || '',
+        offerLabelEN: item.offerLabelEN || '',
+        statusColor: item.statusColor || '#38ef7d'
+    });
+}
+
+function renderScannerSavedState() {
+    const listEl = document.getElementById('scannedItemsList');
+    if (listEl) listEl.innerHTML = '';
+
+    scannedItemsMemory.forEach(item => {
+        addScannerRowToList({
+            imageUrl: item.imageUrl,
+            nameEN: item.nameEN,
+            nameAR: item.nameAR,
+            cleanCode: item.cleanCode,
+            offerLabel: item.offerLabel,
+            offerLabelEN: item.offerLabelEN,
+            statusColor: item.statusColor
+        });
+    });
+
+    if (scannedItemsMemory.length) {
+        const lastItem = scannedItemsMemory[scannedItemsMemory.length - 1];
+
+        setLatestScannerMessage(
+            buildScannerCardHtml({
+                imageUrl: lastItem.imageUrl,
+                nameEN: lastItem.nameEN,
+                nameAR: lastItem.nameAR,
+                cleanCode: lastItem.cleanCode,
+                offerLabel: lastItem.offerLabel,
+                offerLabelEN: lastItem.offerLabelEN,
+                statusColor: lastItem.statusColor,
+                compact: false
+            })
+        );
+    } else {
+        setLatestScannerMessage(getScannerWaitingHtml());
+    }
+}
+
+function resetScannerSession() {
+    scannedItemsMemory = [];
+
+    if (typeof scannedCodesSet !== 'undefined' && scannedCodesSet?.clear) {
+        scannedCodesSet.clear();
+    }
+
+    if (typeof selectedProductCodes !== 'undefined' && selectedProductCodes?.clear) {
+        selectedProductCodes.clear();
+    }
+
+    lastScannedValue = "";
+    lastScannedAt = 0;
+
+    if (typeof updateSelectedCount === 'function') {
+        updateSelectedCount();
+    }
+
+    const listEl = document.getElementById('scannedItemsList');
+    if (listEl) listEl.innerHTML = '';
+
+    const printPanel = document.getElementById('scannerPrintPanel');
+    if (printPanel) printPanel.style.display = 'none';
+
+    setLatestScannerMessage(getScannerWaitingHtml());
+}
+
+async function destroyScannerInstance() {
+    if (!html5QrScanner) return;
+
+    try {
+        await html5QrScanner.stop();
+    } catch (e) {}
+
+    try {
+        await html5QrScanner.clear();
+    } catch (e) {}
+
+    html5QrScanner = null;
+}
+
+function getOfferForScanner(code) {
+    if (typeof getOffer === 'function') {
+        try {
+            return getOffer(code);
+        } catch (e) {
+            return null;
+        }
+    }
+    return null;
+}
+
+function isOfferCurrentlyActive(offer) {
+    if (!offer) return false;
+
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    if (
+        typeof CURRENT_OFFER_START !== 'undefined' &&
+        typeof CURRENT_OFFER_END !== 'undefined' &&
+        CURRENT_OFFER_START &&
+        CURRENT_OFFER_END
+    ) {
+        return now >= CURRENT_OFFER_START && now <= CURRENT_OFFER_END;
+    }
+
+    return true;
+}
+
+function buildNoImageBox(text) {
+    return `
+        <div style="color:#94a3b8;font-size:11px;text-align:center;line-height:1.3;">
+            ${escapeHtml(text)}
+        </div>
+    `;
+}
+
+function getScannerImageUrl(product) {
+    return String(
+        product?.itemurl ||
+        product?.ItemURL ||
+        ''
+    ).trim();
+}
+
+function getScannerThumbMarkup(imageUrl, altText, size) {
+    const safeImageUrl = imageUrl && /^https?:\/\/+/i.test(imageUrl) ? escapeHtml(imageUrl) : '';
+    const safeAlt = escapeHtml(altText || 'Product');
+
+    return `
+        <div style="
+            width:${size}px;
+            height:${size}px;
+            border-radius:16px;
+            overflow:hidden;
+            background:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            flex-shrink:0;
+            border:1px solid #334155;
+        ">
+            ${
+                safeImageUrl
+                    ? `<img
+                        src="${safeImageUrl}"
+                        alt="${safeAlt}"
+                        referrerpolicy="no-referrer"
+                        style="width:100%;height:100%;object-fit:contain;background:#fff;"
+                        onerror="this.outerHTML='<div style=&quot;width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:11px;text-align:center;line-height:1.35;background:#fff;padding:6px;&quot;>No Image</div>';"
+                    >`
+                    : `<div style="color:#94a3b8;font-size:11px;text-align:center;line-height:1.35;background:#fff;padding:6px;">No Image</div>`
+            }
+        </div>
+    `;
+}
+
+function buildScannerCardHtml({
+    imageUrl = '',
+    nameEN = '',
+    nameAR = '',
+    cleanCode = '',
+    offerLabel = '',
+    offerLabelEN = '',
+    statusColor = '#38ef7d',
+    compact = false
+}) {
+    const imageSize = compact ? 74 : 92;
+    const titleSize = compact ? '12px' : '14px';
+    const offerEnSize = compact ? '11px' : '12px';
+    const enSize = compact ? '13px' : '15px';
+    const arSize = compact ? '13px' : '15px';
+    const codeSize = compact ? '12px' : '13px';
+    const pad = compact ? '10px' : '12px';
+
+    return `
+        <div style="
+            display:flex;
+            gap:12px;
+            align-items:center;
+            background:rgba(255,255,255,0.04);
+            padding:${pad};
+            border-radius:18px;
+            border:1px solid rgba(255,255,255,0.10);
+        ">
+            ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageSize)}
+
+            <div style="flex:1; min-width:0; text-align:right;">
+                <div style="color:${statusColor}; font-weight:800; font-size:${titleSize}; margin-bottom:6px; line-height:1.35; word-break:break-word;">
+                    ${escapeHtml(offerLabel || '')}
+                </div>
+
+                ${offerLabelEN ? `
+                    <div style="font-size:${offerEnSize}; color:#93c5fd; font-weight:700; margin-bottom:4px; line-height:1.35; word-break:break-word;">
+                        ${escapeHtml(offerLabelEN)}
+                    </div>
+                ` : ''}
+
+                <div style="font-size:${enSize}; color:#ffffff; font-weight:700; line-height:1.45; word-break:break-word;">
+                    ${escapeHtml(nameEN || 'Unknown Product')}
+                </div>
+
+                <div style="font-size:${arSize}; color:#fbbf24; font-family:Cairo,sans-serif; direction:rtl; margin:4px 0 0; line-height:1.45; word-break:break-word;">
+                    ${escapeHtml(nameAR || '')}
+                </div>
+
+                <div style="margin-top:8px;">
+                    <span style="
+                        display:inline-flex;
+                        align-items:center;
+                        gap:6px;
+                        background:rgba(15,23,42,0.95);
+                        border:1px solid rgba(148,163,184,0.35);
+                        padding:6px 10px;
+                        border-radius:999px;
+                        color:#e2e8f0;
+                        font-family:monospace;
+                        font-size:${codeSize};
+                        font-weight:700;
+                        max-width:100%;
+                        overflow:hidden;
+                        text-overflow:ellipsis;
+                    ">
+                        CODE: ${escapeHtml(cleanCode)}
+                    </span>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function addScannerRowToList({
+    imageUrl = '',
+    nameEN = '',
+    nameAR = '',
+    cleanCode = '',
+    offerLabel = '',
+    offerLabelEN = '',
+    statusColor = '#38ef7d'
+}) {
+    const listEl = document.getElementById('scannedItemsList');
+    if (!listEl) return;
+
+    let bgColor = 'rgba(56,239,125,0.10)';
+
+    if (statusColor === '#ef4444') {
+        bgColor = 'rgba(239,68,68,0.10)';
+    } else if (statusColor === '#f59e0b') {
+        bgColor = 'rgba(245,158,11,0.10)';
+    }
+
+    const row = document.createElement('div');
+    row.style.cssText = `
+        background:${bgColor};
+        border-right:4px solid ${statusColor};
+        border-radius:12px;
+        padding:0;
+        margin-bottom:6px;
+        overflow:hidden;
+    `;
+
+    row.innerHTML = buildScannerCardHtml({
+        imageUrl,
+        nameEN,
+        nameAR,
+        cleanCode,
+        offerLabel,
+        offerLabelEN,
+        statusColor,
+        compact: true
+    });
+
+    listEl.prepend(row);
+}
+
+// =====================================================
+// Open Scanner
+// =====================================================
+async function openBarcodeScanner() {
+    const overlay = document.getElementById('scannerModalOverlay');
+    const readerEl = document.getElementById('reader');
+    const printPanel = document.getElementById('scannerPrintPanel');
+
+    if (overlay) overlay.style.display = 'flex';
+
+    if (readerEl) {
+        readerEl.innerHTML = '';
+        readerEl.style.width = '100%';
+        readerEl.style.height = window.innerWidth <= 768 ? '280px' : '340px';
+        readerEl.style.minHeight = window.innerWidth <= 768 ? '260px' : '320px';
+        readerEl.style.background = '#000';
+        readerEl.style.borderRadius = '18px';
+        readerEl.style.overflow = 'hidden';
+        readerEl.style.position = 'relative';
+    }
+
+    if (printPanel) printPanel.style.display = 'none';
+
+    renderScannerSavedState();
+
+    lastScannedValue = "";
+    lastScannedAt = 0;
+
+    if (typeof Html5Qrcode === 'undefined') {
+        setLatestScannerMessage(`
+            <div style="color:#ef4444;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
+                مكتبة html5-qrcode غير محملة
+            </div>
+        `);
+        return;
+    }
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setLatestScannerMessage(`
+            <div style="color:#ef4444;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
+                المتصفح لا يدعم الكاميرا
+            </div>
+        `);
+        return;
+    }
+
+    try {
+        await destroyScannerInstance();
+
+        const cameras = await Html5Qrcode.getCameras();
+        if (!cameras || !cameras.length) {
+            throw new Error("NO CAMERA FOUND");
+        }
+
+        const preferredCamera = cameras.find(cam =>
+            /back|rear|environment/i.test(cam.label || '')
+        ) || cameras[0];
+
+        html5QrScanner = new Html5Qrcode("reader");
+
+        const config = {
+            fps: 10,
+            qrbox: window.innerWidth <= 768
+                ? { width: 280, height: 110 }
+                : { width: 320, height: 120 },
+            aspectRatio: 1.0
+        };
+
+        if (typeof Html5QrcodeSupportedFormats !== 'undefined') {
+            config.formatsToSupport = [
+                Html5QrcodeSupportedFormats.DATAMATRIX,
+                Html5QrcodeSupportedFormats.QRCODE,
+                Html5QrcodeSupportedFormats.CODE128
+            ];
+        }
+
+        await html5QrScanner.start(
+            preferredCamera.id,
+            config,
+            (decodedText) => {
+                const cleanDecoded = String(decodedText || "").trim();
+                const nowTs = Date.now();
+
+                if (!cleanDecoded) return;
+                if (cleanDecoded === lastScannedValue && nowTs - lastScannedAt < 1200) return;
+
+                lastScannedValue = cleanDecoded;
+                lastScannedAt = nowTs;
+                processScannedCode(cleanDecoded);
+            },
+            () => {}
+        );
+
+        setTimeout(() => {
+            const video = document.querySelector("#reader video");
+            if (video) {
+                video.setAttribute("playsinline", "true");
+                video.setAttribute("autoplay", "true");
+                video.setAttribute("muted", "true");
+                video.muted = true;
+                video.style.width = "100%";
+                video.style.height = "100%";
+                video.style.objectFit = "cover";
+                video.style.background = "#000";
+                video.play().catch(() => {});
+            }
+        }, 400);
+
+        if (!scannedItemsMemory.length) {
+            setLatestScannerMessage(`
+                <div style="color:#22c55e;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
+                    الكاميرا شغالة، وجّه الباركود داخل المساحة الأفقية
+                </div>
+            `);
+        }
+
+    } catch (err) {
+        console.error("Scanner Error:", err);
+        setLatestScannerMessage(`
+            <div style="color:#ef4444;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
+                فشل تشغيل الكاميرا<br>
+                ${escapeHtml(err?.message || "Unknown error")}
+            </div>
+        `);
+        await destroyScannerInstance();
+    }
+}
+
+// =====================================================
+// Process Code
+// =====================================================
+function processScannedCode(code) {
+    const cleanCode = String(code || '').trim();
+    if (!cleanCode) return;
+
+    if (!Array.isArray(window.productsDB) || !productsDB.length) {
+        setLatestScannerMessage(
+            buildScannerCardHtml({
+                imageUrl: '',
+                nameEN: 'Products DB Not Ready',
+                nameAR: 'قاعدة المنتجات غير جاهزة',
+                cleanCode,
+                offerLabel: '❌ خطأ في تحميل قاعدة البيانات',
+                offerLabelEN: 'Database Load Error',
+                statusColor: '#ef4444',
+                compact: false
+            })
+        );
+        return;
+    }
+
+    const product = productsDB.find(p => String(p.Code || '').trim() === cleanCode);
+
+    if (!product) {
+        const itemData = {
+            imageUrl: '',
+            nameEN: 'Product Not Found',
+            nameAR: 'المنتج غير موجود في قاعدة البيانات',
+            cleanCode,
+            offerLabel: '❌ لا يوجد هذا الصنف',
+            offerLabelEN: 'Product Not Found',
+            statusColor: '#ef4444'
+        };
+
+        setLatestScannerMessage(
+            buildScannerCardHtml({
+                ...itemData,
+                compact: false
+            })
+        );
+
+        addScannerRowToList(itemData);
+        rememberScannedItem(itemData);
+
+        if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
+        return;
+    }
+
+    const nameEN =
+        product["Item Description English"] ||
+        product["Item Description"] ||
+        product["Item Description EN"] ||
+        "English Name Not Found";
+
+    const nameAR =
+        product["أسم المنتج"] ||
+        product["اسم المنتج"] ||
+        product["Item Description AR"] ||
+        "";
+
+    const imageUrl = getScannerImageUrl(product);
+
+    if (scannedCodesSet.has(cleanCode)) {
+        setLatestScannerMessage(
+            buildScannerCardHtml({
+                imageUrl,
+                nameEN,
+                nameAR,
+                cleanCode,
+                offerLabel: '⚠️ تم مسح هذا الكود من قبل',
+                offerLabelEN: 'Already Scanned Before',
+                statusColor: '#f59e0b',
+                compact: false
+            })
+        );
+
+        if (navigator.vibrate) navigator.vibrate([60, 60, 60]);
+        return;
+    }
+
+    const offer = getOfferForScanner(cleanCode);
+    const isOfferActive = isOfferCurrentlyActive(offer);
+
+    const offerLabel = isOfferActive
+        ? (offer?.offerTypeAR || offer?.offerAR || offer?.offerType || 'العرض متاح')
+        : '❌ لا يوجد عرض نشط حالياً';
+
+    const offerLabelEN = isOfferActive
+        ? (offer?.offerTypeEN || offer?.offerEN || offer?.offerType || 'Offer Active')
+        : 'No Active Offer Right Now';
+
+    const statusColor = isOfferActive ? '#38ef7d' : '#ef4444';
+
+    const itemData = {
+        imageUrl,
+        nameEN,
+        nameAR,
+        cleanCode,
+        offerLabel,
+        offerLabelEN,
+        statusColor
+    };
+
+    setLatestScannerMessage(
+        buildScannerCardHtml({
+            ...itemData,
+            compact: false
+        })
+    );
+
+    addScannerRowToList(itemData);
+    rememberScannedItem(itemData);
+
+    scannedCodesSet.add(cleanCode);
+
+    if (isOfferActive) {
+        if (typeof selectedProductCodes !== 'undefined' && selectedProductCodes?.add) {
+            selectedProductCodes.add(cleanCode);
+        }
+
+        if (typeof updateSelectedCount === 'function') {
+            updateSelectedCount(true);
+        }
+
+        if (navigator.vibrate) navigator.vibrate(90);
+    } else {
+        if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
+    }
+}
+
+// =====================================================
+// Close Scanner
+// =====================================================
+async function closeBarcodeScanner() {
+    const overlay = document.getElementById('scannerModalOverlay');
+    if (overlay) overlay.style.display = 'none';
+
+    await destroyScannerInstance();
+
+    const readerEl = document.getElementById('reader');
+    if (readerEl) readerEl.innerHTML = "";
+}
+
+// =====================================================
+// Print helpers
+// =====================================================
+function getScannedCodesArray() {
+    const normalizeCode = (code) => String(code || "").trim();
+
+    if (
+        typeof selectedProductCodes !== 'undefined' &&
+        selectedProductCodes instanceof Set &&
+        selectedProductCodes.size > 0
+    ) {
+        return Array.from(
+            new Set(
+                Array.from(selectedProductCodes)
+                    .map(normalizeCode)
+                    .filter(Boolean)
+            )
+        );
+    }
+
+    if (
+        typeof scannedCodesSet !== 'undefined' &&
+        scannedCodesSet instanceof Set &&
+        scannedCodesSet.size > 0
+    ) {
+        return Array.from(
+            new Set(
+                Array.from(scannedCodesSet)
+                    .map(normalizeCode)
+                    .filter(Boolean)
+                    .filter(code => {
+                        const offer =
+                            typeof getOfferForScanner === 'function'
+                                ? getOfferForScanner(code)
+                                : (typeof getOffer === 'function' ? getOffer(code) : null);
+
+                        return typeof isOfferCurrentlyActive === 'function'
+                            ? isOfferCurrentlyActive(offer)
+                            : !!offer;
+                    })
+            )
+        );
+    }
+
+    return [];
+}
+
+function getScannerQuantityPerCode() {
+    const input = document.getElementById('scannerQuantityPerCode');
+    const value = input ? parseInt(input.value, 10) : 1;
+    scannerCardsPerCode = Number.isFinite(value) && value > 0 ? value : 1;
+    return scannerCardsPerCode;
+}
+
+// =====================================================
+// Direct custom print from scanner
+// =====================================================
+async function printScannedCustom() {
+    const scannedCodes = getScannedCodesArray();
+
+    if (!scannedCodes.length) {
+        alert("⚠️ لم يتم مسح أي أصناف عليها عروض للطباعة!");
+        return;
+    }
+
+    if (typeof injectPrintStylesOnce === 'function') {
+        injectPrintStylesOnce();
+    }
+
+    const quantity = getScannerQuantityPerCode();
+    const customCards = [];
+
+    scannedCodes.forEach(code => {
+        let offerData = null;
+
+        if (typeof getOfferTypeForCode === 'function') {
+            offerData = getOfferTypeForCode(code);
+        } else if (typeof getOffer === 'function') {
+            offerData = getOffer(code);
+        }
+
+        if (!offerData) return;
+
+        const offerEN = offerData.offerEN || offerData.offerTypeEN || offerData.offerType || '';
+        const offerAR = offerData.offerAR || offerData.offerTypeAR || offerData.offerType || '';
+
+        for (let i = 0; i < quantity; i++) {
+            customCards.push({
+                Code: '',
+                customData: {
+                    offerEN: offerEN,
+                    offerAR: offerAR,
+                    dateRange: '',
+                    productEN: '',
+                    productAR: '',
+                    category: ''
+                }
+            });
+        }
+    });
+
+    if (!customCards.length) {
+        alert("⚠️ لم يتم تجهيز أي كروت Custom Offer.");
+        return;
+    }
+
+    await closeBarcodeScanner();
+
+    const container = document.getElementById('printContainer');
+    const loader = document.getElementById('printLoader');
+
+    if (!container) {
+        alert("⚠️ printContainer غير موجود.");
+        return;
+    }
+
+    container.innerHTML = '';
+    if (loader) loader.style.display = 'flex';
+
+    setTimeout(async () => {
+        try {
+            if (typeof renderCustomPrint === 'function') {
+                renderCustomPrint(customCards);
+            }
+            if (typeof exportRiyalSymbolsForPrint === 'function') {
+                await exportRiyalSymbolsForPrint();
+            }
+            window.print();
+        } catch (err) {
+            console.error("Direct custom print error:", err);
+            alert("حدث خطأ أثناء تجهيز طباعة Custom Offer");
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
+    }, 150);
+
+    if (typeof restoreRiyalSymbolsAfterPrint === 'function') {
+        window.addEventListener('afterprint', restoreRiyalSymbolsAfterPrint, { once: true });
+    }
+}
+
+// =====================================================
+// Direct normal print
+// =====================================================
+async function printScannedFullQR() {
+    const scannedCodes = getScannedCodesArray();
+
+    if (!scannedCodes.length) {
+        alert("⚠️ لم يتم مسح أي أصناف عليها عروض للطباعة!");
+        return;
+    }
+
+    if (!Array.isArray(window.productsDB) || !productsDB.length) {
+        alert("⚠️ قاعدة المنتجات غير جاهزة.");
+        return;
+    }
+
+    const productsToPrint = productsDB.filter(p =>
+        scannedCodes.includes(String(p.Code || "").trim())
+    );
+
+    if (!productsToPrint.length) {
+        alert("⚠️ لم يتم العثور على المنتجات الممسوحة للطباعة.");
+        return;
+    }
+
+    await closeBarcodeScanner();
+
+    const container = document.getElementById('printContainer');
+    const loader = document.getElementById('printLoader');
+
+    if (!container) {
+        alert("⚠️ printContainer غير موجود.");
+        return;
+    }
+
+    container.innerHTML = "";
+    if (loader) loader.style.display = 'flex';
+
+    try {
+        if (typeof renderPrint !== 'function') {
+            throw new Error("renderPrint is missing");
+        }
+
+        renderPrint(productsToPrint);
+
+        const qrImages = container.querySelectorAll('.qr-code-img');
+
+        if (typeof waitForImagesToLoad === 'function') {
+            await waitForImagesToLoad(qrImages);
+        }
+
+        if (loader) loader.style.display = 'none';
+
+        setTimeout(() => {
+            window.print();
+        }, 50);
+
+    } catch (err) {
+        console.error("Scanner QR print error:", err);
+        if (loader) loader.style.display = 'none';
+        alert("حدث خطأ أثناء تجهيز طباعة QR");
+    }
+}
+
+async function printScannedFull() {
+    return printScannedFullQR();
+}
+
+function toggleScannerPrintPanel() {
+    const panel = document.getElementById('scannerPrintPanel');
+    if (!panel) return;
+    panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
 </script>
