@@ -4569,7 +4569,7 @@ body > div:has(> label[for="codesFileInput"]),
 
 /* إضافة شريط "لسه فيه" تحت الكروت */
 #scannerModalOverlay .scanner-cards-wrap::after {
-    content: "Scroll for more ↔️ اسحب لرؤية المزيد";
+    content: "Scroll for more ↔️ اسحب للمزيد";
     position: absolute;
     bottom: 85px; /* فوق زرار الطباعة */
     left: 50%;
@@ -4649,6 +4649,21 @@ body > div:has(> label[for="codesFileInput"]),
         height: 100vh;
         border-radius: 0;
     }
+}
+/* تأكد من توسيع منطقة الرؤية في الـ CSS */
+#reader__scan_region {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* لو عندك طبقة فوق الكاميرا مرسومة يدوي (Overlay) */
+.custom-scanner-line {
+    width: 80%; /* لازم يطابق عرض الـ qrbox اللي حددناه فوق */
+    height: 150px; 
+    border-left: 4px solid #fff;  /* الخط الرأسي شمال */
+    border-right: 4px solid #fff; /* الخط الرأسي يمين */
+    position: absolute;
 }
 </style>
 </head>
@@ -47863,7 +47878,7 @@ async function openBarcodeScanner() {
 
     if (readerEl) {
         readerEl.innerHTML = '';
-        readerEl.style.width = '85%';
+        readerEl.style.width = '90%'; // زيادة العرض قليلاً ليعطي مساحة أكبر
         readerEl.style.marginLeft = 'auto';
         readerEl.style.marginRight = 'auto';
         readerEl.style.height = window.innerWidth <= 400 ? '220px' : '280px';
@@ -47923,11 +47938,16 @@ async function openBarcodeScanner() {
 
         html5QrScanner = new Html5Qrcode("reader");
 
+        // --- التعديل الجوهري هنا لتوسيع منطقة المسح ---
         const config = {
-            fps: 10,
-            qrbox: window.innerWidth <= 400
-                ? { width: 250, height: 100 }
-                : { width: 300, height: 110 },
+            fps: 20, // زيادة السرعة لقراءة أسلس
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                // جعل منطقة المسح عريضة (80% من العرض) وارتفاع مناسب للباركود
+                // هذا سيجعلها مطابقة للخطوط الرأسية الواسعة
+                const width = viewfinderWidth * 0.85; 
+                const height = viewfinderHeight * 0.4; 
+                return { width: width, height: height };
+            },
             aspectRatio: 1.0
         };
 
@@ -47974,7 +47994,7 @@ async function openBarcodeScanner() {
         if (!scannedItemsMemory.length) {
             setLatestScannerMessage(`
                 <div style="color:#22c55e;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
-                    الكاميرا شغالة، وجّه الباركود داخل الإطار
+                    الكاميرا شغالة، وجّه الباركود داخل الإطار الواسع
                 </div>
             `);
         }
@@ -47998,7 +48018,6 @@ async function openBarcodeScanner() {
         focusManualScannerInput(150);
     }
 }
-
 // =====================================================
 // Process Code
 // =====================================================
