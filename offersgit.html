@@ -4486,6 +4486,197 @@ body > div:has(> label[for="codesFileInput"]),
         max-height: calc(100vh - 90px);
     }
 }
+#scannerModalOverlay * {
+    box-sizing: border-box;
+}
+
+#scannerModalOverlay .scanner-shell {
+    width: 100%;
+    max-width: 520px;
+    height: 96vh;
+    background: #1e293b;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 2px solid #667eea;
+    position: relative;
+    box-shadow: 0 0 25px rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+}
+
+/* منطقة الكاميرا */
+#scannerModalOverlay .scanner-camera-wrap {
+    padding: 8px 8px 0;
+    background: #111827;
+    border-bottom: 1px solid #334155;
+}
+
+#scannerModalOverlay .scanner-camera-box {
+    position: relative;
+    width: 100%;
+}
+
+#scannerModalOverlay #reader {
+    width: 100%;
+    height: clamp(220px, 32vh, 280px) !important;
+    min-height: 220px !important;
+    background: #000;
+    border: 2px solid #667eea;
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+/* منطقة الإدخال اليدوي */
+#scannerModalOverlay .scanner-manual-wrap {
+    padding: 12px;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
+
+#scannerModalOverlay .scanner-manual-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* إخفاء الجزء اللي طلبته تماماً */
+#scannerModalOverlay #latestScannedItem {
+    display: none !important;
+}
+
+/* الحاوية الأساسية للكروت */
+#scannerModalOverlay .scanner-cards-wrap {
+    flex: 1; /* خليه ياخد باقي المساحة المتاحة */
+    overflow: hidden;
+    background: #1e293b;
+    padding: 10px 12px 80px; /* تركنا مساحة 80px تحت عشان الـ FAB */
+    border-top: 1px solid #334155;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* القائمة الأفقية */
+#scannerModalOverlay #scannedItemsList {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    min-height: 140px;
+    align-items: center;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+}
+
+#scannerModalOverlay #scannedItemsList::-webkit-scrollbar {
+    display: none;
+}
+
+/* تصميم الكارت الفردي المعدل */
+#scannerModalOverlay #scannedItemsList > * {
+    flex: 0 0 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    scroll-snap-align: center;
+    scroll-snap-stop: always;
+    border-radius: 18px !important;
+    min-height: 130px !important;
+    height: auto;
+    padding: 14px !important;
+    background: linear-gradient(180deg, rgba(15,23,42,0.98) 0%, rgba(30,41,59,0.98) 100%) !important;
+    border: 1px solid rgba(148,163,184,0.22) !important;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.24) !important;
+    position: relative !important;
+    text-align: right !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    box-sizing: border-box !important;
+}
+
+/* زر الحذف */
+#scannerModalOverlay #scannedItemsList > * .scanner-card-delete-btn {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+/* أزرار التحكم والطباعة */
+#scannerModalOverlay .scanner-fab-wrap {
+    position: absolute;
+    left: 14px;
+    bottom: 14px;
+    z-index: 1005;
+}
+
+#scannerModalOverlay .scanner-print-fab {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+    box-shadow: 0 8px 20px rgba(255,75,43,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+@media (max-width: 480px) {
+    #scannerModalOverlay .scanner-shell {
+        height: 100vh;
+        border-radius: 0;
+    }
+    #scannerModalOverlay #reader {
+        height: 240px !important;
+    }
+}
+@keyframes highlightFlash {
+    0% { filter: brightness(1); transform: scale(1); }
+    50% { filter: brightness(1.5); transform: scale(1.02); shadow: 0 0 20px #38ef7d; }
+    100% { filter: brightness(1); transform: scale(1); }
+}
+
+.new-scanned-item {
+    animation: highlightFlash 0.8s ease-out;
+    border: 2px solid #38ef7d !important; /* تمييز مؤقت */
+}
+
+/* ستايل رسالة التنبيه السريعة (Toast) */
+.scan-toast {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.9);
+    color: #38ef7d;
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: bold;
+    z-index: 2000;
+    border: 1px solid #38ef7d;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 </style>
 </head>
 <body>
@@ -4731,27 +4922,28 @@ body > div:has(> label[for="codesFileInput"]),
         📷
     </button>
 </div>
+
 <div id="scannerModalOverlay" style="display:none; position:fixed; inset:0; width:100%; height:100%; background:rgba(0,0,0,0.88); z-index:100000; flex-direction:column; align-items:center; justify-content:center; padding:8px;">
-    <div style="width:100%; max-width:520px; height:96vh; background:#1e293b; border-radius:18px; overflow:hidden; border:2px solid #667eea; position:relative; box-shadow:0 0 25px rgba(0,0,0,0.55); display:flex; flex-direction:column;">
+    <div class="scanner-shell">
 
         <button onclick="closeBarcodeScanner()" style="position:absolute; right:12px; top:12px; z-index:1001; background:#ef4444; color:white; border:none; border-radius:50%; width:40px; height:40px; cursor:pointer; font-weight:bold; font-size:16px; display:flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(0,0,0,0.25);">✕</button>
 
-        <div style="padding:8px 8px 0; background:#111827; border-bottom:1px solid #334155;">
-            <div style="position:relative; width:100%;">
+        <div class="scanner-camera-wrap">
+            <div class="scanner-camera-box">
                 <div id="reader" style="width:100%; height:clamp(240px, 40vh, 340px); min-height:240px; background:#000; border:2px solid #667eea; border-radius:18px; overflow:hidden;"></div>
 
-                <div style="pointer-events:none; position:absolute; inset:10px; border:2px solid rgba(255,255,255,0.72); border-radius:16px; box-shadow:inset 0 0 0 1px rgba(102,126,234,0.35);"></div>
+                <div class="scanner-frame"></div>
 
-                <div style="pointer-events:none; position:absolute; left:0; right:0; bottom:12px; text-align:center;">
-                    <span style="display:inline-block; background:rgba(15,23,42,0.75); color:#e2e8f0; font-size:12px; font-weight:700; padding:6px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.14);">
+                <div class="scanner-camera-note">
+                    <span>
                         وجّه الباركود داخل كامل مساحة الكاميرا
                     </span>
                 </div>
             </div>
         </div>
 
-        <div style="padding:12px; background:#0f172a; border-bottom:1px solid #334155;">
-            <div style="display:flex; gap:8px; align-items:center;">
+        <div class="scanner-manual-wrap">
+            <div class="scanner-manual-row">
                 <input
                     id="scannerManualCode"
                     type="text"
@@ -4764,29 +4956,24 @@ body > div:has(> label[for="codesFileInput"]),
                 />
                 <button
                     onclick="processManualScannerCode()"
+                    class="scanner-add-btn"
                     style="height:46px; padding:0 16px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; border:none; border-radius:12px; cursor:pointer; font-size:14px; font-weight:bold; white-space:nowrap;"
                 >
                     إضافة
                 </button>
             </div>
-
-            <div style="margin-top:8px; color:#94a3b8; font-size:12px; text-align:center;">
-                كاميرا أو كتابة الكود يدويًا
-            </div>
         </div>
 
-        <div id="latestScannedItem" style="padding:12px; background:#0f172a; color:white; text-align:right; min-height:128px; border-bottom:1px solid #334155;">
-            <div style="color:#94a3b8; font-size:14px; text-align:center;">بانتظار مسح الكود</div>
-        </div>
+       <div class="scanner-cards-wrap" style="flex:1; display:flex; flex-direction:column; overflow:hidden; background:#1e293b; padding:10px 12px 100px; border-top:1px solid #334155;">
+    <div id="scannedItemsList" style="display:flex; flex-direction:row; gap:12px; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-bottom:10px;">
+    </div>
+    <div id="scannerSliderDots"></div>
+</div>
 
-        <div style="flex:1; overflow-y:auto; background:#1e293b; padding:10px 12px 100px; border-top:1px solid #334155;">
-            <div id="scannedItemsList" style="display:flex; flex-direction:column; gap:10px;"></div>
-        </div>
-
-        <div id="scannerFabWrap" style="position:absolute; left:14px; bottom:14px; z-index:1005; display:flex; flex-direction:column; align-items:flex-start; gap:10px;">
-            <div id="scannerPrintPanel" style="display:none; min-width:270px; background:rgba(15,23,42,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:12px; box-shadow:0 18px 35px rgba(0,0,0,0.35); backdrop-filter:blur(10px);">
+        <div id="scannerFabWrap" class="scanner-fab-wrap" style="position:absolute; left:14px; bottom:14px; z-index:1005; display:flex; flex-direction:column; align-items:flex-start; gap:10px;">
+            <div id="scannerPrintPanel" class="scanner-print-panel" style="display:none; min-width:270px; background:rgba(15,23,42,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:12px; box-shadow:0 18px 35px rgba(0,0,0,0.35); backdrop-filter:blur(10px);">
                 
-                <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:14px; margin-bottom:10px;">
+                <div class="scanner-qty-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:14px; margin-bottom:10px;">
                     <label for="scannerQuantityPerCode" style="color:#fff; font-size:13px; font-weight:bold; direction:rtl; white-space:nowrap;">
                         عدد الكروت
                     </label>
@@ -4799,20 +4986,20 @@ body > div:has(> label[for="codesFileInput"]),
                     />
                 </div>
 
-                <button onclick="resetScannerSession()" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
+                <button onclick="resetScannerSession()" class="scanner-panel-btn reset" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
                     مسح القائمة / Reset
                 </button>
 
-                <button onclick="toggleScannerPrintPanel(); printScannedCustom()" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
+                <button onclick="toggleScannerPrintPanel(); printScannedCustom()" class="scanner-panel-btn print-type" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
                     طباعة نوع العرض فقط
                 </button>
 
-                <button onclick="toggleScannerPrintPanel(); printScannedFullQR()" style="width:100%; padding:12px 14px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
+                <button onclick="toggleScannerPrintPanel(); printScannedFullQR()" class="scanner-panel-btn print-full" style="width:100%; padding:12px 14px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
                     طباعة كافة التفاصيل
                 </button>
             </div>
 
-            <button onclick="toggleScannerPrintPanel()" style="width:62px; height:62px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); background:linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color:white; box-shadow:0 8px 20px rgba(255,75,43,0.45); cursor:pointer; font-size:26px; display:flex; align-items:center; justify-content:center;">
+            <button onclick="toggleScannerPrintPanel()" class="scanner-print-fab" style="width:62px; height:62px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); background:linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color:white; box-shadow:0 8px 20px rgba(255,75,43,0.45); cursor:pointer; font-size:26px; display:flex; align-items:center; justify-content:center;">
                 🖨️
             </button>
         </div>
@@ -46995,6 +47182,256 @@ function getScannerWaitingHtml() {
 }
 
 // =====================================================
+// NEW: Scanner UI helpers
+// =====================================================
+function ensureScannerUiStyles() {
+    if (document.getElementById('scannerDynamicUiStyles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'scannerDynamicUiStyles';
+    style.textContent = `
+        .scanner-feedback-bar {
+            margin: 8px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            text-align: center;
+            background: rgba(15, 23, 42, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.22);
+        }
+
+        .scanner-feedback-main {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+        }
+
+        .scanner-feedback-sub {
+            margin-top: 4px;
+            color: #cbd5e1;
+            font-size: 12px;
+        }
+
+        .scanner-feedback-bar.scanner-idle {
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        .scanner-feedback-bar.scanner-success {
+            border-color: rgba(56, 239, 125, 0.55);
+            box-shadow: 0 0 0 1px rgba(56,239,125,0.15), 0 8px 22px rgba(0,0,0,0.25);
+        }
+
+        .scanner-feedback-bar.scanner-duplicate {
+            border-color: rgba(245, 158, 11, 0.65);
+            box-shadow: 0 0 0 1px rgba(245,158,11,0.15), 0 8px 22px rgba(0,0,0,0.25);
+        }
+
+        .scanner-feedback-bar.scanner-error {
+            border-color: rgba(239, 68, 68, 0.65);
+            box-shadow: 0 0 0 1px rgba(239,68,68,0.15), 0 8px 22px rgba(0,0,0,0.25);
+        }
+
+        #scannerSwipeBar {
+            padding: 10px 12px 12px;
+            background: #020617;
+            border-bottom: 1px solid #334155;
+        }
+
+        .scanner-swipe-track {
+            position: relative;
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(255,255,255,0.08);
+            box-shadow: inset 0 0 0 1px rgba(148,163,184,0.15);
+        }
+
+        .scanner-swipe-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 32%;
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(59,130,246,0.1), #38bdf8, rgba(59,130,246,0.1));
+            box-shadow: 0 0 16px rgba(56, 189, 248, 0.85);
+            animation: scannerSweep 1.5s linear infinite;
+        }
+
+        .scanner-swipe-text {
+            margin-top: 8px;
+            text-align: center;
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            direction: rtl;
+        }
+
+        #scannerSwipeBar.is-success .scanner-swipe-line {
+            background: linear-gradient(90deg, rgba(56,239,125,0.1), #38ef7d, rgba(56,239,125,0.1));
+            box-shadow: 0 0 18px rgba(56, 239, 125, 0.9);
+        }
+
+        #scannerSwipeBar.is-duplicate .scanner-swipe-line {
+            background: linear-gradient(90deg, rgba(245,158,11,0.1), #f59e0b, rgba(245,158,11,0.1));
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.9);
+        }
+
+        #scannerSwipeBar.is-error .scanner-swipe-line {
+            background: linear-gradient(90deg, rgba(239,68,68,0.1), #ef4444, rgba(239,68,68,0.1));
+            box-shadow: 0 0 18px rgba(239, 68, 68, 0.9);
+        }
+
+        @keyframes scannerSweep {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(330%); }
+        }
+
+        .scanner-result-shell {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .scanner-result-actions {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .scanner-state-btn {
+            border: 1px solid transparent;
+            color: #fff;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+            cursor: default;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+        }
+
+        .scanner-duplicate-hit {
+            outline: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245,158,11,0.12);
+            animation: duplicateBlink 0.7s ease 2;
+        }
+
+        @keyframes duplicateBlink {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function ensureScannerUiExtras() {
+    ensureScannerUiStyles();
+
+    const latestEl = document.getElementById('latestScannedItem');
+    const readerEl = document.getElementById('reader');
+    if (!latestEl || !readerEl) return;
+
+    if (!document.getElementById('scannerFeedbackBar')) {
+        const feedbackBar = document.createElement('div');
+        feedbackBar.id = 'scannerFeedbackBar';
+        feedbackBar.className = 'scanner-feedback-bar scanner-idle';
+        feedbackBar.innerHTML = `
+            <div class="scanner-feedback-main">📷 جاهز للمسح</div>
+            <div class="scanner-feedback-sub">وجّه الباركود داخل الإطار</div>
+        `;
+        latestEl.parentNode.insertBefore(feedbackBar, latestEl);
+    }
+
+    if (!document.getElementById('scannerSwipeBar')) {
+        const swipeBar = document.createElement('div');
+        swipeBar.id = 'scannerSwipeBar';
+        swipeBar.innerHTML = `
+            <div class="scanner-swipe-track">
+                <div class="scanner-swipe-line"></div>
+            </div>
+            <div class="scanner-swipe-text">حرّك الباركود ببطء داخل الإطار</div>
+        `;
+        readerEl.insertAdjacentElement('afterend', swipeBar);
+    }
+}
+
+function setScannerFeedback(type, title, subText = '') {
+    ensureScannerUiExtras();
+
+    const bar = document.getElementById('scannerFeedbackBar');
+    if (!bar) return;
+
+    bar.className = `scanner-feedback-bar scanner-${type || 'idle'}`;
+    bar.innerHTML = `
+        <div class="scanner-feedback-main">${escapeHtml(title)}</div>
+        <div class="scanner-feedback-sub">${escapeHtml(subText)}</div>
+    `;
+}
+
+function resetScannerSwipeState() {
+    const swipeBar = document.getElementById('scannerSwipeBar');
+    if (!swipeBar) return;
+    swipeBar.classList.remove('is-success', 'is-duplicate', 'is-error');
+}
+
+function flashScannerSwipe(type = 'success') {
+    const swipeBar = document.getElementById('scannerSwipeBar');
+    if (!swipeBar) return;
+
+    swipeBar.classList.remove('is-success', 'is-duplicate', 'is-error');
+
+    if (type === 'success') swipeBar.classList.add('is-success');
+    if (type === 'duplicate') swipeBar.classList.add('is-duplicate');
+    if (type === 'error') swipeBar.classList.add('is-error');
+
+    clearTimeout(swipeBar._flashTimer);
+    swipeBar._flashTimer = setTimeout(() => {
+        swipeBar.classList.remove('is-success', 'is-duplicate', 'is-error');
+    }, 1200);
+}
+
+function buildScannerStateButton(text, bg, border) {
+    return `
+        <button type="button" class="scanner-state-btn"
+            style="background:${bg};border-color:${border || bg};">
+            ${escapeHtml(text)}
+        </button>
+    `;
+}
+
+function renderScannerResultWithState(itemData, stateText, stateBg, stateBorder) {
+    return `
+        <div class="scanner-result-shell">
+            <div class="scanner-result-actions">
+                ${buildScannerStateButton(stateText, stateBg, stateBorder)}
+            </div>
+            ${buildScannerCardHtml({ ...itemData, compact: false })}
+        </div>
+    `;
+}
+
+function highlightExistingScannedRow(code) {
+    const listEl = document.getElementById('scannedItemsList');
+    if (!listEl) return;
+
+    const target = Array.from(listEl.children).find(el =>
+        (el.textContent || '').includes(String(code))
+    );
+
+    if (!target) return;
+
+    target.classList.remove('scanner-duplicate-hit');
+    void target.offsetWidth;
+    target.classList.add('scanner-duplicate-hit');
+
+    clearTimeout(target._dupTimer);
+    target._dupTimer = setTimeout(() => {
+        target.classList.remove('scanner-duplicate-hit');
+    }, 1500);
+}
+
+// =====================================================
 // NEW: Manual Code Helpers
 // =====================================================
 function normalizeManualScannerCode(value) {
@@ -47038,6 +47475,8 @@ function processManualScannerCode() {
     const input = document.getElementById('scannerManualCode');
     if (!input) return;
 
+    ensureScannerUiExtras();
+
     const cleanCode = normalizeManualScannerCode(input.value);
     input.value = cleanCode;
 
@@ -47047,6 +47486,9 @@ function processManualScannerCode() {
                 من فضلك اكتب الكود السداسي كاملًا (6 أرقام)
             </div>
         `);
+
+        setScannerFeedback('error', 'إدخال غير مكتمل', 'اكتب الكود السداسي كاملًا');
+        flashScannerSwipe('error');
 
         if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
         focusManualScannerInput(10);
@@ -47080,6 +47522,8 @@ function rememberScannedItem(item) {
 }
 
 function renderScannerSavedState() {
+    ensureScannerUiExtras();
+
     const listEl = document.getElementById('scannedItemsList');
     if (listEl) listEl.innerHTML = '';
 
@@ -47110,8 +47554,13 @@ function renderScannerSavedState() {
                 compact: false
             })
         );
+
+        setScannerFeedback('idle', '📷 جاهز لمسح جديد', 'آخر نتيجة ظاهرة بالأسفل');
+        resetScannerSwipeState();
     } else {
         setLatestScannerMessage(getScannerWaitingHtml());
+        setScannerFeedback('idle', '📷 جاهز للمسح', 'وجّه الباركود داخل الإطار');
+        resetScannerSwipeState();
     }
 }
 
@@ -47141,7 +47590,11 @@ function resetScannerSession() {
     const printPanel = document.getElementById('scannerPrintPanel');
     if (printPanel) printPanel.style.display = 'none';
 
+    ensureScannerUiExtras();
     setLatestScannerMessage(getScannerWaitingHtml());
+    setScannerFeedback('idle', '📷 جاهز للمسح', 'تم تصفير الجلسة الحالية');
+    resetScannerSwipeState();
+
     focusManualScannerInput(50);
 }
 
@@ -47315,45 +47768,101 @@ function addScannerRowToList({
     nameEN = '',
     nameAR = '',
     cleanCode = '',
-    offerLabel = '',
-    offerLabelEN = '',
+    offerLabel = '',   // العرض بالعربي
+    offerLabelEN = '', // العرض بالإنجليزي
     statusColor = '#38ef7d'
 }) {
     const listEl = document.getElementById('scannedItemsList');
+    const shell = document.querySelector('.scanner-shell');
     if (!listEl) return;
 
-    let bgColor = 'rgba(56,239,125,0.10)';
-
-    if (statusColor === '#ef4444') {
-        bgColor = 'rgba(239,68,68,0.10)';
-    } else if (statusColor === '#f59e0b') {
-        bgColor = 'rgba(245,158,11,0.10)';
-    }
+    // تمييز خلفية الكارت بناءً على الحالة
+    let bgColor = 'rgba(56, 239, 125, 0.08)';
+    if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)';
+    else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)';
 
     const row = document.createElement('div');
+    
+    // إضافة كلاس الوميض (Animation)
+    row.className = 'new-scanned-item-flash';
+
     row.style.cssText = `
-        background:${bgColor};
-        border-right:4px solid ${statusColor};
-        border-radius:12px;
-        padding:0;
-        margin-bottom:6px;
-        overflow:hidden;
+        background: ${bgColor};
+        border-right: 4px solid ${statusColor};
+        border-radius: 16px;
+        padding: 10px; 
+        margin: 0;
+        overflow: hidden;
+        flex: 0 0 100%; 
+        width: 100%;
+        min-height: 125px;
+        box-sizing: border-box;
+        scroll-snap-align: center;
+        display: flex;
+        align-items: center;
+        position: relative;
+        transition: all 0.3s ease;
     `;
 
+    // بناء محتوى الكارت (بنتأكد إن offerLabelEN مبعوت)
     row.innerHTML = buildScannerCardHtml({
         imageUrl,
         nameEN,
         nameAR,
         cleanCode,
-        offerLabel,
-        offerLabelEN,
+        offerLabel,     // هيظهر: خصم 30% على الحبة الثانية
+        offerLabelEN,   // هيظهر: 30% Off on 2nd Pc
         statusColor,
         compact: true
     });
 
-    listEl.prepend(row);
-}
+    // إضافة زر المسح (X) بشكل أشيك
+    const deleteBtn = document.createElement('div');
+    deleteBtn.innerHTML = '✕';
+    deleteBtn.style.cssText = `
+        position: absolute; top: 8px; left: 8px; width: 28px; height: 28px; 
+        background: rgba(239, 68, 68, 0.9); color: #fff; border-radius: 50%; 
+        display: flex; align-items: center; justify-content: center; 
+        cursor: pointer; font-size: 14px; z-index: 20; font-weight: bold;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    `;
+    deleteBtn.onclick = (e) => {
+        e.stopPropagation();
+        row.style.transform = 'scale(0.8)';
+        row.style.opacity = '0';
+        setTimeout(() => {
+            row.remove();
+            if (typeof updateScannerDots === 'function') updateScannerDots();
+        }, 200);
+    };
+    row.appendChild(deleteBtn);
 
+    // إضافة الكارت في بداية القائمة
+    listEl.prepend(row);
+    
+    // سكرول ناعم لأول صنف
+    listEl.scrollTo({ left: 0, behavior: 'smooth' });
+
+    // رسالة تأكيد سريعة (Toast) تظهر فوق منطقة الكروت
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+        background: #0f172a; color: #38ef7d; padding: 6px 14px; border-radius: 20px;
+        font-size: 12px; font-weight: bold; z-index: 10000; border: 1px solid #38ef7d;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4); pointer-events: none;
+    `;
+    toast.innerHTML = `✅ تم مسح ${cleanCode}`;
+    if (shell) shell.appendChild(toast);
+
+    // إخفاء الرسالة بعد ثانية
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 400);
+    }, 1000);
+
+    // تحديث نقاط السلايدر لو موجودة
+    if (typeof updateScannerDots === 'function') updateScannerDots();
+}
 // =====================================================
 // Open Scanner
 // =====================================================
@@ -47365,17 +47874,15 @@ async function openBarcodeScanner() {
 
     if (overlay) overlay.style.display = 'flex';
 
+    ensureScannerUiExtras();
+
     if (readerEl) {
         readerEl.innerHTML = '';
-        // تصغير العرض لـ 85% وتوسيط النافذة
         readerEl.style.width = '85%';
         readerEl.style.marginLeft = 'auto';
         readerEl.style.marginRight = 'auto';
-        
-        // تقليل الارتفاع عشان تكون النافذة ملمومة أكتر
         readerEl.style.height = window.innerWidth <= 400 ? '220px' : '280px';
         readerEl.style.minHeight = window.innerWidth <= 400 ? '220px' : '280px';
-        
         readerEl.style.background = '#000';
         readerEl.style.borderRadius = '18px';
         readerEl.style.overflow = 'hidden';
@@ -47399,6 +47906,8 @@ async function openBarcodeScanner() {
                 مكتبة html5-qrcode غير محملة
             </div>
         `);
+        setScannerFeedback('error', 'خطأ في المكتبة', 'مكتبة html5-qrcode غير محملة');
+        flashScannerSwipe('error');
         focusManualScannerInput(150);
         return;
     }
@@ -47409,6 +47918,8 @@ async function openBarcodeScanner() {
                 المتصفح لا يدعم الكاميرا
             </div>
         `);
+        setScannerFeedback('error', 'الكاميرا غير مدعومة', 'المتصفح لا يدعم تشغيل الكاميرا');
+        flashScannerSwipe('error');
         focusManualScannerInput(150);
         return;
     }
@@ -47429,7 +47940,6 @@ async function openBarcodeScanner() {
 
         const config = {
             fps: 10,
-            // الـ qrbox هيفضل زي ما هو عشان جودة القراءة
             qrbox: window.innerWidth <= 400
                 ? { width: 250, height: 100 }
                 : { width: 300, height: 110 },
@@ -47484,6 +47994,9 @@ async function openBarcodeScanner() {
             `);
         }
 
+        setScannerFeedback('idle', '📷 الكاميرا شغالة', 'وجّه الباركود داخل الإطار');
+        resetScannerSwipeState();
+
         focusManualScannerInput(300);
 
     } catch (err) {
@@ -47494,10 +48007,13 @@ async function openBarcodeScanner() {
                 ${escapeHtml(err?.message || "Unknown error")}
             </div>
         `);
+        setScannerFeedback('error', 'فشل تشغيل الكاميرا', err?.message || 'Unknown error');
+        flashScannerSwipe('error');
         await destroyScannerInstance();
         focusManualScannerInput(150);
     }
 }
+
 // =====================================================
 // Process Code
 // =====================================================
@@ -47505,41 +48021,37 @@ function processScannedCode(code) {
     const cleanCode = String(code || '').trim();
     if (!cleanCode) return;
 
+    ensureScannerUiExtras();
+
+    const existsInSelection =
+        typeof selectedProductCodes !== 'undefined' &&
+        selectedProductCodes?.has &&
+        selectedProductCodes.has(cleanCode);
+
+    // 1. التحقق من قاعدة البيانات
     if (!Array.isArray(window.productsDB) || !productsDB.length) {
-        setLatestScannerMessage(
-            buildScannerCardHtml({
-                imageUrl: '',
-                nameEN: 'Products DB Not Ready',
-                nameAR: 'قاعدة المنتجات غير جاهزة',
-                cleanCode,
-                offerLabel: '❌ خطأ في تحميل قاعدة البيانات',
-                offerLabelEN: 'Database Load Error',
-                statusColor: '#ef4444',
-                compact: false
-            })
-        );
+        setScannerFeedback('error', 'قاعدة البيانات غير جاهزة', 'استنى التحميل وجرب تاني');
+        flashScannerSwipe('error');
+        if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
         return;
     }
 
     const product = productsDB.find(p => String(p.Code || '').trim() === cleanCode);
 
+    // 2. حالة الصنف غير موجود
     if (!product) {
         const itemData = {
             imageUrl: '',
             nameEN: 'Product Not Found',
-            nameAR: 'المنتج غير موجود في قاعدة البيانات',
+            nameAR: 'الصنف غير موجود بالقاعدة',
             cleanCode,
-            offerLabel: '❌ لا يوجد هذا الصنف',
-            offerLabelEN: 'Product Not Found',
+            offerLabel: '❌ صنف غير مسجل',
+            offerLabelEN: 'Not Found',
             statusColor: '#ef4444'
         };
 
-        setLatestScannerMessage(
-            buildScannerCardHtml({
-                ...itemData,
-                compact: false
-            })
-        );
+        setScannerFeedback('error', `الكود ${cleanCode} غير موجود`, 'تأكد من الرقم المكتوب');
+        flashScannerSwipe('error');
 
         addScannerRowToList(itemData);
         rememberScannedItem(itemData);
@@ -47548,48 +48060,37 @@ function processScannedCode(code) {
         return;
     }
 
-    const nameEN =
-        product["Item Description English"] ||
-        product["Item Description"] ||
-        product["Item Description EN"] ||
-        "English Name Not Found";
-
-    const nameAR =
-        product["أسم المنتج"] ||
-        product["اسم المنتج"] ||
-        product["Item Description AR"] ||
-        "";
-
+    const nameEN = product["Item Description English"] || product["Item Description"] || "English Name Not Found";
+    const nameAR = product["أسم المنتج"] || product["اسم المنتج"] || "";
     const imageUrl = getScannerImageUrl(product);
 
+    // 3. حالة التكرار
     if (scannedCodesSet.has(cleanCode)) {
-        setLatestScannerMessage(
-            buildScannerCardHtml({
-                imageUrl,
-                nameEN,
-                nameAR,
-                cleanCode,
-                offerLabel: '⚠️ تم مسح هذا الكود من قبل',
-                offerLabelEN: 'Already Scanned Before',
-                statusColor: '#f59e0b',
-                compact: false
-            })
+        setScannerFeedback(
+            'duplicate',
+            existsInSelection ? 'موجود بالفعل في القائمة' : 'تم مسحه مسبقاً',
+            'مرر الكروت لرؤية التفاصيل'
         );
+
+        flashScannerSwipe('duplicate');
+        highlightExistingScannedRow(cleanCode);
 
         if (navigator.vibrate) navigator.vibrate([60, 60, 60]);
         return;
     }
 
+    // 4. جلب بيانات العرض وحالة النشاط (التعديل الجوهري هنا)
     const offer = getOfferForScanner(cleanCode);
     const isOfferActive = isOfferCurrentlyActive(offer);
 
+    // سحب العرض بالعربي وبالإنجليزي من الداتا الحقيقية
     const offerLabel = isOfferActive
-        ? (offer?.offerTypeAR || offer?.offerAR || offer?.offerType || 'العرض متاح')
+        ? (offer?.offerTypeAR || offer?.offerAR || 'العرض متاح')
         : '❌ لا يوجد عرض نشط حالياً';
 
     const offerLabelEN = isOfferActive
-        ? (offer?.offerTypeEN || offer?.offerEN || offer?.offerType || 'Offer Active')
-        : 'No Active Offer Right Now';
+        ? (offer?.offerType || offer?.offerEN || 'Offer Active') // استخدام offerType للإنجليزي
+        : 'No Active Offer';
 
     const statusColor = isOfferActive ? '#38ef7d' : '#ef4444';
 
@@ -47603,18 +48104,12 @@ function processScannedCode(code) {
         statusColor
     };
 
-    setLatestScannerMessage(
-        buildScannerCardHtml({
-            ...itemData,
-            compact: false
-        })
-    );
-
+    // 5. الإضافة للقائمة والذاكرة
     addScannerRowToList(itemData);
     rememberScannedItem(itemData);
-
     scannedCodesSet.add(cleanCode);
 
+    // 6. التغذية الراجعة (Feedback)
     if (isOfferActive) {
         if (typeof selectedProductCodes !== 'undefined' && selectedProductCodes?.add) {
             selectedProductCodes.add(cleanCode);
@@ -47624,8 +48119,12 @@ function processScannedCode(code) {
             updateSelectedCount(true);
         }
 
+        setScannerFeedback('success', `تم مسح ${cleanCode} بنجاح`, 'تمت إضافته للطباعة ✅');
+        flashScannerSwipe('success');
         if (navigator.vibrate) navigator.vibrate(90);
     } else {
+        setScannerFeedback('success', `تم مسح ${cleanCode}`, 'لكن لا يوجد عرض نشط حالياً ⚠️');
+        flashScannerSwipe('success');
         if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
     }
 }
