@@ -4750,6 +4750,31 @@ body > div:has(> label[for="codesFileInput"]),
             </div>
         </div>
 
+        <div style="padding:12px; background:#0f172a; border-bottom:1px solid #334155;">
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input
+                    id="scannerManualCode"
+                    type="text"
+                    inputmode="numeric"
+                    maxlength="6"
+                    placeholder="اكتب الكود السداسي"
+                    oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"
+                    onkeydown="handleScannerManualInputKey(event)"
+                    style="flex:1; height:46px; padding:0 14px; border-radius:12px; border:1px solid #475569; background:#111827; color:#fff; font-weight:bold; text-align:center; letter-spacing:1px; outline:none;"
+                />
+                <button
+                    onclick="processManualScannerCode()"
+                    style="height:46px; padding:0 16px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; border:none; border-radius:12px; cursor:pointer; font-size:14px; font-weight:bold; white-space:nowrap;"
+                >
+                    إضافة
+                </button>
+            </div>
+
+            <div style="margin-top:8px; color:#94a3b8; font-size:12px; text-align:center;">
+                كاميرا أو كتابة الكود يدويًا
+            </div>
+        </div>
+
         <div id="latestScannedItem" style="padding:12px; background:#0f172a; color:white; text-align:right; min-height:128px; border-bottom:1px solid #334155;">
             <div style="color:#94a3b8; font-size:14px; text-align:center;">بانتظار مسح الكود</div>
         </div>
@@ -46969,6 +46994,77 @@ function getScannerWaitingHtml() {
     `;
 }
 
+// =====================================================
+// NEW: Manual Code Helpers
+// =====================================================
+function normalizeManualScannerCode(value) {
+    return String(value || '')
+        .replace(/\D/g, '')
+        .slice(0, 6)
+        .trim();
+}
+
+function clearManualScannerInput() {
+    const input = document.getElementById('scannerManualCode');
+    if (input) input.value = '';
+}
+
+function focusManualScannerInput(delay = 0) {
+    const run = () => {
+        const input = document.getElementById('scannerManualCode');
+        if (!input) return;
+        try {
+            input.focus();
+            input.select();
+        } catch (e) {}
+    };
+
+    if (delay > 0) {
+        setTimeout(run, delay);
+    } else {
+        run();
+    }
+}
+
+function handleScannerManualInputKey(event) {
+    if (!event) return;
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        processManualScannerCode();
+    }
+}
+
+function processManualScannerCode() {
+    const input = document.getElementById('scannerManualCode');
+    if (!input) return;
+
+    const cleanCode = normalizeManualScannerCode(input.value);
+    input.value = cleanCode;
+
+    if (!cleanCode || cleanCode.length !== 6) {
+        setLatestScannerMessage(`
+            <div style="color:#f59e0b;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
+                من فضلك اكتب الكود السداسي كاملًا (6 أرقام)
+            </div>
+        `);
+
+        if (navigator.vibrate) navigator.vibrate([80, 40, 80]);
+        focusManualScannerInput(10);
+        return;
+    }
+
+    const nowTs = Date.now();
+    if (cleanCode === lastScannedValue && nowTs - lastScannedAt < 1200) return;
+
+    lastScannedValue = cleanCode;
+    lastScannedAt = nowTs;
+
+    processScannedCode(cleanCode);
+
+    clearManualScannerInput();
+    focusManualScannerInput(50);
+}
+
 function rememberScannedItem(item) {
     if (!item || !item.cleanCode) return;
 
@@ -47033,6 +47129,8 @@ function resetScannerSession() {
     lastScannedValue = "";
     lastScannedAt = 0;
 
+    clearManualScannerInput();
+
     if (typeof updateSelectedCount === 'function') {
         updateSelectedCount();
     }
@@ -47044,6 +47142,7 @@ function resetScannerSession() {
     if (printPanel) printPanel.style.display = 'none';
 
     setLatestScannerMessage(getScannerWaitingHtml());
+    focusManualScannerInput(50);
 }
 
 async function destroyScannerInstance() {
@@ -47262,14 +47361,21 @@ async function openBarcodeScanner() {
     const overlay = document.getElementById('scannerModalOverlay');
     const readerEl = document.getElementById('reader');
     const printPanel = document.getElementById('scannerPrintPanel');
+    const manualInput = document.getElementById('scannerManualCode');
 
     if (overlay) overlay.style.display = 'flex';
 
     if (readerEl) {
         readerEl.innerHTML = '';
-        readerEl.style.width = '100%';
-        readerEl.style.height = window.innerWidth <= 768 ? '280px' : '340px';
-        readerEl.style.minHeight = window.innerWidth <= 768 ? '260px' : '320px';
+        // تصغير العرض لـ 85% وتوسيط النافذة
+        readerEl.style.width = '85%';
+        readerEl.style.marginLeft = 'auto';
+        readerEl.style.marginRight = 'auto';
+        
+        // تقليل الارتفاع عشان تكون النافذة ملمومة أكتر
+        readerEl.style.height = window.innerWidth <= 400 ? '220px' : '280px';
+        readerEl.style.minHeight = window.innerWidth <= 400 ? '220px' : '280px';
+        
         readerEl.style.background = '#000';
         readerEl.style.borderRadius = '18px';
         readerEl.style.overflow = 'hidden';
@@ -47277,6 +47383,10 @@ async function openBarcodeScanner() {
     }
 
     if (printPanel) printPanel.style.display = 'none';
+
+    if (manualInput) {
+        manualInput.value = '';
+    }
 
     renderScannerSavedState();
 
@@ -47289,6 +47399,7 @@ async function openBarcodeScanner() {
                 مكتبة html5-qrcode غير محملة
             </div>
         `);
+        focusManualScannerInput(150);
         return;
     }
 
@@ -47298,6 +47409,7 @@ async function openBarcodeScanner() {
                 المتصفح لا يدعم الكاميرا
             </div>
         `);
+        focusManualScannerInput(150);
         return;
     }
 
@@ -47317,9 +47429,10 @@ async function openBarcodeScanner() {
 
         const config = {
             fps: 10,
-            qrbox: window.innerWidth <= 768
-                ? { width: 280, height: 110 }
-                : { width: 320, height: 120 },
+            // الـ qrbox هيفضل زي ما هو عشان جودة القراءة
+            qrbox: window.innerWidth <= 400
+                ? { width: 250, height: 100 }
+                : { width: 300, height: 110 },
             aspectRatio: 1.0
         };
 
@@ -47366,10 +47479,12 @@ async function openBarcodeScanner() {
         if (!scannedItemsMemory.length) {
             setLatestScannerMessage(`
                 <div style="color:#22c55e;font-weight:bold;font-size:13px;text-align:center;line-height:1.8;">
-                    الكاميرا شغالة، وجّه الباركود داخل المساحة الأفقية
+                    الكاميرا شغالة، وجّه الباركود داخل الإطار
                 </div>
             `);
         }
+
+        focusManualScannerInput(300);
 
     } catch (err) {
         console.error("Scanner Error:", err);
@@ -47380,9 +47495,9 @@ async function openBarcodeScanner() {
             </div>
         `);
         await destroyScannerInstance();
+        focusManualScannerInput(150);
     }
 }
-
 // =====================================================
 // Process Code
 // =====================================================
@@ -47521,6 +47636,8 @@ function processScannedCode(code) {
 async function closeBarcodeScanner() {
     const overlay = document.getElementById('scannerModalOverlay');
     if (overlay) overlay.style.display = 'none';
+
+    clearManualScannerInput();
 
     await destroyScannerInstance();
 
