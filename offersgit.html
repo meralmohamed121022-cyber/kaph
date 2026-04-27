@@ -47928,14 +47928,25 @@ function addScannerRowToList({
     
     // سكرول ناعم لأول صنف
     listEl.scrollTo({ left: 0, behavior: 'smooth' });
-
-    // رسالة تأكيد سريعة (Toast) تظهر فوق منطقة الكروت
+// رسالة تأكيد سريعة (Toast) تظهر أسفل منطقة الباركود (فوق منطقة الكروت)
     const toast = document.createElement('div');
     toast.style.cssText = `
-        position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
-        background: #0f172a; color: #38ef7d; padding: 6px 14px; border-radius: 20px;
-        font-size: 12px; font-weight: bold; z-index: 10000; border: 1px solid #38ef7d;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.4); pointer-events: none;
+        position: absolute; 
+        bottom: 110px; /* القيمة دي هتخليها تظهر فوق شريط السحب والزرار */
+        left: 50%; 
+        transform: translateX(-50%);
+        background: #0f172a; 
+        color: #38ef7d; 
+        padding: 8px 18px; 
+        border-radius: 25px;
+        font-size: 13px; 
+        font-weight: bold; 
+        z-index: 10000; 
+        border: 2px solid #38ef7d;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
+        pointer-events: none;
+        transition: opacity 0.4s ease, transform 0.4s ease;
+        white-space: nowrap;
     `;
     toast.innerHTML = `✅ تم مسح ${cleanCode}`;
     if (shell) shell.appendChild(toast);
@@ -47943,6 +47954,7 @@ function addScannerRowToList({
     // إخفاء الرسالة بعد ثانية
     setTimeout(() => {
         toast.style.opacity = '0';
+        toast.style.transform = 'translateX(-50%) translateY(10px)'; // إضافة حركة هبوط خفيفة عند الاختفاء
         setTimeout(() => toast.remove(), 400);
     }, 1000);
 
