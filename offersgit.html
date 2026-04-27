@@ -4538,8 +4538,8 @@ body > div:has(> label[for="codesFileInput"]),
     display: flex;
     flex-direction: column;
     position: relative;
+    padding-bottom: 20px !important; /* قلل الـ padding لأننا شلنا المستطيل العريض */
 }
-
 /* القائمة الأفقية - فرد الكارت */
 #scannerModalOverlay #scannedItemsList {
     display: flex !important;
@@ -4569,7 +4569,6 @@ body > div:has(> label[for="codesFileInput"]),
 
 /* إضافة شريط "لسه فيه" تحت الكروت */
 #scannerModalOverlay .scanner-cards-wrap::after {
-    content: "Scroll for more ↔️ اسحب للمزيد";
     position: absolute;
     bottom: 85px; /* فوق زرار الطباعة */
     left: 50%;
@@ -4597,46 +4596,51 @@ body > div:has(> label[for="codesFileInput"]),
 
 /* زرار الطباعة مستطيل أزرق مالي العرض */
 /* حاوية الزرار المستطيل في القاع */
+/* ابحث عن هذا الجزء وعدله ليكون هكذا */
 #scannerModalOverlay .scanner-fab-wrap {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    padding: 12px 15px;
-    background: #1e293b; /* نفس لون خلفية الشل عشان الدمج */
+    bottom: 20px; /* ارفعه شوية عن الحافة */
+    right: 20px;  /* خليه في الجنب بدل ما يكون مالي العرض */
+    left: auto;   /* إلغاء التمدد لليسار */
+    padding: 0;   /* شيل المسافات */
+    background: transparent !important; /* 🔥 أهم سطر: شفاف تماماً */
     z-index: 1005;
     display: flex;
     justify-content: center;
     align-items: center;
 }
-
 /* الزرار المستطيل الأزرق */
+/* ابحث عن هذا الجزء وعدله */
 #scannerModalOverlay .scanner-print-fab {
-    width: 100%;
-    height: 50px;
-    border-radius: 12px;
-    border: none;
-    background: #2563eb !important;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    width: 65px !important;   /* عرض ثابت للدائرة */
+    height: 65px !important;  /* ارتفاع ثابت للدائرة */
+    border-radius: 50% !important; /* 🔥 تحويله لدائرة */
+    border: 2px solid rgba(255,255,255,0.8);
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%) !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5); /* ظل قوي عشان يبان إنه طاير */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* عشان لو فيه توهج */
+    transition: all 0.3s ease;
 }
 
+#scannerModalOverlay .scanner-print-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 12px 30px rgba(37, 99, 235, 0.4);
+}
 /* الأيقونة الوحيدة المطلوبة */
 #scannerModalOverlay .scanner-print-fab::before {
-    content: "🖨️"; /* رمز واحد فقط */
-    font-size: 24px;
+    content: "🖨️"; 
+    font-size: 28px; /* كبر الأيقونة شوية */
     position: absolute;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%); /* سنترة دقيقة */
+    transform: translate(-50%, -50%);
     display: block !important;
 }
-
 /* إخفاء أي أيقونات أو نصوص تانية جاية من الـ HTML الأصلي */
 #scannerModalOverlay .scanner-print-fab * {
     display: none !important;
@@ -4664,6 +4668,89 @@ body > div:has(> label[for="codesFileInput"]),
     border-left: 4px solid #fff;  /* الخط الرأسي شمال */
     border-right: 4px solid #fff; /* الخط الرأسي يمين */
     position: absolute;
+}
+/* الحاوية الرئيسية */
+.swipe-indicator-wrapper {
+    position: absolute;
+    bottom: 85px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    pointer-events: none;
+    z-index: 100;
+}
+
+/* رسم اليد بالـ CSS */
+.css-hand {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    animation: handSwipe 2s infinite ease-in-out;
+}
+
+.hand-main {
+    position: absolute;
+    bottom: 0;
+    width: 18px;
+    height: 14px;
+    background: #667eea;
+    border-radius: 4px;
+}
+
+.finger {
+    position: absolute;
+    top: 5px;
+    left: 4px;
+    width: 6px;
+    height: 15px;
+    background: #667eea;
+    border-radius: 3px;
+    transform: rotate(-10deg);
+}
+
+/* رسم الأسهم (دوائر صغيرة بتتحرك) */
+.swipe-arrows {
+    display: flex;
+    gap: 4px;
+}
+
+.swipe-arrows span {
+    width: 5px;
+    height: 5px;
+    background: #667eea;
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: arrowBlink 1s infinite alternate;
+}
+
+.swipe-arrows span:nth-child(2) { animation-delay: 0.2s; }
+.swipe-arrows span:nth-child(3) { animation-delay: 0.4s; }
+
+/* النص */
+.swipe-text {
+    font-size: 10px;
+    font-weight: 800;
+    color: #667eea;
+    background: rgba(102, 126, 234, 0.1);
+    padding: 2px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
+}
+
+/* --- الأنميشن --- */
+
+@keyframes handSwipe {
+    0% { transform: translateX(-15px) rotate(-10deg); opacity: 0.5; }
+    50% { transform: translateX(15px) rotate(10deg); opacity: 1; }
+    100% { transform: translateX(-15px) rotate(-10deg); opacity: 0.5; }
+}
+
+@keyframes arrowBlink {
+    from { opacity: 0.2; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1.2); }
 }
 </style>
 </head>
@@ -4822,49 +4909,44 @@ body > div:has(> label[for="codesFileInput"]),
 ========================= -->
 <div class="promo-media-section">
     <div class="promo-media-head">
-        <h2> PLATFORM FEATURES</h2>
+        <h2>PLATFORM FEATURES</h2>
     </div>
 
     <div class="promo-media-swiper" id="promoMediaSwiper">
         
-       
-<article class="promo-media-card">
-    <h3 class="promo-media-title">SCAN 6 CODE ITEM AND PRINT OFFERS</h3>
-    <button class="promo-media-thumb" type="button"
-        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4')">
-        
-        <video muted playsinline preload="metadata" poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/scan%20code.jpeg">
-            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4" type="video/mp4">
-        </video>
-        
-        <span class="promo-play-badge">▶</span>
-    </button>
-</article>
-      
-<article class="promo-media-card">
-    <h3 class="promo-media-title">Sidebar Options</h3>
-    <button class="promo-media-thumb" type="button"
-        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SIDEBAR%20OPTIONS.mp4')">
-        
-        <video muted playsinline preload="metadata" poster="https://github.com/meralmohamed121022-cyber/photos/blob/main/SIDE%20BAR%20OPTIONS.jpeg?raw=true">
-            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/SIDEBAR%20OPTIONS.mp4">
-        </video>
-        
-        <span class="promo-play-badge">▶</span>
-    </button>
-</article>
-<article class="promo-media-card">
-    <h3 class="promo-media-title">CONNECTION ERROR</h3>
-    <button class="promo-media-thumb" type="button"
-        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/CONNECTION%20ERROR.mp4')">
-        
-        <video muted playsinline preload="metadata" poster="https://github.com/meralmohamed121022-cyber/photos/blob/main/WhatsApp%20Image%202026-04-27%20at%205.56.33%20PM.jpeg?raw=true">
-            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/CONNECTION%20ERROR.mp4" type="video/mp4">
-        </video>
-        
-        <span class="promo-play-badge">▶</span>
-    </button>
-</article>
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">SCAN 6 CODE ITEM AND PRINT OFFERS</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4')">
+                <video muted playsinline preload="metadata" poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/scan%20code.jpeg">
+                    <source src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4" type="video/mp4">
+                </video>
+                <span class="promo-play-badge">▶</span>
+            </button>
+        </article>
+
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">Sidebar Options</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDEBAR%20OPTIONS.mp4')">
+                <video muted playsinline preload="metadata" poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDE%20BAR%20OPTIONS.jpeg">
+                    <source src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDEBAR%20OPTIONS.mp4" type="video/mp4">
+                </video>
+                <span class="promo-play-badge">▶</span>
+            </button>
+        </article>
+
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">CONNECTION ERROR</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/CONNECTION%20ERROR.mp4')">
+                <video muted playsinline preload="metadata" poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/WhatsApp%20Image%202026-04-27%20at%205.56.33%20PM.jpeg">
+                    <source src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/CONNECTION%20ERROR.mp4" type="video/mp4">
+                </video>
+                <span class="promo-play-badge">▶</span>
+            </button>
+        </article>
+
         <article class="promo-media-card">
             <h3 class="promo-media-title">كيف تفلتر</h3>
             <button class="promo-media-thumb" type="button"
@@ -4875,42 +4957,39 @@ body > div:has(> label[for="codesFileInput"]),
                 <span class="promo-play-badge">▶</span>
             </button>
         </article>
+
         <article class="promo-media-card">
             <h3 class="promo-media-title">print setting</h3>
             <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png')">
-                <img src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png" alt="Animated Offer Banner" loading="lazy">
+                onclick="openPromoMedia('image','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png')">
+                <img src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png" alt="Printer Settings" loading="lazy">
             </button>
         </article>
- 
-     
+
         <article class="promo-media-card">
-            <h3 class="promo-media-title">PRINT OFFERS FROM FILE (pdf,excel..)</h3>
+            <h3 class="promo-media-title">PRINT OFFERS FROM FILE</h3>
             <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4)">
+                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4')">
                 <video muted playsinline preload="metadata">
-                    <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4" type="video/mp4">
+                    <source src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4" type="video/mp4">
                 </video>
                 <span class="promo-play-badge">▶</span>
             </button>
         </article>
-    
-<article class="promo-media-card">
-    <h3 class="promo-media-title">Magazine offers file</h3>
-    <button class="promo-media-thumb" type="button"
-        onclick="openPromoMedia('video','https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/magazine%20offers%20print.mp4')">
+
+        <article class="promo-media-card">
+            <h3 class="promo-media-title">Magazine offers file</h3>
+            <button class="promo-media-thumb" type="button"
+                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazine%20offers%20print.mp4')">
+                <video muted playsinline preload="metadata" poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazie%20offers.jpeg">
+                    <source src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazine%20offers%20print.mp4" type="video/mp4">
+                </video>
+                <span class="promo-play-badge">▶</span>
+            </button>
+        </article>
         
-        <video muted playsinline preload="metadata" poster="https://github.com/meralmohamed121022-cyber/photos/blob/main/magazie%20offers.jpeg?raw=true">
-            <source src="https://github.com/meralmohamed121022-cyber/photos/raw/refs/heads/main/magazine%20offers%20print.mp4" type="video/mp4">
-        </video>
-        
-        <span class="promo-play-badge">▶</span>
-    </button>
-</article>
-       
     </div>
 </div>
-
 <!-- FULLSCREEN LIGHTBOX -->
 <div id="promoMediaLightbox" class="promo-media-lightbox" onclick="closePromoMedia(event)">
     <button class="promo-media-close" type="button" onclick="closePromoMedia()">✕</button>
@@ -4936,7 +5015,6 @@ body > div:has(> label[for="codesFileInput"]),
 
                 <div class="scanner-camera-note">
                     <span>
-                        وجّه الباركود داخل كامل مساحة الكاميرا
                     </span>
                 </div>
             </div>
@@ -4969,7 +5047,15 @@ body > div:has(> label[for="codesFileInput"]),
     </div>
     <div id="scannerSliderDots"></div>
 </div>
-
+<div class="swipe-indicator-wrapper">
+    <div class="css-hand">
+        <div class="hand-main"></div>
+        <div class="finger"></div>
+    </div>
+    <div class="swipe-arrows">
+        <span></span><span></span><span></span>
+    </div>
+</div>
         <div id="scannerFabWrap" class="scanner-fab-wrap" style="position:absolute; left:14px; bottom:14px; z-index:1005; display:flex; flex-direction:column; align-items:flex-start; gap:10px;">
             <div id="scannerPrintPanel" class="scanner-print-panel" style="display:none; min-width:270px; background:rgba(15,23,42,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:12px; box-shadow:0 18px 35px rgba(0,0,0,0.35); backdrop-filter:blur(10px);">
                 
@@ -47939,17 +48025,17 @@ async function openBarcodeScanner() {
         html5QrScanner = new Html5Qrcode("reader");
 
         // --- التعديل الجوهري هنا لتوسيع منطقة المسح ---
-        const config = {
-            fps: 20, // زيادة السرعة لقراءة أسلس
-            qrbox: (viewfinderWidth, viewfinderHeight) => {
-                // جعل منطقة المسح عريضة (80% من العرض) وارتفاع مناسب للباركود
-                // هذا سيجعلها مطابقة للخطوط الرأسية الواسعة
-                const width = viewfinderWidth * 0.85; 
-                const height = viewfinderHeight * 0.4; 
-                return { width: width, height: height };
-            },
-            aspectRatio: 1.0
-        };
+      const config = {
+    fps: 25, // زيادة عدد الفريمات لسرعة الاستجابة
+    qrbox: (viewfinderWidth, viewfinderHeight) => {
+        // هنا السحر: هنخلي العرض 90% من الشاشة والارتفاع صغير (مستطيل)
+        // ده بيزود مساحة القراءة العرضية جداً للموبايل
+        const width = viewfinderWidth * 0.95; 
+        const height = viewfinderHeight * 0.5; // مستطيل عرضي مريح للباركود
+        return { width: width, height: height };
+    },
+    aspectRatio: 1.0
+};
 
         if (typeof Html5QrcodeSupportedFormats !== 'undefined') {
             config.formatsToSupport = [
