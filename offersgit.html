@@ -4764,6 +4764,26 @@ body > div:has(> label[for="codesFileInput"]),
     animation: shakeError 0.4s ease-in-out;
     box-shadow: 0 0 15px rgba(245, 158, 11, 0.5) !important;
 }
+/* إخفاء اليد والأسهم القديمة تماماً */
+.css-hand, .hand-main, .finger, .swipe-indicator-wrapper .swipe-arrows {
+    display: none !important;
+}
+
+/* وميض الأسهم الجديد لجذب الانتباه */
+@keyframes arrowBlink {
+    from { opacity: 0.1; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1.1); }
+}
+
+/* أنيميشن لظهور الكروت الجديدة بسلاسة */
+.new-scanned-item-flash {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
 </style>
 </head>
 <body>
@@ -5021,85 +5041,64 @@ body > div:has(> label[for="codesFileInput"]),
 
         <div class="scanner-camera-wrap">
             <div class="scanner-camera-box">
-                <div id="reader" style="width:100%; height:clamp(240px, 40vh, 340px); min-height:240px; background:#000; border:2px solid #667eea; border-radius:18px; overflow:hidden;"></div>
-
+                <div id="reader" style="width:100%; height:clamp(220px, 35vh, 300px); min-height:220px; background:#000; border:2px solid #667eea; border-radius:18px; overflow:hidden;"></div>
                 <div class="scanner-frame"></div>
-
-                <div class="scanner-camera-note">
-                    <span>
-                    </span>
-                </div>
             </div>
         </div>
 
-        <div class="scanner-manual-wrap">
-            <div class="scanner-manual-row">
+        <div class="scanner-manual-wrap" style="padding: 10px; background: #0f172a; border-bottom: 1px solid #334155;">
+            <div class="scanner-manual-row" style="display:flex; gap:6px; align-items:center; justify-content: space-between;">
+                
+                <button onclick="clearAllScannerData()" title="مسح الكل" style="height:42px; width:42px; flex-shrink:0; background:linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color:white; border:none; border-radius:10px; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);">
+                    🗑️
+                </button>
+
                 <input
                     id="scannerManualCode"
                     type="text"
                     inputmode="numeric"
                     maxlength="6"
-                    placeholder="اكتب الكود السداسي"
+                    placeholder="كود سداسي"
                     oninput="this.value=this.value.replace(/\D/g,'').slice(0,6)"
                     onkeydown="handleScannerManualInputKey(event)"
-                    style="flex:1; height:46px; padding:0 14px; border-radius:12px; border:1px solid #475569; background:#111827; color:#fff; font-weight:bold; text-align:center; letter-spacing:1px; outline:none;"
+                    style="flex: 1; min-width: 80px; height:42px; padding:0 10px; border-radius:10px; border:1px solid #475569; background:#111827; color:#fff; font-weight:bold; text-align:center; font-size:14px; outline:none;"
                 />
+
                 <button
                     onclick="processManualScannerCode()"
-                    class="scanner-add-btn"
-                    style="height:46px; padding:0 16px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; border:none; border-radius:12px; cursor:pointer; font-size:14px; font-weight:bold; white-space:nowrap;"
+                    style="height:42px; padding:0 12px; background:linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color:white; border:none; border-radius:10px; cursor:pointer; font-size:13px; font-weight:bold; white-space:nowrap; flex-shrink:0;"
                 >
                     إضافة
                 </button>
             </div>
         </div>
 
-       <div class="scanner-cards-wrap" style="flex:1; display:flex; flex-direction:column; overflow:hidden; background:#1e293b; padding:10px 12px 100px; border-top:1px solid #334155;">
-    <div id="scannedItemsList" style="display:flex; flex-direction:row; gap:12px; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-bottom:10px;">
-    </div>
-    <div id="scannerSliderDots"></div>
-</div>
-<div class="swipe-indicator-wrapper">
-    <div class="css-hand">
-        <div class="hand-main"></div>
-        <div class="finger"></div>
-    </div>
-    <div class="swipe-arrows">
-        <span></span><span></span><span></span>
-    </div>
-</div>
-        <div id="scannerFabWrap" class="scanner-fab-wrap" style="position:absolute; left:14px; bottom:14px; z-index:1005; display:flex; flex-direction:column; align-items:flex-start; gap:10px;">
-            <div id="scannerPrintPanel" class="scanner-print-panel" style="display:none; min-width:270px; background:rgba(15,23,42,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:12px; box-shadow:0 18px 35px rgba(0,0,0,0.35); backdrop-filter:blur(10px);">
+        <div class="scanner-cards-wrap" style="flex:1; display:flex; flex-direction:column; overflow:hidden; background:#1e293b; padding:10px 12px 100px; border-top:1px solid #334155; position: relative;">
+            <div id="scannedItemsList" style="display:flex; flex-direction:row; gap:12px; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; padding-bottom:10px;">
+                </div>
+            
+            <div class="modern-nav-indicator" style="display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 5px; padding: 5px; background: rgba(102, 126, 234, 0.1); border-radius: 20px; width: fit-content; align-self: center; pointer-events: none;">
+                <span style="color: #667eea; font-size: 18px; font-weight: bold; animation: arrowBlink 1s infinite alternate;">❮</span>
+                <div style="font-size: 10px; font-weight: 800; color: #667eea; text-transform: uppercase; letter-spacing: 1px;">اسحب للتنقل</div>
+                <span style="color: #667eea; font-size: 18px; font-weight: bold; animation: arrowBlink 1s infinite alternate-reverse;">❯</span>
+            </div>
+        </div>
+
+        <div id="scannerFabWrap" class="scanner-fab-wrap" style="position:absolute; left:14px; bottom:14px; z-index:1005; display:flex; flex-direction:column; align-items:flex-start;">
+            
+            <div id="scannerPrintPanel" class="scanner-print-panel" style="display:none; min-width:250px; background:rgba(15,23,42,0.97); border:1px solid rgba(255,255,255,0.12); border-radius:18px; padding:12px; box-shadow:0 18px 35px rgba(0,0,0,0.35); backdrop-filter:blur(10px); margin-bottom: 10px;">
                 
                 <div class="scanner-qty-box" style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:14px; margin-bottom:10px;">
-                    <label for="scannerQuantityPerCode" style="color:#fff; font-size:13px; font-weight:bold; direction:rtl; white-space:nowrap;">
-                        عدد الكروت
-                    </label>
-                    <input
-                        id="scannerQuantityPerCode"
-                        type="number"
-                        value="1"
-                        min="1"
-                        style="width:58px; height:42px; padding:0; background:#111827; border:1px solid #475569; color:#fff; border-radius:999px; text-align:center; font-weight:bold; outline:none;"
-                    />
+                    <label style="color:#fff; font-size:12px; font-weight:bold;">عدد الكروت</label>
+                    <input id="scannerQuantityPerCode" type="number" value="1" min="1" style="width:50px; height:35px; background:#111827; border:1px solid #475569; color:#fff; border-radius:999px; text-align:center; font-weight:bold; outline:none;"/>
                 </div>
 
-                <button onclick="resetScannerSession()" class="scanner-panel-btn reset" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
-                    مسح القائمة / Reset
-                </button>
-
-                <button onclick="toggleScannerPrintPanel(); printScannedCustom()" class="scanner-panel-btn print-type" style="width:100%; margin-bottom:8px; padding:12px 14px; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
-                    طباعة نوع العرض فقط
-                </button>
-
-                <button onclick="toggleScannerPrintPanel(); printScannedFullQR()" class="scanner-panel-btn print-full" style="width:100%; padding:12px 14px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; border:none; border-radius:14px; font-weight:bold; cursor:pointer;">
-                    طباعة كافة التفاصيل
-                </button>
+                <button onclick="clearAllScannerData()" class="scanner-panel-btn" style="width:100%; margin-bottom:8px; padding:10px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; border:none; border-radius:12px; font-weight:bold; font-size:12px;">Reset</button>
+                <button onclick="toggleScannerPrintPanel(); printScannedCustom()" class="scanner-panel-btn" style="width:100%; margin-bottom:8px; padding:10px; background:linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color:white; border:none; border-radius:12px; font-weight:bold; font-size:12px;">طباعة نوع العرض</button>
+                <button onclick="toggleScannerPrintPanel(); printScannedFullQR()" class="scanner-panel-btn" style="width:100%; padding:10px; background:linear-gradient(135deg, #10b981 0%, #059669 100%); color:white; border:none; border-radius:12px; font-weight:bold; font-size:12px;">طباعة التفاصيل</button>
             </div>
-
-            <button onclick="toggleScannerPrintPanel()" class="scanner-print-fab" style="width:62px; height:62px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); background:linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color:white; box-shadow:0 8px 20px rgba(255,75,43,0.45); cursor:pointer; font-size:26px; display:flex; align-items:center; justify-content:center;">
-                🖨️
-            </button>
+            
+            <button onclick="toggleScannerPrintPanel()" class="scanner-print-fab" style="width:60px; height:60px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); background:linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color:white; box-shadow:0 8px 20px rgba(255,75,43,0.45); cursor:pointer; font-size:24px; display:flex; align-items:center; justify-content:center;">🖨️</button>
         </div>
     </div>
 </div>
@@ -5560,6 +5559,67 @@ body > div:has(> label[for="codesFileInput"]),
     50% { transform: scale(1.03); opacity: 0.9; }
     100% { transform: scale(1); opacity: 1; }
 }
+/* Confirm Modal Art */
+.confirm-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    padding: 30px;
+    border-radius: 25px;
+    border: 2px solid #d4af37;
+    text-align: center;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    animation: modalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.warning-icon-art {
+    width: 70px;
+    height: 70px;
+    border: 4px solid #ef4444;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: pulseRed 2s infinite;
+}
+
+.exclamation-mark {
+    color: #ef4444;
+    font-size: 40px;
+    font-weight: 900;
+}
+
+.confirm-title { color: #d4af37; font-size: 22px; margin-bottom: 10px; font-weight: 800; }
+.confirm-msg { color: #cbd5e1; font-size: 15px; margin-bottom: 25px; line-height: 1.5; }
+
+.confirm-btns { display: flex; gap: 12px; }
+
+.btn-confirm-yes {
+    flex: 1; padding: 12px; border-radius: 12px; border: none;
+    background: linear-gradient(135deg, #ef4444 0%, #991b1b 100%);
+    color: white; font-weight: 700; cursor: pointer; transition: 0.3s;
+}
+
+.btn-confirm-no {
+    flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #475569;
+    background: transparent; color: white; font-weight: 700; cursor: pointer; transition: 0.3s;
+}
+
+.btn-confirm-yes:hover { transform: translateY(-3px); box-shadow: 0 5px 15px rgba(239, 68, 68, 0.4); }
+.btn-confirm-no:hover { background: rgba(255,255,255,0.05); }
+
+@keyframes modalPop {
+    from { transform: scale(0.5); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulseRed {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
 </style>
 
 <!-- Offer Boxes -->
@@ -5604,7 +5664,19 @@ body > div:has(> label[for="codesFileInput"]),
     </div>
 </div>
    
- 
+ <div id="deleteConfirmOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200000; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
+    <div class="confirm-card">
+        <div class="warning-icon-art">
+            <div class="exclamation-mark">!</div>
+        </div>
+        <h3 class="confirm-title">Clear All Data?</h3>
+        <div class="confirm-btns">
+            <button onclick="executeClearAll()" class="btn-confirm-yes">Yes, Clear All</button>
+            <button onclick="closeDeleteModal()" class="btn-confirm-no">Cancel</button>
+        </div>
+    </div>
+</div>
+    
   
   
   
@@ -47644,16 +47716,22 @@ function renderScannerSavedState() {
     const listEl = document.getElementById('scannedItemsList');
     if (listEl) listEl.innerHTML = '';
 
-    // 1. استعادة البيانات من الجلسة (Session) لضمان وجود الـ onlineOffer المخزن
+    // 1. استعادة البيانات من الجلسة (Session) وتحديث الذاكرة الحية فوراً
     const saved = sessionStorage.getItem('scanned_items_session');
     if (saved) {
-        // تحديث الذاكرة الحية بالبيانات المخزنة في الجلسة
-        scannedItemsMemory = JSON.parse(saved);
-        // تحديث الـ Set عشان البرنامج ميعتبرش الأصناف القديمة أصناف جديدة
-        scannedCodesSet = new Set(scannedItemsMemory.map(i => i.cleanCode));
+        try {
+            scannedItemsMemory = JSON.parse(saved);
+            // تحديث الـ Set لضمان منع التكرار وعدم تعليق الفلترة
+            scannedCodesSet = new Set(scannedItemsMemory.map(i => String(i.cleanCode).trim()));
+        } catch (e) {
+            console.error("❌ Error parsing scanner session:", e);
+            scannedItemsMemory = [];
+            scannedCodesSet.clear();
+        }
     }
 
-    // 2. رسم الكروت من الذاكرة (مع تمرير العرض الأونلاين إن وجد)
+    // 2. رسم الكروت من الذاكرة (إرسال الـ onlineOffer الحالي لضمان عدم ظهور "جاري الفحص")
+    // استخدمنا reverse() أو ترتيب عكسي لو حابب الأحدث يظهر في الأول دائماً
     scannedItemsMemory.forEach(item => {
         addScannerRowToList({
             imageUrl: item.imageUrl,
@@ -47663,12 +47741,12 @@ function renderScannerSavedState() {
             offerLabel: item.offerLabel,
             offerLabelEN: item.offerLabelEN,
             statusColor: item.statusColor,
-            onlineOffer: item.onlineOffer || '' // ✅ التعديل هنا: تمرير العرض المخزن
+            onlineOffer: item.onlineOffer || '' // ✅ القيمة هنا بتمنع اللودر من الظهور لو العرض موجود
         });
     });
 
     if (scannedItemsMemory.length) {
-        // ترتيب الذاكرة عشان نجيب آخر واحد (عادة بيكون أول عنصر في المصفوفة لو استخدمنا unshift)
+        // ترتيب الذاكرة عشان نجيب آخر واحد (عادة بيكون أول عنصر في المصفوفة)
         const lastItem = scannedItemsMemory[0]; 
 
         setLatestScannerMessage(
@@ -47680,19 +47758,24 @@ function renderScannerSavedState() {
                 offerLabel: lastItem.offerLabel,
                 offerLabelEN: lastItem.offerLabelEN,
                 statusColor: lastItem.statusColor,
-                onlineOffer: lastItem.onlineOffer || '', // ✅ إظهار العرض في رسالة الحالة
+                onlineOffer: lastItem.onlineOffer || '', // ✅ عرض النتيجة النهائية في رسالة الحالة
                 compact: false
             })
         );
 
-        setScannerFeedback('idle', '📷 جاهز لمسح جديد', 'آخر نتيجة ظاهرة بالأسفل');
+        setScannerFeedback('idle', '📷 جاهز لمسح جديد', `تم استعادة ${scannedItemsMemory.length} صنف من الجلسة`);
         resetScannerSwipeState();
     } else {
         setLatestScannerMessage(getScannerWaitingHtml());
         setScannerFeedback('idle', '📷 جاهز للمسح', 'وجّه الباركود داخل الإطار');
         resetScannerSwipeState();
     }
+
+    // تحديث نقاط السلايدر والعداد بعد الرندر
+    if (typeof updateScannerDots === 'function') updateScannerDots();
+    if (typeof updateSelectedCount === 'function') updateSelectedCount();
 }
+
 function resetScannerSession() {
     scannedItemsMemory = [];
 
@@ -47827,7 +47910,8 @@ function buildScannerCardHtml({
     offerLabelEN = '',
     statusColor = '#38ef7d',
     compact = false,
-    onlineOffer = '' // ✅ استلام القيمة المخزنة في الجلسة
+    onlineOffer = '',
+    onlineOfferData = null
 }) {
     const imageSize = compact ? 74 : 92;
     const titleSize = compact ? '12px' : '14px';
@@ -47837,29 +47921,89 @@ function buildScannerCardHtml({
     const codeSize = compact ? '12px' : '13px';
     const pad = compact ? '10px' : '12px';
 
-    // رابط صفحة الدواء أونلاين
     const productUrl = `https://www.al-dawaa.com/en/p/${cleanCode}`;
 
-    // ✅ منطق العرض الأونلاين المطور:
-    // 1. لو فيه عرض مخزن (onlineOffer) اظهر البادج البنفسجي فوراً.
-    // 2. لو مفيش، اظهر اللودر والرسالة عشان يبدأ عملية الفحص.
-    const onlineOfferHTML = (onlineOffer && onlineOffer !== "" && onlineOffer !== "No online offer found")
+    const hasOnlineStructuredOffer =
+        onlineOfferData &&
+        (
+            onlineOfferData.hasOnlineOffer === true ||
+            onlineOfferData.onlineStatus === 'HAS_ONLINE_OFFER'
+        );
+
+    const hasOnlineTextOffer =
+        onlineOffer &&
+        String(onlineOffer).trim() !== '' &&
+        !/^no online offer/i.test(String(onlineOffer).trim());
+
+    const hasPriceOffer =
+        hasOnlineStructuredOffer &&
+        onlineOfferData &&
+        onlineOfferData.finalPrice != null;
+
+    const offerTitle = hasOnlineStructuredOffer
+        ? (onlineOfferData.offer || onlineOfferData.offerText || onlineOffer || 'Online Offer')
+        : (onlineOffer || '');
+
+    const originalPrice = hasPriceOffer && onlineOfferData.originalPrice != null
+        ? Number(onlineOfferData.originalPrice)
+        : null;
+
+    const finalPrice = hasPriceOffer
+        ? Number(onlineOfferData.finalPrice)
+        : null;
+
+    const showStrikethrough =
+        originalPrice != null &&
+        finalPrice != null &&
+        originalPrice > finalPrice;
+
+    const onlineOfferHTML = hasPriceOffer
         ? `
-            <div onclick="window.open('${productUrl}', '_blank')"
-                 style="margin-top: 8px; padding: 8px 12px; border-radius: 10px; 
-                        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); 
-                        border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
-                        box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3); animation: pulseOnline 2s infinite;">
-                <span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${escapeHtml(onlineOffer)}</span>
+            <div id="online-offer-${cleanCode}"
+                 onclick="window.open('${productUrl}', '_blank')"
+                 style="margin-top:8px; padding:10px 12px; border-radius:12px;
+                        background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                        border:none; display:flex; flex-direction:column; gap:6px; cursor:pointer;
+                        box-shadow:0 6px 16px rgba(124,58,237,0.35); animation:pulseOnline 2s infinite;">
+                
+                <div style="display:flex; align-items:center; justify-content:center;">
+                    <span style="color:white; font-weight:800; font-size:12px; line-height:1.3; text-align:center;">
+                        🌐 Online: ${escapeHtml(offerTitle)}
+                    </span>
+                </div>
+
+                <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; flex-wrap:wrap;">
+                    ${showStrikethrough ? `
+                        <span style="color:rgba(255,255,255,0.72); font-size:11px; text-decoration:line-through; font-weight:700;">
+                            ${escapeHtml(originalPrice.toFixed(2))} SAR
+                        </span>
+                    ` : ''}
+
+                    <span style="color:#ffffff; font-size:${compact ? '15px' : '17px'}; font-weight:900; letter-spacing:0.2px;">
+                        ${escapeHtml(finalPrice.toFixed(2))} SAR
+                    </span>
+                </div>
+            </div>`
+        : hasOnlineStructuredOffer || hasOnlineTextOffer
+        ? `
+            <div id="online-offer-${cleanCode}"
+                 onclick="window.open('${productUrl}', '_blank')"
+                 style="margin-top:8px; padding:8px 12px; border-radius:10px;
+                        background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                        border:none; display:flex; align-items:center; justify-content:center; cursor:pointer;
+                        box-shadow:0 4px 10px rgba(124,58,237,0.3); animation:pulseOnline 2s infinite;">
+                <span style="color:white; font-weight:800; font-size:12px; line-height:1.35; text-align:center;">
+                    🌐 Online: ${escapeHtml(offerTitle)}
+                </span>
             </div>`
         : `
             <div id="online-offer-${cleanCode}" 
                  onclick="window.open('${productUrl}', '_blank')"
-                 style="margin-top: 8px; padding: 6px 12px; border-radius: 10px; 
-                        background: rgba(124, 58, 237, 0.1); border: 1px dashed rgba(124, 58, 237, 0.3); 
-                        display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 28px; cursor: pointer;">
+                 style="margin-top:8px; padding:6px 12px; border-radius:10px;
+                        background:rgba(124,58,237,0.1); border:1px dashed rgba(124,58,237,0.3);
+                        display:flex; align-items:center; justify-content:center; gap:8px; min-height:28px; cursor:pointer;">
                 <div class="scanner-mini-loader"></div>
-                <span style="font-size: 11px; color: #a78bfa; font-weight: 700;">جاري فحص العرض أونلاين...</span>
+                <span style="font-size:11px; color:#a78bfa; font-weight:700;">جاري فحص العرض أونلاين...</span>
             </div>`;
 
     return `
@@ -47871,7 +48015,7 @@ function buildScannerCardHtml({
             padding:${pad};
             border-radius:18px;
             border:1px solid rgba(255,255,255,0.10);
-            position: relative;
+            position:relative;
         ">
             ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageSize)}
 
@@ -47928,25 +48072,25 @@ function addScannerRowToList({
     offerLabel = '',   // العرض بالعربي
     offerLabelEN = '', // العرض بالإنجليزي
     statusColor = '#38ef7d',
-    onlineOffer = ''   // ✅ ضفنا استقبال العرض الأونلاين هنا
+    onlineOffer = ''   // استقبال العرض الأونلاين لضمان ظهوره عند التحديث
 }) {
     const listEl = document.getElementById('scannedItemsList');
     const shell = document.querySelector('.scanner-shell');
     if (!listEl) return;
 
-    // تمييز خلفية الكارت بناءً على الحالة
-    let bgColor = 'rgba(56, 239, 125, 0.08)';
-    if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)';
-    else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)';
+    // 1. تحديد لون الخلفية بناءً على حالة العرض
+    let bgColor = 'rgba(56, 239, 125, 0.08)'; // أخضر افتراضي
+    if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)'; // أحمر (لا يوجد)
+    else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)'; // برتقالي (تنبيه)
 
-    // ✅ البحث عن الكارت لو موجود مسبقاً لمسحه وتحديثه بدل التكرار
+    // 2. إدارة التكرار: مسح الكارت القديم لنفس الكود لضمان تحديث البيانات (مثل الأونلاين أوفر)
     const existingRow = document.getElementById(`card-row-${cleanCode}`);
     if (existingRow) {
         existingRow.remove();
     }
 
     const row = document.createElement('div');
-    row.id = `card-row-${cleanCode}`; // ✅ إضافة ID فريد لتسهيل التحديث لاحقاً
+    row.id = `card-row-${cleanCode}`; 
     row.className = 'new-scanned-item-flash';
 
     row.style.cssText = `
@@ -47967,7 +48111,7 @@ function addScannerRowToList({
         transition: all 0.3s ease;
     `;
 
-    // بناء محتوى الكارت (تمرير كل البيانات بما فيها الأونلاين)
+    // 3. بناء محتوى الكارت وتمرير بيانات الأونلاين
     row.innerHTML = buildScannerCardHtml({
         imageUrl,
         nameEN,
@@ -47977,10 +48121,10 @@ function addScannerRowToList({
         offerLabelEN,
         statusColor,
         compact: true,
-        onlineOffer: onlineOffer // ✅ تمرير القيمة المتخزنة للجلسة
+        onlineOffer: onlineOffer 
     });
 
-    // إضافة زر المسح (X)
+    // 4. زر حذف الكارت المفرد (X)
     const deleteBtn = document.createElement('div');
     deleteBtn.innerHTML = '✕';
     deleteBtn.style.cssText = `
@@ -47990,29 +48134,29 @@ function addScannerRowToList({
         cursor: pointer; font-size: 14px; z-index: 20; font-weight: bold;
         box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     `;
+    
     deleteBtn.onclick = (e) => {
         e.stopPropagation();
         row.style.transform = 'scale(0.8)';
         row.style.opacity = '0';
         setTimeout(() => {
             row.remove();
-            // تحديث الذاكرة عند المسح
-            scannedCodesSet.delete(cleanCode);
+            // تنظيف شامل للذاكرة عند حذف كارت واحد
+            if (typeof scannedCodesSet !== 'undefined') scannedCodesSet.delete(cleanCode);
             scannedItemsMemory = scannedItemsMemory.filter(i => i.cleanCode !== cleanCode);
             sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
+            
             if (typeof updateScannerDots === 'function') updateScannerDots();
             if (typeof updateSelectedCount === 'function') updateSelectedCount();
         }, 200);
     };
     row.appendChild(deleteBtn);
 
-    // إضافة الكارت في بداية القائمة
+    // 5. إضافة الكارت في المقدمة وتحريك السكرول
     listEl.prepend(row);
-    
-    // سكرول ناعم لأول صنف
     listEl.scrollTo({ left: 0, behavior: 'smooth' });
 
-    // رسالة التنبيه (Toast)
+    // 6. نظام الـ Toast (تأكيد المسح البصري)
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: absolute; 
@@ -48032,7 +48176,7 @@ function addScannerRowToList({
         transition: opacity 0.4s ease, transform 0.4s ease;
         white-space: nowrap;
     `;
-    toast.innerHTML = `✅ تم مسح ${cleanCode}`;
+    toast.innerHTML = `✅ Scanned: ${cleanCode}`;
     if (shell) shell.appendChild(toast);
 
     setTimeout(() => {
@@ -48041,6 +48185,7 @@ function addScannerRowToList({
         setTimeout(() => toast.remove(), 400);
     }, 1000);
 
+    // تحديث النقاط (Dots) لو موجودة
     if (typeof updateScannerDots === 'function') updateScannerDots();
 }
 // =====================================================
@@ -48207,44 +48352,19 @@ async function processScannedCode(code) {
 
     ensureScannerUiExtras();
 
-    // 1. التحقق من قاعدة البيانات
     if (!Array.isArray(window.productsDB) || !productsDB.length) {
         setScannerFeedback('error', 'قاعدة البيانات غير جاهزة', 'استنى التحميل وجرب تاني');
-        flashScannerSwipe('error');
-        if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
         return;
     }
 
-    // 2. التحقق من ذاكرة الجلسة أولاً (Session Storage) لضمان استمرارية البيانات
-    const savedSession = sessionStorage.getItem('scanned_items_session');
-    if (savedSession) {
-        const parsedSession = JSON.parse(savedSession);
-        // تحديث الذاكرة الحية من الجلسة لو كانت ناقصة
-        parsedSession.forEach(sItem => {
-            if (!scannedItemsMemory.find(m => m.cleanCode === sItem.cleanCode)) {
-                scannedItemsMemory.push(sItem);
-                scannedCodesSet.add(sItem.cleanCode);
-            }
-        });
-    }
-
-    // 3. فحص التكرار (لو الصنف موجود فعلاً في الذاكرة الحية)
-    const existingItem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
-
     if (scannedCodesSet.has(cleanCode)) {
-        setScannerFeedback('duplicate', 'موجود بالفعل في القائمة', 'جاري الانتقال للكارت...');
-        flashScannerSwipe('duplicate');
-
-        const listEl = document.getElementById('scannedItemsList');
-        if (listEl) {
-            const card = Array.from(listEl.children).find(c => c.innerHTML.includes(cleanCode));
-            if (card) {
-                card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-                card.style.boxShadow = "0 0 20px #f59e0b";
-                setTimeout(() => card.style.boxShadow = "none", 1500);
-            }
+        setScannerFeedback('duplicate', 'موجود بالفعل', 'جاري الانتقال للكارت...');
+        const card = document.getElementById(`card-row-${cleanCode}`);
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+            card.style.boxShadow = "0 0 20px #f59e0b";
+            setTimeout(() => card.style.boxShadow = "none", 1500);
         }
-        // حتى لو مكرر، لو فيه "عرض أونلاين" متخزن اعرضه في حالة التعليق
         return;
     }
 
@@ -48254,7 +48374,6 @@ async function processScannedCode(code) {
         return;
     }
 
-    // 4. تجهيز بيانات الصنف
     const imageUrl = getScannerImageUrl(product);
     const offer = getOfferForScanner(cleanCode);
     const isOfferActive = isOfferCurrentlyActive(offer);
@@ -48267,98 +48386,273 @@ async function processScannedCode(code) {
         offerLabel: isOfferActive ? (offer?.offerTypeAR || 'العرض متاح') : '❌ لا يوجد عرض نشط حالياً',
         offerLabelEN: isOfferActive ? (offer?.offerType || 'Offer Active') : 'No Active Offer',
         statusColor: isOfferActive ? '#38ef7d' : '#ef4444',
-        onlineOffer: existingItem ? existingItem.onlineOffer : "" 
+        onlineOffer: "",
+        onlineOfferData: null
     };
 
-    // 5. الإضافة للقائمة والذاكرة وتحديث الجلسة فوراً
     addScannerRowToList(itemData);
-    rememberScannedItem(itemData); 
+    scannedItemsMemory.unshift(itemData);
     scannedCodesSet.add(cleanCode);
-    
-    // حفظ مبدئي في الجلسة
-    sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
 
-    // 6. جلب العرض الأونلاين (فقط لو مش موجود)
+    persistScannerSession();
+
+    setScannerFeedback('success', `تمت إضافة ${cleanCode}`, 'جاري فحص العرض الأونلاين...');
+    flashScannerSwipe('success');
+
     const fetchOnlineOffer = () => {
-        const onlineBox = document.getElementById(`online-offer-${cleanCode}`);
-        if (!onlineBox) return;
+        let attempts = 0;
 
-        // الحالة أ: العرض مخزن مسبقاً (سواء يدوي أو سكان قديم)
-        if (itemData.onlineOffer) {
-            onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-            onlineBox.style.border = "none";
-            onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${itemData.onlineOffer}</span>`;
-            return;
-        }
+        const checkExist = setInterval(() => {
+            const onlineBox = document.getElementById(`online-offer-${cleanCode}`);
+            attempts++;
 
-        // الحالة ب: أول مرة يتم رصد الكود
-        onlineBox.style.display = "flex";
-        fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${cleanCode}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.offer && data.offer !== "No online offer found") {
-                    onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-                    onlineBox.style.border = "none";
-                    onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${data.offer}</span>`;
-                    
-                    // تحديث الذاكرة الحية والجلسة فوراً لضمان عدم ضياع العرض
+            if (!onlineBox) {
+                if (attempts > 50) clearInterval(checkExist);
+                return;
+            }
+
+            clearInterval(checkExist);
+
+            onlineBox.style.display = "flex";
+            onlineBox.style.marginTop = "8px";
+            onlineBox.style.padding = "8px 12px";
+            onlineBox.style.borderRadius = "10px";
+            onlineBox.style.alignItems = "center";
+            onlineBox.style.justifyContent = "center";
+            onlineBox.style.cursor = "pointer";
+            onlineBox.style.background = "rgba(124, 58, 237, 0.10)";
+            onlineBox.style.border = "1px dashed rgba(124, 58, 237, 0.30)";
+            onlineBox.innerHTML = `
+                <div class="scanner-mini-loader"></div>
+                <span style="font-size:11px; color:#a78bfa; font-weight:700;">جاري فحص العرض الأونلاين...</span>
+            `;
+
+            fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${encodeURIComponent(cleanCode)}&t=${Date.now()}`)
+                .then(res => res.json())
+                .then(data => {
                     const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
-                    if (itemInMem) {
-                        itemInMem.onlineOffer = data.offer;
-                        sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
+                    if (!itemInMem) return;
+
+                    const hasOffer =
+                        data &&
+                        data.success === true &&
+                        (
+                            data.hasOnlineOffer === true ||
+                            data.onlineStatus === "HAS_ONLINE_OFFER" ||
+                            (data.offer && !/^no online offer/i.test(String(data.offer).trim()))
+                        );
+
+                    if (hasOffer) {
+                        let badgeText = data.offer || data.offerText || 'Online Offer';
+
+                        if (
+                            data.finalPrice != null &&
+                            data.originalPrice != null &&
+                            Number(data.originalPrice) > Number(data.finalPrice)
+                        ) {
+                            badgeText = `${badgeText} | ${Number(data.finalPrice).toFixed(2)} SAR بدل ${Number(data.originalPrice).toFixed(2)} SAR`;
+                        } else if (data.finalPrice != null) {
+                            badgeText = `${badgeText} | ${Number(data.finalPrice).toFixed(2)} SAR`;
+                        }
+
+                        onlineBox.style.display = "flex";
+                        onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                        onlineBox.style.border = "none";
+                        onlineBox.innerHTML = `
+                            <span style="color:white; font-weight:800; font-size:12px;">
+                                🌐 Online: ${escapeHtml(badgeText)}
+                            </span>
+                        `;
+
+                        itemInMem.onlineOffer = badgeText;
+                        itemInMem.onlineOfferData = {
+                            onlineStatus: data.onlineStatus || "HAS_ONLINE_OFFER",
+                            hasOnlineOffer: true,
+                            offer: data.offer || "",
+                            offerText: data.offerText || "",
+                            originalPrice: data.originalPrice ?? null,
+                            finalPrice: data.finalPrice ?? null,
+                            priceDisplay: data.priceDisplay ?? null,
+                            source: data.source ?? null,
+                            confidence: data.confidence ?? null,
+                            url: data.url || `https://www.al-dawaa.com/en/p/${encodeURIComponent(cleanCode)}`
+                        };
+                    } else {
+                        onlineBox.style.display = "flex";
+                        onlineBox.style.background = "rgba(239, 68, 68, 0.12)";
+                        onlineBox.style.border = "1px solid rgba(239, 68, 68, 0.45)";
+                        onlineBox.innerHTML = `
+                            <span style="color:#fecaca; font-weight:800; font-size:12px;">
+                                🌐 No online offer
+                            </span>
+                        `;
+
+                        itemInMem.onlineOffer = "No online offer";
+                        itemInMem.onlineOfferData = {
+                            onlineStatus: data?.onlineStatus || "NO_ONLINE_OFFER",
+                            hasOnlineOffer: false,
+                            offer: data?.offer || "",
+                            offerText: data?.offerText || "",
+                            originalPrice: null,
+                            finalPrice: null,
+                            priceDisplay: null,
+                            source: data?.source || null,
+                            confidence: data?.confidence ?? 0,
+                            url: data?.url || `https://www.al-dawaa.com/en/p/${encodeURIComponent(cleanCode)}`
+                        };
                     }
-                } else {
-                    // لو مفيش داتا، بنخزن إن مفيش عشان ميفضلش يحمل كل مرة
+
+                    persistScannerSession();
+                })
+                .catch(() => {
                     const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
+
+                    onlineBox.style.display = "flex";
+                    onlineBox.style.background = "rgba(245, 158, 11, 0.12)";
+                    onlineBox.style.border = "1px solid rgba(245, 158, 11, 0.45)";
+                    onlineBox.innerHTML = `
+                        <span style="color:#fde68a; font-weight:800; font-size:12px;">
+                            🌐 Online check failed
+                        </span>
+                    `;
+
                     if (itemInMem) {
-                        itemInMem.onlineOffer = "No Offer"; 
-                        sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
+                        itemInMem.onlineOffer = "Online check failed";
+                        itemInMem.onlineOfferData = {
+                            onlineStatus: "FETCH_ERROR",
+                            hasOnlineOffer: false
+                        };
                     }
-                    onlineBox.style.display = "none";
-                }
-            }).catch(() => {
-                onlineBox.style.display = "none";
-            });
+
+                    persistScannerSession();
+                });
+        }, 100);
     };
 
-    setTimeout(fetchOnlineOffer, 50);
+    fetchOnlineOffer();
+
+    function persistScannerSession() {
+        try {
+            sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
+        } catch (e) {}
+    }
 }
 
-function updateCardWithOnlineOffer(code, onlineOfferText) {
-    const listEl = document.getElementById('scannedItemsList');
-    if (!listEl) return;
+function updateCardWithOnlineOffer(code, onlineOfferText, onlineOfferData = null) {
+    const cleanCode = String(code || '').trim();
+    if (!cleanCode) return;
 
-    // بندور في كل الكروت اللي في القائمة
-    const cards = listEl.querySelectorAll('.new-scanned-item-flash, [style*="flex: 0 0 100%"]');
-    cards.forEach(card => {
-        // نتأكد إن الكارت ده يخص الكود اللي لسه ماسحينه ومفهوش بادج أونلاين قبل كده
-        if (card.innerHTML.includes(code) && !card.querySelector('.online-offer-badge')) {
-            const infoDiv = card.querySelector('div[style*="text-align:right"]');
-            if (infoDiv) {
-                const onlineBadge = document.createElement('div');
-                onlineBadge.className = 'online-offer-badge';
-                onlineBadge.style.cssText = `
-                    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                    color: white;
-                    padding: 4px 10px;
-                    border-radius: 8px;
-                    font-size: 11px;
-                    font-weight: 800;
-                    margin-top: 6px;
-                    display: inline-block;
-                    border: 1px solid rgba(255,255,255,0.2);
-                    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-                `;
-                onlineBadge.innerHTML = `🌐 Online: ${onlineOfferText}`;
-                infoDiv.appendChild(onlineBadge);
-                
-                // وميض خفيف للكارت عشان المستخدم يعرف إن فيه داتا وصلت
-                card.style.boxShadow = "0 0 15px rgba(124, 58, 237, 0.5)";
-                setTimeout(() => card.style.boxShadow = "none", 1000);
-            }
-        }
-    });
+    const row =
+        document.getElementById(`card-row-${cleanCode}`) ||
+        Array.from(document.querySelectorAll('#scannedItemsList > div')).find(el =>
+            (el.id === `card-row-${cleanCode}`) || el.textContent.includes(cleanCode)
+        );
+
+    if (!row) return;
+
+    const onlineBox =
+        document.getElementById(`online-offer-${cleanCode}`) ||
+        row.querySelector(`[id="online-offer-${cleanCode}"]`) ||
+        row.querySelector('.online-offer-badge');
+
+    if (!onlineBox) return;
+
+    const productUrl = `https://www.al-dawaa.com/en/p/${encodeURIComponent(cleanCode)}`;
+
+    const hasStructuredOffer =
+        onlineOfferData &&
+        (
+            onlineOfferData.hasOnlineOffer === true ||
+            onlineOfferData.onlineStatus === 'HAS_ONLINE_OFFER'
+        );
+
+    const hasTextOffer =
+        onlineOfferText &&
+        String(onlineOfferText).trim() !== '' &&
+        !/^no online offer/i.test(String(onlineOfferText).trim());
+
+    if (!hasStructuredOffer && !hasTextOffer) {
+        onlineBox.style.display = 'none';
+        return;
+    }
+
+    const title = hasStructuredOffer
+        ? (onlineOfferData.offer || onlineOfferData.offerText || onlineOfferText || 'Online Offer')
+        : String(onlineOfferText || 'Online Offer');
+
+    const hasFinalPrice =
+        hasStructuredOffer &&
+        onlineOfferData &&
+        onlineOfferData.finalPrice != null &&
+        Number.isFinite(Number(onlineOfferData.finalPrice));
+
+    const hasOriginalPrice =
+        hasStructuredOffer &&
+        onlineOfferData &&
+        onlineOfferData.originalPrice != null &&
+        Number.isFinite(Number(onlineOfferData.originalPrice));
+
+    const finalPrice = hasFinalPrice ? Number(onlineOfferData.finalPrice) : null;
+    const originalPrice = hasOriginalPrice ? Number(onlineOfferData.originalPrice) : null;
+    const showStrike = originalPrice != null && finalPrice != null && originalPrice > finalPrice;
+
+    onlineBox.classList.add('online-offer-badge');
+    onlineBox.setAttribute('onclick', `window.open('${productUrl}', '_blank')`);
+    onlineBox.style.display = 'flex';
+    onlineBox.style.cursor = 'pointer';
+    onlineBox.style.marginTop = '8px';
+    onlineBox.style.borderRadius = '10px';
+    onlineBox.style.background = 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)';
+    onlineBox.style.border = 'none';
+    onlineBox.style.boxShadow = '0 4px 12px rgba(124, 58, 237, 0.35)';
+    onlineBox.style.animation = 'pulseOnline 2s infinite';
+
+    if (hasFinalPrice) {
+        onlineBox.style.padding = '10px 12px';
+        onlineBox.style.flexDirection = 'column';
+        onlineBox.style.alignItems = 'center';
+        onlineBox.style.justifyContent = 'center';
+        onlineBox.style.gap = '6px';
+
+        onlineBox.innerHTML = `
+            <div style="display:flex; align-items:center; justify-content:center;">
+                <span style="color:white; font-weight:800; font-size:12px; line-height:1.35; text-align:center;">
+                    🌐 Online: ${escapeHtml(title)}
+                </span>
+            </div>
+
+            <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; flex-wrap:wrap;">
+                ${showStrike ? `
+                    <span style="color:rgba(255,255,255,0.72); font-size:11px; text-decoration:line-through; font-weight:700;">
+                        ${escapeHtml(originalPrice.toFixed(2))} SAR
+                    </span>
+                ` : ''}
+
+                <span style="color:#ffffff; font-size:17px; font-weight:900; letter-spacing:0.2px;">
+                    ${escapeHtml(finalPrice.toFixed(2))} SAR
+                </span>
+            </div>
+        `;
+    } else {
+        onlineBox.style.padding = '8px 12px';
+        onlineBox.style.flexDirection = 'row';
+        onlineBox.style.alignItems = 'center';
+        onlineBox.style.justifyContent = 'center';
+        onlineBox.style.gap = '8px';
+
+        onlineBox.innerHTML = `
+            <span style="color:white; font-weight:800; font-size:12px; line-height:1.35; text-align:center;">
+                🌐 Online: ${escapeHtml(title)}
+            </span>
+        `;
+    }
+
+    row.style.boxShadow = "0 0 15px rgba(124, 58, 237, 0.5)";
+    setTimeout(() => {
+        row.style.boxShadow = "none";
+    }, 1000);
 }
+
 // =====================================================
 // Close Scanner
 // =====================================================
@@ -48652,4 +48946,54 @@ document.addEventListener('keydown', function (e) {
         closePromoMedia();
     }
 });
+
+// 1. وظيفة فتح المودال عند الضغط على الزر
+function clearAllScannerData() {
+    document.getElementById('deleteConfirmOverlay').style.display = 'flex';
+}
+
+// 2. وظيفة إغلاق المودال
+function closeDeleteModal() {
+    document.getElementById('deleteConfirmOverlay').style.display = 'none';
+}
+
+// 3. التنفيذ الفعلي للمسح (يُنادى من زر "نعم")
+function executeClearAll() {
+    // 1. تصفير الذاكرة الحية (البيانات النشطة)
+    scannedItemsMemory = [];
+    if (typeof scannedCodesSet !== 'undefined') scannedCodesSet.clear();
+    
+    // 2. مسح تخزين الجلسة (عشان لما تقفل وتفتح ميرجعوش تاني)
+    sessionStorage.removeItem('scanned_items_session');
+
+    // 3. تنظيف الواجهة (مسح الكروت بصرياً)
+    const listEl = document.getElementById('scannedItemsList');
+    if (listEl) listEl.innerHTML = '';
+
+    // 4. إعادة تعيين رسائل الحالة للوضع الافتراضي
+    setLatestScannerMessage(getScannerWaitingHtml());
+    setScannerFeedback('idle', '🗑️ Session Cleared', 'Ready for new scan');
+    
+    // 5. تحديث عداد الكروت المختارة للطباعة
+    if (typeof updateSelectedCount === 'function') {
+        if (typeof selectedProductCodes !== 'undefined') selectedProductCodes.clear();
+        updateSelectedCount();
+    }
+
+    // 6. تصفير خانة الإدخال اليدوي
+    const manualInput = document.getElementById('scannerManualCode');
+    if (manualInput) manualInput.value = '';
+
+    // 7. تحديث العناصر التفاعلية (إخفاء الأسهم ونقاط التمرير)
+    if (typeof updateScannerDots === 'function') updateScannerDots();
+
+    // 8. إغلاق لوحة الطباعة لو كانت مفتوحة
+    const printPanel = document.getElementById('scannerPrintPanel');
+    if (printPanel) printPanel.style.display = 'none';
+
+    // 9. إغلاق مودال التأكيد الـ CSS Art
+    closeDeleteModal();
+    
+    console.log("🧹 Depanto session wiped clean successfully!");
+}
 </script>
