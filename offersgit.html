@@ -48232,13 +48232,11 @@ async function processScannedCode(code) {
     const cleanCode = String(code || '').trim();
     if (!cleanCode) return;
 
-    // --- 🟢 1. إضافة الاستجابة الصوتية والحركية فوراً ---
     if (navigator.vibrate) {
-        // نغمة اهتزاز واحدة للإضافة، ونغمتين للتكرار (سيتم تحديدها بالأسفل)
         if (!scannedCodesSet.has(cleanCode)) {
-            navigator.vibrate(100); 
+            navigator.vibrate(100);
         } else {
-            navigator.vibrate([50, 50, 50]); // اهتزاز متقطع للتنبيه بالتكرار
+            navigator.vibrate([50, 50, 50]);
         }
     }
 
@@ -48248,10 +48246,9 @@ async function processScannedCode(code) {
         const gainNode = audioCtx.createGain();
         oscillator.connect(gainNode);
         gainNode.connect(audioCtx.destination);
-        oscillator.type = 'sine'; 
-        // تردد مختلف قليلاً لو مكرر (اختياري)
-        const freq = scannedCodesSet.has(cleanCode) ? 440 : 880; 
-        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime); 
+        oscillator.type = 'sine';
+        const freq = scannedCodesSet.has(cleanCode) ? 440 : 880;
+        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
         oscillator.start();
         oscillator.stop(audioCtx.currentTime + 0.1);
@@ -48264,41 +48261,32 @@ async function processScannedCode(code) {
         return;
     }
 
-    // --- 🟠 2. معالجة الصنف المكرر (Duplicate Toast) ---
+    // --- 🟠 معالجة التكرار ---
     if (scannedCodesSet.has(cleanCode)) {
         setScannerFeedback('duplicate', 'موجود بالفعل', 'جاري الانتقال للكارت...');
-        
         const shell = document.querySelector('.scanner-shell');
         if (shell) {
             const dupToast = document.createElement('div');
             dupToast.style.cssText = `
-                position: absolute; 
-                top: 230px; /* تحت الكاميرا بالظبط */
-                left: 50%; 
-                transform: translateX(-50%);
-                background: #f59e0b; 
-                color: #fff; 
-                padding: 10px 22px; 
-                border-radius: 30px;
-                font-size: 14px; 
-                font-weight: 800; 
-                z-index: 100000; 
-                border: 2px solid #fff;
-                box-shadow: 0 10px 30px rgba(245, 158, 11, 0.5); 
-                pointer-events: none;
-                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-                white-space: nowrap;
+                position:absolute; top:230px; left:50%;
+                transform:translateX(-50%);
+                background:#f59e0b; color:#fff;
+                padding:10px 22px; border-radius:30px;
+                font-size:14px; font-weight:800; z-index:100000;
+                border:2px solid #fff;
+                box-shadow:0 10px 30px rgba(245,158,11,0.5);
+                pointer-events:none;
+                transition:all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+                white-space:nowrap;
             `;
             dupToast.innerHTML = `⚠️ ${cleanCode} مضاف بالفعل`;
             shell.appendChild(dupToast);
-
             setTimeout(() => {
                 dupToast.style.opacity = '0';
                 dupToast.style.transform = 'translateX(-50%) translateY(20px)';
                 setTimeout(() => dupToast.remove(), 400);
             }, 1200);
         }
-
         const card = document.getElementById(`card-row-${cleanCode}`);
         if (card) {
             card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
@@ -48308,7 +48296,7 @@ async function processScannedCode(code) {
         return;
     }
 
-    // --- 🟢 3. معالجة إضافة صنف جديد ---
+    // --- 🟢 إضافة صنف جديد ---
     const product = productsDB.find(p => String(p.Code || '').trim() === cleanCode);
     if (!product) {
         setScannerFeedback('error', `الكود ${cleanCode} غير موجود`, 'تأكد من الرقم المكتوب');
@@ -48334,34 +48322,25 @@ async function processScannedCode(code) {
     addScannerRowToList(itemData);
     scannedItemsMemory.unshift(itemData);
     scannedCodesSet.add(cleanCode);
-
     persistScannerSession();
 
-    // رسالة التنبيه للإضافة الجديدة (Green Toast)
     const shell = document.querySelector('.scanner-shell');
     if (shell) {
         const toast = document.createElement('div');
         toast.style.cssText = `
-            position: absolute; 
-            top: 230px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9); 
-            color: #38ef7d; 
-            padding: 10px 22px; 
-            border-radius: 30px;
-            font-size: 14px; 
-            font-weight: 800; 
-            z-index: 100000; 
-            border: 2px solid #38ef7d;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            white-space: nowrap;
+            position:absolute; top:230px; left:50%;
+            transform:translateX(-50%);
+            background:rgba(15,23,42,0.9); color:#38ef7d;
+            padding:10px 22px; border-radius:30px;
+            font-size:14px; font-weight:800; z-index:100000;
+            border:2px solid #38ef7d;
+            box-shadow:0 10px 30px rgba(0,0,0,0.6);
+            pointer-events:none;
+            transition:all 0.4s cubic-bezier(0.68,-0.55,0.265,1.55);
+            white-space:nowrap;
         `;
         toast.innerHTML = `✅ Added: ${cleanCode}`;
         shell.appendChild(toast);
-
         setTimeout(() => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateX(-50%) translateY(20px)';
@@ -48372,49 +48351,156 @@ async function processScannedCode(code) {
     setScannerFeedback('success', `تمت إضافة ${cleanCode}`, 'جاري فحص العرض الأونلاين...');
     flashScannerSwipe('success');
 
-    // ... (باقي كود fetchOnlineOffer يظل كما هو)
+    // =====================================================
+    // ✅ fetchOnlineOffer — النسخة المُصلحة
+    // =====================================================
     const fetchOnlineOffer = () => {
         let attempts = 0;
         const checkExist = setInterval(() => {
-            const onlineBox = document.getElementById(`online-offer-${cleanCode}`);
             attempts++;
-            if (!onlineBox) {
-                if (attempts > 50) clearInterval(checkExist);
-                return;
-            }
+            if (attempts > 50) { clearInterval(checkExist); return; }
+
+            // ✅ نستخدم querySelectorAll لتحديث كل الأماكن اللي فيها الـ ID (القائمة + الـ latest)
+            const allBoxes = document.querySelectorAll(`[id="online-offer-${cleanCode}"]`);
+            if (!allBoxes.length) return;
+
             clearInterval(checkExist);
-            // ... (نفس الكود الخاص بك لعمل Fetch للأونلاين أوفر)
-            onlineBox.style.display = "flex";
-            onlineBox.innerHTML = `<div class="scanner-mini-loader"></div> <span style="font-size:11px; color:#a78bfa; font-weight:700;">جاري فحص العرض الأونلاين...</span>`;
+
+            // عرض اللودر في كل الصناديق
+            allBoxes.forEach(box => {
+                box.style.display = "flex";
+                box.innerHTML = `<div class="scanner-mini-loader"></div><span style="font-size:11px;color:#a78bfa;font-weight:700;">جاري فحص العرض الأونلاين...</span>`;
+            });
+
             fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${encodeURIComponent(cleanCode)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(data => {
                     const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
                     if (!itemInMem) return;
-                    const hasOffer = data && data.success === true && (data.hasOnlineOffer === true || data.onlineStatus === "HAS_ONLINE_OFFER" || (data.offer && !/^no online offer/i.test(String(data.offer).trim())));
+
+                    const hasOffer = data && data.success === true && (
+                        data.hasOnlineOffer === true ||
+                        data.onlineStatus === "HAS_ONLINE_OFFER" ||
+                        (data.offer && !/^no online offer/i.test(String(data.offer).trim()))
+                    );
+
                     if (hasOffer) {
-                        let badgeText = data.offer || data.offerText || 'Online Offer';
-                        onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-                        onlineBox.style.border = "none";
-                        onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${data.offer}</span>`;
+                        // ✅ حفظ البيانات الكاملة في الذاكرة
+                        const badgeText = data.offer || data.offerText || 'Online Offer';
                         itemInMem.onlineOffer = badgeText;
+                        itemInMem.onlineOfferData = data; // ← السطر المهم
+
+                        const productUrl = `https://www.al-dawaa.com/en/p/${cleanCode}`;
+                        const originalPrice = data.originalPrice != null ? Number(data.originalPrice) : null;
+                        const finalPrice = data.finalPrice != null ? Number(data.finalPrice) : null;
+                        const hasPriceOffer = originalPrice != null && finalPrice != null;
+                        const showStrikethrough = hasPriceOffer && originalPrice > finalPrice;
+
+                       const buildOfferBoxHTML = (compact) => {
+    const priceSize = compact ? '16px' : '19px';
+    if (hasPriceOffer) {
+        const savings = (originalPrice - finalPrice).toFixed(2);
+        const savingPct = data.savingPercentage
+            ? Number(data.savingPercentage).toFixed(1)
+            : ((originalPrice - finalPrice) / originalPrice * 100).toFixed(1);
+        return `
+            <div style="display:flex;align-items:center;justify-content:center;">
+                <span style="color:rgba(255,255,255,0.9);font-weight:800;font-size:12px;line-height:1.3;text-align:center;">
+                    🌐 Online: ${escapeHtml(badgeText)}
+                </span>
+            </div>
+
+            <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:2px;">
+                ${showStrikethrough ? `
+                    <span style="
+                        color:rgba(255,255,255,0.45);
+                        font-size:${compact ? '12px' : '13px'};
+                        text-decoration:line-through;
+                        text-decoration-color:rgba(255,100,100,0.8);
+                        text-decoration-thickness:2px;
+                        font-weight:700;
+                    ">
+                        ${originalPrice.toFixed(2)} SAR
+                    </span>
+                ` : ''}
+
+                <span style="
+                    color:#4ade80;
+                    font-size:${priceSize};
+                    font-weight:900;
+                    letter-spacing:0.3px;
+                    text-shadow:0 0 12px rgba(74,222,128,0.6);
+                ">
+                    ${finalPrice.toFixed(2)} SAR
+                </span>
+            </div>
+
+            ${showStrikethrough ? `
+                <div style="
+                    display:inline-flex;
+                    align-items:center;
+                    justify-content:center;
+                    background:rgba(74,222,128,0.18);
+                    border:1px solid rgba(74,222,128,0.4);
+                    border-radius:999px;
+                    padding:2px 10px;
+                    margin-top:4px;
+                    gap:4px;
+                ">
+                    <span style="color:#4ade80;font-size:11px;font-weight:800;">
+                        وفّر ${savings} SAR · ${savingPct}%
+                    </span>
+                </div>
+            ` : ''}
+        `;
+    } else {
+        return `<span style="color:white;font-weight:800;font-size:12px;">🌐 Online: ${escapeHtml(badgeText)}</span>`;
+    }
+};
+                        // ✅ تحديث كل الصناديق (latest + list)
+                        document.querySelectorAll(`[id="online-offer-${cleanCode}"]`).forEach(box => {
+                            const isCompact = box.closest('#scannedItemsList') !== null;
+                            box.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                            box.style.border = "none";
+                            box.style.flexDirection = hasPriceOffer ? "column" : "row";
+                            box.style.gap = hasPriceOffer ? "6px" : "0";
+                            box.style.cursor = "pointer";
+                            box.style.boxShadow = "0 6px 16px rgba(124,58,237,0.35)";
+                            box.onclick = () => window.open(productUrl, '_blank');
+                            box.innerHTML = buildOfferBoxHTML(isCompact);
+                        });
+
                     } else {
-                        onlineBox.style.background = "rgba(239, 68, 68, 0.12)";
-                        onlineBox.style.border = "1px solid rgba(239, 68, 68, 0.45)";
-                        onlineBox.innerHTML = `<span style="color:#fecaca; font-weight:800; font-size:12px;">🌐 No online offer</span>`;
+                        // ❌ لا يوجد عرض
                         itemInMem.onlineOffer = "No online offer";
+                        itemInMem.onlineOfferData = null;
+
+                        document.querySelectorAll(`[id="online-offer-${cleanCode}"]`).forEach(box => {
+                            box.style.background = "rgba(239,68,68,0.12)";
+                            box.style.border = "1px solid rgba(239,68,68,0.45)";
+                            box.style.flexDirection = "row";
+                            box.innerHTML = `<span style="color:#fecaca;font-weight:800;font-size:12px;">🌐 No online offer</span>`;
+                        });
                     }
+
                     persistScannerSession();
-                }).catch(() => {});
+                })
+                .catch(() => {
+                    document.querySelectorAll(`[id="online-offer-${cleanCode}"]`).forEach(box => {
+                        box.style.background = "rgba(100,100,100,0.1)";
+                        box.style.border = "1px dashed rgba(148,163,184,0.3)";
+                        box.innerHTML = `<span style="color:#94a3b8;font-size:11px;font-weight:700;">⚠️ تعذّر الاتصال</span>`;
+                    });
+                });
         }, 100);
     };
+
     fetchOnlineOffer();
 
     function persistScannerSession() {
         try { sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory)); } catch (e) {}
     }
 }
-
 function updateCardWithOnlineOffer(code, onlineOfferText, onlineOfferData = null) {
     const cleanCode = String(code || '').trim();
     if (!cleanCode) return;
