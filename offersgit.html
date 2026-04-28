@@ -4752,7 +4752,18 @@ body > div:has(> label[for="codesFileInput"]),
     from { opacity: 0.2; transform: scale(0.8); }
     to { opacity: 1; transform: scale(1.2); }
 }
+@keyframes shakeError {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
 
+
+.scanner-duplicate-hit {
+    border: 2px solid #f59e0b !important;
+    animation: shakeError 0.4s ease-in-out;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.5) !important;
+}
 </style>
 </head>
 <body>
@@ -47633,6 +47644,16 @@ function renderScannerSavedState() {
     const listEl = document.getElementById('scannedItemsList');
     if (listEl) listEl.innerHTML = '';
 
+    // 1. استعادة البيانات من الجلسة (Session) لضمان وجود الـ onlineOffer المخزن
+    const saved = sessionStorage.getItem('scanned_items_session');
+    if (saved) {
+        // تحديث الذاكرة الحية بالبيانات المخزنة في الجلسة
+        scannedItemsMemory = JSON.parse(saved);
+        // تحديث الـ Set عشان البرنامج ميعتبرش الأصناف القديمة أصناف جديدة
+        scannedCodesSet = new Set(scannedItemsMemory.map(i => i.cleanCode));
+    }
+
+    // 2. رسم الكروت من الذاكرة (مع تمرير العرض الأونلاين إن وجد)
     scannedItemsMemory.forEach(item => {
         addScannerRowToList({
             imageUrl: item.imageUrl,
@@ -47641,12 +47662,14 @@ function renderScannerSavedState() {
             cleanCode: item.cleanCode,
             offerLabel: item.offerLabel,
             offerLabelEN: item.offerLabelEN,
-            statusColor: item.statusColor
+            statusColor: item.statusColor,
+            onlineOffer: item.onlineOffer || '' // ✅ التعديل هنا: تمرير العرض المخزن
         });
     });
 
     if (scannedItemsMemory.length) {
-        const lastItem = scannedItemsMemory[scannedItemsMemory.length - 1];
+        // ترتيب الذاكرة عشان نجيب آخر واحد (عادة بيكون أول عنصر في المصفوفة لو استخدمنا unshift)
+        const lastItem = scannedItemsMemory[0]; 
 
         setLatestScannerMessage(
             buildScannerCardHtml({
@@ -47657,6 +47680,7 @@ function renderScannerSavedState() {
                 offerLabel: lastItem.offerLabel,
                 offerLabelEN: lastItem.offerLabelEN,
                 statusColor: lastItem.statusColor,
+                onlineOffer: lastItem.onlineOffer || '', // ✅ إظهار العرض في رسالة الحالة
                 compact: false
             })
         );
@@ -47669,7 +47693,6 @@ function renderScannerSavedState() {
         resetScannerSwipeState();
     }
 }
-
 function resetScannerSession() {
     scannedItemsMemory = [];
 
@@ -47803,7 +47826,8 @@ function buildScannerCardHtml({
     offerLabel = '',
     offerLabelEN = '',
     statusColor = '#38ef7d',
-    compact = false
+    compact = false,
+    onlineOffer = '' // ✅ استلام القيمة المخزنة في الجلسة
 }) {
     const imageSize = compact ? 74 : 92;
     const titleSize = compact ? '12px' : '14px';
@@ -47815,6 +47839,28 @@ function buildScannerCardHtml({
 
     // رابط صفحة الدواء أونلاين
     const productUrl = `https://www.al-dawaa.com/en/p/${cleanCode}`;
+
+    // ✅ منطق العرض الأونلاين المطور:
+    // 1. لو فيه عرض مخزن (onlineOffer) اظهر البادج البنفسجي فوراً.
+    // 2. لو مفيش، اظهر اللودر والرسالة عشان يبدأ عملية الفحص.
+    const onlineOfferHTML = (onlineOffer && onlineOffer !== "" && onlineOffer !== "No online offer found")
+        ? `
+            <div onclick="window.open('${productUrl}', '_blank')"
+                 style="margin-top: 8px; padding: 8px 12px; border-radius: 10px; 
+                        background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); 
+                        border: none; display: flex; align-items: center; justify-content: center; cursor: pointer;
+                        box-shadow: 0 4px 10px rgba(124, 58, 237, 0.3); animation: pulseOnline 2s infinite;">
+                <span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${escapeHtml(onlineOffer)}</span>
+            </div>`
+        : `
+            <div id="online-offer-${cleanCode}" 
+                 onclick="window.open('${productUrl}', '_blank')"
+                 style="margin-top: 8px; padding: 6px 12px; border-radius: 10px; 
+                        background: rgba(124, 58, 237, 0.1); border: 1px dashed rgba(124, 58, 237, 0.3); 
+                        display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 28px; cursor: pointer;">
+                <div class="scanner-mini-loader"></div>
+                <span style="font-size: 11px; color: #a78bfa; font-weight: 700;">جاري فحص العرض أونلاين...</span>
+            </div>`;
 
     return `
         <div style="
@@ -47848,25 +47894,7 @@ function buildScannerCardHtml({
                     ${escapeHtml(nameAR || '')}
                 </div>
 
-                <div id="online-offer-${cleanCode}" 
-                     onclick="window.open('${productUrl}', '_blank')"
-                     style="
-                        margin-top: 8px;
-                        padding: 6px 12px;
-                        border-radius: 10px;
-                        background: rgba(124, 58, 237, 0.1);
-                        border: 1px dashed rgba(124, 58, 237, 0.3);
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 8px;
-                        min-height: 28px;
-                        cursor: pointer;
-                        transition: all 0.3s ease;
-                     ">
-                    <div class="scanner-mini-loader"></div>
-                    <span style="font-size: 11px; color: #a78bfa; font-weight: 700;">جاري فحص العرض أونلاين...</span>
-                </div>
+                ${onlineOfferHTML}
 
                 <div style="margin-top:8px;">
                     <span style="
@@ -47899,7 +47927,8 @@ function addScannerRowToList({
     cleanCode = '',
     offerLabel = '',   // العرض بالعربي
     offerLabelEN = '', // العرض بالإنجليزي
-    statusColor = '#38ef7d'
+    statusColor = '#38ef7d',
+    onlineOffer = ''   // ✅ ضفنا استقبال العرض الأونلاين هنا
 }) {
     const listEl = document.getElementById('scannedItemsList');
     const shell = document.querySelector('.scanner-shell');
@@ -47910,9 +47939,14 @@ function addScannerRowToList({
     if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)';
     else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)';
 
+    // ✅ البحث عن الكارت لو موجود مسبقاً لمسحه وتحديثه بدل التكرار
+    const existingRow = document.getElementById(`card-row-${cleanCode}`);
+    if (existingRow) {
+        existingRow.remove();
+    }
+
     const row = document.createElement('div');
-    
-    // إضافة كلاس الوميض (Animation)
+    row.id = `card-row-${cleanCode}`; // ✅ إضافة ID فريد لتسهيل التحديث لاحقاً
     row.className = 'new-scanned-item-flash';
 
     row.style.cssText = `
@@ -47933,19 +47967,20 @@ function addScannerRowToList({
         transition: all 0.3s ease;
     `;
 
-    // بناء محتوى الكارت (بنتأكد إن offerLabelEN مبعوت)
+    // بناء محتوى الكارت (تمرير كل البيانات بما فيها الأونلاين)
     row.innerHTML = buildScannerCardHtml({
         imageUrl,
         nameEN,
         nameAR,
         cleanCode,
-        offerLabel,     // هيظهر: خصم 30% على الحبة الثانية
-        offerLabelEN,   // هيظهر: 30% Off on 2nd Pc
+        offerLabel,
+        offerLabelEN,
         statusColor,
-        compact: true
+        compact: true,
+        onlineOffer: onlineOffer // ✅ تمرير القيمة المتخزنة للجلسة
     });
 
-    // إضافة زر المسح (X) بشكل أشيك
+    // إضافة زر المسح (X)
     const deleteBtn = document.createElement('div');
     deleteBtn.innerHTML = '✕';
     deleteBtn.style.cssText = `
@@ -47961,7 +47996,12 @@ function addScannerRowToList({
         row.style.opacity = '0';
         setTimeout(() => {
             row.remove();
+            // تحديث الذاكرة عند المسح
+            scannedCodesSet.delete(cleanCode);
+            scannedItemsMemory = scannedItemsMemory.filter(i => i.cleanCode !== cleanCode);
+            sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
             if (typeof updateScannerDots === 'function') updateScannerDots();
+            if (typeof updateSelectedCount === 'function') updateSelectedCount();
         }, 200);
     };
     row.appendChild(deleteBtn);
@@ -47971,11 +48011,12 @@ function addScannerRowToList({
     
     // سكرول ناعم لأول صنف
     listEl.scrollTo({ left: 0, behavior: 'smooth' });
-// رسالة تأكيد سريعة (Toast) تظهر أسفل منطقة الباركود (فوق منطقة الكروت)
+
+    // رسالة التنبيه (Toast)
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: absolute; 
-        bottom: 110px; /* القيمة دي هتخليها تظهر فوق شريط السحب والزرار */
+        bottom: 110px;
         left: 50%; 
         transform: translateX(-50%);
         background: #0f172a; 
@@ -47994,14 +48035,12 @@ function addScannerRowToList({
     toast.innerHTML = `✅ تم مسح ${cleanCode}`;
     if (shell) shell.appendChild(toast);
 
-    // إخفاء الرسالة بعد ثانية
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(10px)'; // إضافة حركة هبوط خفيفة عند الاختفاء
+        toast.style.transform = 'translateX(-50%) translateY(10px)';
         setTimeout(() => toast.remove(), 400);
     }, 1000);
 
-    // تحديث نقاط السلايدر لو موجودة
     if (typeof updateScannerDots === 'function') updateScannerDots();
 }
 // =====================================================
@@ -48168,11 +48207,6 @@ async function processScannedCode(code) {
 
     ensureScannerUiExtras();
 
-    const existsInSelection =
-        typeof selectedProductCodes !== 'undefined' &&
-        selectedProductCodes?.has &&
-        selectedProductCodes.has(cleanCode);
-
     // 1. التحقق من قاعدة البيانات
     if (!Array.isArray(window.productsDB) || !productsDB.length) {
         setScannerFeedback('error', 'قاعدة البيانات غير جاهزة', 'استنى التحميل وجرب تاني');
@@ -48181,125 +48215,113 @@ async function processScannedCode(code) {
         return;
     }
 
-    const product = productsDB.find(p => String(p.Code || '').trim() === cleanCode);
-
-    // 2. حالة الصنف غير موجود
-    if (!product) {
-        const itemData = {
-            imageUrl: '',
-            nameEN: 'Product Not Found',
-            nameAR: 'الصنف غير موجود بالقاعدة',
-            cleanCode,
-            offerLabel: '❌ صنف غير مسجل',
-            offerLabelEN: 'Not Found',
-            statusColor: '#ef4444'
-        };
-
-        setScannerFeedback('error', `الكود ${cleanCode} غير موجود`, 'تأكد من الرقم المكتوب');
-        flashScannerSwipe('error');
-
-        addScannerRowToList(itemData);
-        rememberScannedItem(itemData);
-
-        if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
-        return;
+    // 2. التحقق من ذاكرة الجلسة أولاً (Session Storage) لضمان استمرارية البيانات
+    const savedSession = sessionStorage.getItem('scanned_items_session');
+    if (savedSession) {
+        const parsedSession = JSON.parse(savedSession);
+        // تحديث الذاكرة الحية من الجلسة لو كانت ناقصة
+        parsedSession.forEach(sItem => {
+            if (!scannedItemsMemory.find(m => m.cleanCode === sItem.cleanCode)) {
+                scannedItemsMemory.push(sItem);
+                scannedCodesSet.add(sItem.cleanCode);
+            }
+        });
     }
 
-    const nameEN = product["Item Description English"] || product["Item Description"] || "English Name Not Found";
-    const nameAR = product["أسم المنتج"] || product["اسم المنتج"] || "";
-    const imageUrl = getScannerImageUrl(product);
+    // 3. فحص التكرار (لو الصنف موجود فعلاً في الذاكرة الحية)
+    const existingItem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
 
-    // 3. حالة التكرار
     if (scannedCodesSet.has(cleanCode)) {
-        setScannerFeedback(
-            'duplicate',
-            existsInSelection ? 'موجود بالفعل في القائمة' : 'تم مسحه مسبقاً',
-            'مرر الكروت لرؤية التفاصيل'
-        );
-
+        setScannerFeedback('duplicate', 'موجود بالفعل في القائمة', 'جاري الانتقال للكارت...');
         flashScannerSwipe('duplicate');
-        highlightExistingScannedRow(cleanCode);
 
-        if (navigator.vibrate) navigator.vibrate([60, 60, 60]);
+        const listEl = document.getElementById('scannedItemsList');
+        if (listEl) {
+            const card = Array.from(listEl.children).find(c => c.innerHTML.includes(cleanCode));
+            if (card) {
+                card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+                card.style.boxShadow = "0 0 20px #f59e0b";
+                setTimeout(() => card.style.boxShadow = "none", 1500);
+            }
+        }
+        // حتى لو مكرر، لو فيه "عرض أونلاين" متخزن اعرضه في حالة التعليق
         return;
     }
 
-    // 4. جلب بيانات العرض المحلي (Offline)
+    const product = productsDB.find(p => String(p.Code || '').trim() === cleanCode);
+    if (!product) {
+        setScannerFeedback('error', `الكود ${cleanCode} غير موجود`, 'تأكد من الرقم المكتوب');
+        return;
+    }
+
+    // 4. تجهيز بيانات الصنف
+    const imageUrl = getScannerImageUrl(product);
     const offer = getOfferForScanner(cleanCode);
     const isOfferActive = isOfferCurrentlyActive(offer);
 
-    const offerLabel = isOfferActive
-        ? (offer?.offerTypeAR || offer?.offerAR || 'العرض متاح')
-        : '❌ لا يوجد عرض نشط حالياً';
-
-    const offerLabelEN = isOfferActive
-        ? (offer?.offerType || offer?.offerEN || 'Offer Active')
-        : 'No Active Offer';
-
-    const statusColor = isOfferActive ? '#38ef7d' : '#ef4444';
-
     const itemData = {
         imageUrl,
-        nameEN,
-        nameAR,
         cleanCode,
-        offerLabel,
-        offerLabelEN,
-        statusColor
+        nameEN: product["Item Description English"] || product["Item Description"] || "Unknown",
+        nameAR: product["أسم المنتج"] || "",
+        offerLabel: isOfferActive ? (offer?.offerTypeAR || 'العرض متاح') : '❌ لا يوجد عرض نشط حالياً',
+        offerLabelEN: isOfferActive ? (offer?.offerType || 'Offer Active') : 'No Active Offer',
+        statusColor: isOfferActive ? '#38ef7d' : '#ef4444',
+        onlineOffer: existingItem ? existingItem.onlineOffer : "" 
     };
 
-    // 5. الإضافة للقائمة والذاكرة (الكارت بيترسم هنا فوراً)
+    // 5. الإضافة للقائمة والذاكرة وتحديث الجلسة فوراً
     addScannerRowToList(itemData);
-    rememberScannedItem(itemData);
+    rememberScannedItem(itemData); 
     scannedCodesSet.add(cleanCode);
+    
+    // حفظ مبدئي في الجلسة
+    sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
 
-    // 6. التغذية الراجعة (Feedback)
-    if (isOfferActive) {
-        if (typeof selectedProductCodes !== 'undefined' && selectedProductCodes?.add) {
-            selectedProductCodes.add(cleanCode);
-        }
-        if (typeof updateSelectedCount === 'function') {
-            updateSelectedCount(true);
-        }
-        setScannerFeedback('success', `تم مسح ${cleanCode} بنجاح`, 'تمت إضافته للطباعة ✅');
-        flashScannerSwipe('success');
-        if (navigator.vibrate) navigator.vibrate(90);
-    } else {
-        setScannerFeedback('success', `تم مسح ${cleanCode}`, 'لكن لا يوجد عرض نشط حالياً ⚠️');
-        flashScannerSwipe('success');
-        if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
-    }
-
-    // 🔥 7. الجزء الجديد: جلب العرض الأونلاين فوراً وتحديث "الحاوية" المحجوزة
-    // تأخير بسيط 50ms عشان نضمن إن الكارت "ظهر" فعلياً في الصفحة
-    setTimeout(() => {
+    // 6. جلب العرض الأونلاين (فقط لو مش موجود)
+    const fetchOnlineOffer = () => {
         const onlineBox = document.getElementById(`online-offer-${cleanCode}`);
-        
-        if (onlineBox) {
-            // إظهار حالة التحميل فوراً جوه الكارت
-            onlineBox.style.display = "flex";
-            onlineBox.innerHTML = `<div class="scanner-mini-loader"></div> <span style="font-size:11px; color:#a78bfa;">جاري جلب العرض أونلاين...</span>`;
+        if (!onlineBox) return;
 
-            fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${cleanCode}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success && data.offer && data.offer !== "No online offer found") {
-                        // تحديث الشكل للحالة الناجحة (اللون البنفسجي)
-                        onlineBox.classList.add("online-offer-success");
-                        onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-                        onlineBox.style.border = "none";
-                        onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${data.offer}</span>`;
-                    } else {
-                        // لو مفيش عرض أونلاين، اخفي المربع عشان الكارت يبقى شكله نظيف
-                        onlineBox.style.display = "none";
-                    }
-                })
-                .catch(err => {
-                    console.log("Worker Error:", err);
-                    onlineBox.style.display = "none";
-                });
+        // الحالة أ: العرض مخزن مسبقاً (سواء يدوي أو سكان قديم)
+        if (itemData.onlineOffer) {
+            onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+            onlineBox.style.border = "none";
+            onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${itemData.onlineOffer}</span>`;
+            return;
         }
-    }, 50);
+
+        // الحالة ب: أول مرة يتم رصد الكود
+        onlineBox.style.display = "flex";
+        fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${cleanCode}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.offer && data.offer !== "No online offer found") {
+                    onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                    onlineBox.style.border = "none";
+                    onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${data.offer}</span>`;
+                    
+                    // تحديث الذاكرة الحية والجلسة فوراً لضمان عدم ضياع العرض
+                    const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
+                    if (itemInMem) {
+                        itemInMem.onlineOffer = data.offer;
+                        sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
+                    }
+                } else {
+                    // لو مفيش داتا، بنخزن إن مفيش عشان ميفضلش يحمل كل مرة
+                    const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
+                    if (itemInMem) {
+                        itemInMem.onlineOffer = "No Offer"; 
+                        sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
+                    }
+                    onlineBox.style.display = "none";
+                }
+            }).catch(() => {
+                onlineBox.style.display = "none";
+            });
+    };
+
+    setTimeout(fetchOnlineOffer, 50);
 }
 
 function updateCardWithOnlineOffer(code, onlineOfferText) {
