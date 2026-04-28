@@ -4752,6 +4752,7 @@ body > div:has(> label[for="codesFileInput"]),
     from { opacity: 0.2; transform: scale(0.8); }
     to { opacity: 1; transform: scale(1.2); }
 }
+
 </style>
 </head>
 <body>
@@ -5528,7 +5529,26 @@ body > div:has(> label[for="codesFileInput"]),
     from { opacity: 0; transform: scale(0.9); }
     to { opacity: 1; transform: scale(1); }
 }
+/* ستايل العرض القادم من الوركر داخل الكارت */
+.online-offer-badge {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    color: white !important;
+    padding: 5px 12px !important;
+    border-radius: 10px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    margin-top: 8px !important;
+    display: inline-block !important;
+    border: 1px solid rgba(255,255,255,0.2) !important;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3) !important;
+    animation: pulseOnline 2s infinite !important;
+}
 
+@keyframes pulseOnline {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.03); opacity: 0.9; }
+    100% { transform: scale(1); opacity: 1; }
+}
 </style>
 
 <!-- Offer Boxes -->
@@ -47793,6 +47813,9 @@ function buildScannerCardHtml({
     const codeSize = compact ? '12px' : '13px';
     const pad = compact ? '10px' : '12px';
 
+    // رابط صفحة الدواء أونلاين
+    const productUrl = `https://www.al-dawaa.com/en/p/${cleanCode}`;
+
     return `
         <div style="
             display:flex;
@@ -47802,6 +47825,7 @@ function buildScannerCardHtml({
             padding:${pad};
             border-radius:18px;
             border:1px solid rgba(255,255,255,0.10);
+            position: relative;
         ">
             ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageSize)}
 
@@ -47822,6 +47846,26 @@ function buildScannerCardHtml({
 
                 <div style="font-size:${arSize}; color:#fbbf24; font-family:Cairo,sans-serif; direction:rtl; margin:4px 0 0; line-height:1.45; word-break:break-word;">
                     ${escapeHtml(nameAR || '')}
+                </div>
+
+                <div id="online-offer-${cleanCode}" 
+                     onclick="window.open('${productUrl}', '_blank')"
+                     style="
+                        margin-top: 8px;
+                        padding: 6px 12px;
+                        border-radius: 10px;
+                        background: rgba(124, 58, 237, 0.1);
+                        border: 1px dashed rgba(124, 58, 237, 0.3);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                        min-height: 28px;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                     ">
+                    <div class="scanner-mini-loader"></div>
+                    <span style="font-size: 11px; color: #a78bfa; font-weight: 700;">جاري فحص العرض أونلاين...</span>
                 </div>
 
                 <div style="margin-top:8px;">
@@ -47848,7 +47892,6 @@ function buildScannerCardHtml({
         </div>
     `;
 }
-
 function addScannerRowToList({
     imageUrl = '',
     nameEN = '',
@@ -48119,7 +48162,7 @@ async function openBarcodeScanner() {
 // =====================================================
 // Process Code
 // =====================================================
-function processScannedCode(code) {
+async function processScannedCode(code) {
     const cleanCode = String(code || '').trim();
     if (!cleanCode) return;
 
@@ -48181,17 +48224,16 @@ function processScannedCode(code) {
         return;
     }
 
-    // 4. جلب بيانات العرض وحالة النشاط (التعديل الجوهري هنا)
+    // 4. جلب بيانات العرض المحلي (Offline)
     const offer = getOfferForScanner(cleanCode);
     const isOfferActive = isOfferCurrentlyActive(offer);
 
-    // سحب العرض بالعربي وبالإنجليزي من الداتا الحقيقية
     const offerLabel = isOfferActive
         ? (offer?.offerTypeAR || offer?.offerAR || 'العرض متاح')
         : '❌ لا يوجد عرض نشط حالياً';
 
     const offerLabelEN = isOfferActive
-        ? (offer?.offerType || offer?.offerEN || 'Offer Active') // استخدام offerType للإنجليزي
+        ? (offer?.offerType || offer?.offerEN || 'Offer Active')
         : 'No Active Offer';
 
     const statusColor = isOfferActive ? '#38ef7d' : '#ef4444';
@@ -48206,7 +48248,7 @@ function processScannedCode(code) {
         statusColor
     };
 
-    // 5. الإضافة للقائمة والذاكرة
+    // 5. الإضافة للقائمة والذاكرة (الكارت بيترسم هنا فوراً)
     addScannerRowToList(itemData);
     rememberScannedItem(itemData);
     scannedCodesSet.add(cleanCode);
@@ -48216,11 +48258,9 @@ function processScannedCode(code) {
         if (typeof selectedProductCodes !== 'undefined' && selectedProductCodes?.add) {
             selectedProductCodes.add(cleanCode);
         }
-
         if (typeof updateSelectedCount === 'function') {
             updateSelectedCount(true);
         }
-
         setScannerFeedback('success', `تم مسح ${cleanCode} بنجاح`, 'تمت إضافته للطباعة ✅');
         flashScannerSwipe('success');
         if (navigator.vibrate) navigator.vibrate(90);
@@ -48229,8 +48269,74 @@ function processScannedCode(code) {
         flashScannerSwipe('success');
         if (navigator.vibrate) navigator.vibrate([100, 80, 100]);
     }
+
+    // 🔥 7. الجزء الجديد: جلب العرض الأونلاين فوراً وتحديث "الحاوية" المحجوزة
+    // تأخير بسيط 50ms عشان نضمن إن الكارت "ظهر" فعلياً في الصفحة
+    setTimeout(() => {
+        const onlineBox = document.getElementById(`online-offer-${cleanCode}`);
+        
+        if (onlineBox) {
+            // إظهار حالة التحميل فوراً جوه الكارت
+            onlineBox.style.display = "flex";
+            onlineBox.innerHTML = `<div class="scanner-mini-loader"></div> <span style="font-size:11px; color:#a78bfa;">جاري جلب العرض أونلاين...</span>`;
+
+            fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${cleanCode}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.offer && data.offer !== "No online offer found") {
+                        // تحديث الشكل للحالة الناجحة (اللون البنفسجي)
+                        onlineBox.classList.add("online-offer-success");
+                        onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                        onlineBox.style.border = "none";
+                        onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${data.offer}</span>`;
+                    } else {
+                        // لو مفيش عرض أونلاين، اخفي المربع عشان الكارت يبقى شكله نظيف
+                        onlineBox.style.display = "none";
+                    }
+                })
+                .catch(err => {
+                    console.log("Worker Error:", err);
+                    onlineBox.style.display = "none";
+                });
+        }
+    }, 50);
 }
 
+function updateCardWithOnlineOffer(code, onlineOfferText) {
+    const listEl = document.getElementById('scannedItemsList');
+    if (!listEl) return;
+
+    // بندور في كل الكروت اللي في القائمة
+    const cards = listEl.querySelectorAll('.new-scanned-item-flash, [style*="flex: 0 0 100%"]');
+    cards.forEach(card => {
+        // نتأكد إن الكارت ده يخص الكود اللي لسه ماسحينه ومفهوش بادج أونلاين قبل كده
+        if (card.innerHTML.includes(code) && !card.querySelector('.online-offer-badge')) {
+            const infoDiv = card.querySelector('div[style*="text-align:right"]');
+            if (infoDiv) {
+                const onlineBadge = document.createElement('div');
+                onlineBadge.className = 'online-offer-badge';
+                onlineBadge.style.cssText = `
+                    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                    color: white;
+                    padding: 4px 10px;
+                    border-radius: 8px;
+                    font-size: 11px;
+                    font-weight: 800;
+                    margin-top: 6px;
+                    display: inline-block;
+                    border: 1px solid rgba(255,255,255,0.2);
+                    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+                `;
+                onlineBadge.innerHTML = `🌐 Online: ${onlineOfferText}`;
+                infoDiv.appendChild(onlineBadge);
+                
+                // وميض خفيف للكارت عشان المستخدم يعرف إن فيه داتا وصلت
+                card.style.boxShadow = "0 0 15px rgba(124, 58, 237, 0.5)";
+                setTimeout(() => card.style.boxShadow = "none", 1000);
+            }
+        }
+    });
+}
 // =====================================================
 // Close Scanner
 // =====================================================
