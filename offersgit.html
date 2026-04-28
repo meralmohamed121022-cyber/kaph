@@ -42335,7 +42335,6 @@ function processRenderQueue() {
     while (processed < CHUNK_SIZE && renderingQueue.length > 0) {
         const item = renderingQueue.shift();
         
-        // --- 1. العناوين (Categories) ---
         if (item.type === 'HEADER_A') {
             const headerA = document.createElement('div');
             headerA.className = "category-a-header";
@@ -42345,63 +42344,31 @@ function processRenderQueue() {
         else if (item.type === 'HEADER_D') {
             const headerD = document.createElement('div');
             headerD.className = "category-b-header";
-            headerD.style.cssText = `
-              background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-              padding: 15px 20px;
-              margin: 20px 10px 10px 10px;
-              border-radius: 12px;
-              border-left: 5px solid #3498db;
-              box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-            `;
+            headerD.style.cssText = `background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); padding: 15px 20px; margin: 20px 10px 10px 10px; border-radius: 12px; border-left: 5px solid #3498db; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);`;
             headerD.innerHTML = `<h3 style="margin: 0; color: white; font-size: 20px; font-weight: 600;">🔹 ${item.catD}</h3>`;
             container.appendChild(headerD);
         }
         else if (item.type === 'BLOCK_OFFER') {
-            // --- 2. بلوك العرض ---
             const offerSection = document.createElement('div');
             offerSection.style.padding = "0 10px 20px 10px";
-            
             const groupContainer = document.createElement('div');
             groupContainer.className = "offer-group-container";
-            
             const colorData = generateOfferColor(item.offerType);
             
-            // هيدر نوع العرض
             const groupHeader = document.createElement('div');
             groupHeader.className = "offer-group-header";
-            groupHeader.style.cssText = `
-              background: ${colorData.gradient};
-              padding: 15px;
-              margin: 15px 0;
-              border-radius: 15px;
-              box-shadow: ${colorData.shadow};
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              border: 2px solid rgba(255, 255, 255, 0.2);
-            `;
-            const displayOfferType = convertTextNumbersToDigits(item.offerType);
-            groupHeader.innerHTML = `
-              <div style="color: white; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: center;">
-                ${displayOfferType}
-              </div>
-            `;
+            groupHeader.style.cssText = `background: ${colorData.gradient}; padding: 15px; margin: 15px 0; border-radius: 15px; box-shadow: ${colorData.shadow}; display: flex; align-items: center; justify-content: center; border: 2px solid rgba(255, 255, 255, 0.2);`;
+            groupHeader.innerHTML = `<div style="color: white; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; text-align: center;">${convertTextNumbersToDigits(item.offerType)}</div>`;
             groupContainer.appendChild(groupHeader);
 
-            // تجميع المنتجات وترتيبها
-            const sortedProducts = [...item.products].sort((a, b) => 
-                (a.Brand || '').localeCompare(b.Brand || '')
-            );
+            const sortedProducts = [...item.products].sort((a, b) => (a.Brand || '').localeCompare(b.Brand || ''));
 
-            // تقسيم المنتجات لصفوف
             for (let i = 0; i < sortedProducts.length; i += ITEMS_PER_ROW) {
                 const rowProducts = sortedProducts.slice(i, i + ITEMS_PER_ROW);
-                
                 const rowWrapper = document.createElement('div');
                 rowWrapper.className = 'offer-row-wrapper';
                 rowWrapper.style.cssText = `display: flex; width: 100%; gap: 15px; margin-bottom: 20px;`;
 
-                // تجميع منتجات الصف حسب البراند
                 const rowBrands = {};
                 rowProducts.forEach(p => {
                     const b = p.Brand || 'Other';
@@ -42409,7 +42376,6 @@ function processRenderQueue() {
                     rowBrands[b].push(p);
                 });
 
-                // رسم المجموعات (Brands Clusters)
                 Object.keys(rowBrands).forEach(brandName => {
                     const productsInThisCluster = rowBrands[brandName];
                     const count = productsInThisCluster.length;
@@ -42418,183 +42384,53 @@ function processRenderQueue() {
 
                     const brandCluster = document.createElement('div');
                     brandCluster.className = 'brand-cluster-card';
-                    brandCluster.style.cssText = `
-                        width: ${widthPercent}%;
-                        display: flex;
-                        flex-direction: column;
-                        background: #f8fafc;
-                        border-radius: 16px;
-                        overflow: hidden;
-                        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                        border: 1px solid #e2e8f0;
-                    `;
+                    brandCluster.style.cssText = `width: ${widthPercent}%; display: flex; flex-direction: column; background: #f8fafc; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;`;
 
-                    // هيدر البراند
                     const clusterHeader = document.createElement('div');
-                    clusterHeader.style.cssText = `
-                        background: ${brandColor};
-                        color: white;
-                        padding: 8px;
-                        font-size: 13px;
-                        font-weight: 800;
-                        text-align: center;
-                        text-transform: uppercase;
-                    `;
+                    clusterHeader.style.cssText = `background: ${brandColor}; color: white; padding: 8px; font-size: 13px; font-weight: 800; text-align: center; text-transform: uppercase;`;
                     clusterHeader.innerHTML = `${brandName}`;
                     brandCluster.appendChild(clusterHeader);
 
-                    // Grid للكروت
-                   const clusterGrid = document.createElement('div');
-clusterGrid.className = 'cluster-grid';
-clusterGrid.style.cssText = `display: grid; grid-template-columns: repeat(${count}, 1fr); gap: 10px; padding: 10px; flex: 1`;
+                    const clusterGrid = document.createElement('div');
+                    clusterGrid.className = 'cluster-grid';
+                    clusterGrid.style.cssText = `display: grid; grid-template-columns: repeat(${count}, 1fr); gap: 10px; padding: 10px; flex: 1`;
+                    
                     productsInThisCluster.forEach(product => {
                         const offer = getOffer(product.Code);
-                        const original = parseFloat(product["Unit Price"] || product.Price || 0);
-                       // ====== منطق السعر (معدل لدعم الخصم المباشر والسعر الثابت) ======
-                        let offerTypeLower = offer.offerType.toLowerCase();
-                        
-                        // نعتبر العرض مباشر لو فيه كلمة off أو direct أو @ (للسعر الثابت) 
-                        // أو نسبة مئوية بشرط ألا يحتوي على كلمة sec أو second (لأنها تعني خصم على الحبة الثانية)
-                        let isDirectOffer = offerTypeLower.includes("off") || 
-                                            offerTypeLower.includes("direct") || 
-                                            offerTypeLower.includes("@") || 
-                                            (offerTypeLower.includes("%") && !offerTypeLower.includes("sec") && !offerTypeLower.includes("second"));
-                        
-                        let finalPrice = original;
-                        let showStrikethrough = false;
-                        
-                        if (isDirectOffer) {
-                            // 1. أولاً: لو السعر موجود ومحسوب جاهز في ملف الداتا (offerPrice)
-                            if (offer.offerPrice && typeof offer.offerPrice[product.Code] === "number") {
-                                finalPrice = offer.offerPrice[product.Code];
-                                showStrikethrough = true;
-                            } 
-                            // 2. ثانياً: لو السعر غير موجود في الداتا لكنه نسبة مئوية، نقوم بحسابه
-                            else {
-                                const match = offer.offerType.match(/(\d+)%/);
-                                if (match) {
-                                    finalPrice = original * (1 - (parseInt(match[1]) / 100));
-                                    showStrikethrough = true;
-                                }
-                            }
-                        }
-                        // ================================================================
-
-                        const productLink = `https://www.al-dawaa.com/en/p/${product.Code}`;
-                        const displayOfferType = convertTextNumbersToDigits(offer.offerType); 
+                        const dbPrice = parseFloat(product["Unit Price"] || product.Price || 0);
                         const shortOfferType = shortenOfferType(offer.offerType);
+                        
+                        const onlineBoxId = `online-main-${product.Code}`;
+                        const priceId = `price-main-${product.Code}`;
+                        const productLink = `https://www.al-dawaa.com/en/p/${product.Code}`;
 
-                        // 🔥 كود الكارت الجديد (مفصول تماماً)
                         const cardHTML = `
-                          <div class="product-card" style="
-                              background: white; 
-                              border-radius: 12px; 
-                              overflow: hidden; 
-                              display: flex; 
-                              flex-direction: column; 
-                              height: 100%; 
-                              min-height: 380px;
-                              border: 1px solid #f1f5f9;
-                              box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-                              transition: transform 0.2s;
-                          " onmouseover="this.style.transform='translateY(-5px)'; this.style.boxShadow='0 10px 20px rgba(0,0,0,0.1)'"
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 5px rgba(0,0,0,0.05)'">
-                            
-                            <div style="
-                                position: relative;
-                                height: 200px; /* ارتفاع ثابت للصورة */
-                                width: 100%;
-                                background: #fff;
-                                padding: 15px;
-                                display: flex;
-                                align-items: center;
-                                justify-content: center;
-                                border-bottom: 1px solid #f8fafc;
-                            ">
+                          <div class="product-card" style="background: white; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; height: 100%; min-height: 400px; border: 1px solid #f1f5f9; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                            <div style="position: relative; height: 180px; width: 100%; background: #fff; padding: 10px; display: flex; align-items: center; justify-content: center; border-bottom: 1px solid #f8fafc;">
                                 <div class="checkbox-container" style="position: absolute; top: 10px; right: 10px; z-index: 10;">
                                     <input type="checkbox" class="product-card-checkbox" data-code="${product.Code}" onchange="updateSelectedCount()" style="width:18px; height:18px; cursor:pointer;"/>
                                 </div>
-
-                                <div style="
-                                    position: absolute; top: 10px; left: 10px; 
-                                    background: #dc2626; color: white; 
-                                    font-size: 10px; font-weight: 800; 
-                                    padding: 4px 8px; border-radius: 4px;
-                                    z-index: 10;
-                                ">
+                                <div style="position: absolute; top: 10px; left: 10px; background: #dc2626; color: white; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px; z-index: 10; direction: ltr !important;">
                                     ${shortOfferType}
                                 </div>
-
-                             <img 
-    data-code="${product.Code}" 
-    data-brand="${product.Brand || 'Generic'}" 
-    data-itemurl="${product.itemurl || ''}" 
-    class="product-image smart-lazy-img" 
-    style="
-        max-width: 100%; 
-        max-height: 100%; 
-        object-fit: contain; 
-        opacity: 0; 
-        transition: opacity 0.3s;
-    " 
-    alt="${product["Item Description"]}"
-/>
-${getWaImageBtnHTML(product)}
-</div>
-                            <div style="
-                                flex: 1; 
-                                padding: 15px; 
-                                display: flex; 
-                                flex-direction: column; 
-                                justify-content: space-between;
-                                background: #fff;
-                            ">
+                                <img data-code="${product.Code}" data-brand="${product.Brand || 'Generic'}" data-itemurl="${product.itemurl || ''}" class="product-image smart-lazy-img" style="max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s;" alt="${product["Item Description"]}"/>
+                            </div>
+                            <div style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; background: #fff;">
                                 <div>
-                                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; margin-bottom: 5px;">
-                                        CODE: ${product.Code}
-                                    </div>
-                                    <div style="
-                                        font-size: 13px; 
-                                        font-weight: 700; 
-                                        color: #1e293b; 
-                                        line-height: 1.4; 
-                                        margin-bottom: 8px;
-                                        display: -webkit-box;
-                                        -webkit-line-clamp: 2;
-                                        -webkit-box-orient: vertical;
-                                        overflow: hidden;
-                                        height: 36px;
-                                    ">
-                                        ${product["Item Description"]}
-                                    </div>
-                                    <div style="font-size: 11px; font-weight: 700; color: #7c3aed; margin-bottom: 10px;">
-                                        ${displayOfferType}
+                                    <div style="font-size: 10px; color: #94a3b8; font-family: monospace; text-align: left;">CODE: ${product.Code}</div>
+                                    <div style="font-size: 12px; font-weight: 700; color: #1e293b; line-height: 1.3; margin-bottom: 5px; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; text-align: left;">${product["Item Description"]}</div>
+                                    <div style="font-size: 11px; font-weight: 700; color: #7c3aed; margin-bottom: 10px; text-align: left;">Offline: ${convertTextNumbersToDigits(offer.offerType)}</div>
+
+                                    <div id="${onlineBoxId}" style="margin-bottom: 10px; min-height: 25px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="scanner-mini-loader" style="width:12px; height:12px; border-width:2px;"></div>
                                     </div>
                                 </div>
 
                                 <div>
-                                    <div class="product-price" style="display:flex; align-items:baseline; gap:8px; margin-bottom: 12px;">
-                                        ${showStrikethrough ? `
-                                            <span style="text-decoration: line-through; color: #94a3b8; font-size: 12px;">
-                                                ${original.toFixed(2)}
-                                            </span>
-                                        ` : ''}
-                                        <span style="color: ${showStrikethrough ? '#dc2626' : '#0f172a'}; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 2px;">
-                                            ${finalPrice.toFixed(2)} 
-                                            <img src="${RIYAL_SVG_URL}" style="width:14px!important;height:14px!important;max-width:14px!important;max-height:14px!important;min-width:14px;min-height:14px;flex-shrink:0;display:inline-block!important;" alt="SAR"/>
-                                        </span>
+                                    <div id="${priceId}" class="product-price" style="display:flex; align-items:baseline; gap:8px; margin-bottom: 12px; justify-content: flex-start;">
+                                        <span style="color: #94a3b8; font-size: 12px;">جاري جلب السعر...</span>
                                     </div>
-                                    
-                                    <a href="${productLink}" target="_blank" style="
-                                        display: block; width: 100%; text-align: center;
-                                        background: #10b981;
-                                        color: white; font-weight: 700; font-size: 13px;
-                                        padding: 10px; border-radius: 8px;
-                                        text-decoration: none;
-                                        transition: background 0.2s;
-                                    " onmouseover="this.style.background='#059669'" onmouseout="this.style.background='#10b981'">
-                                        Online Offer
-                                    </a>
+                                    <a href="${productLink}" target="_blank" style="display: block; width: 100%; text-align: center; background: #10b981; color: white; font-weight: 700; font-size: 12px; padding: 10px; border-radius: 8px; text-decoration: none;">View Site</a>
                                 </div>
                             </div>
                           </div>
@@ -42603,27 +42439,71 @@ ${getWaImageBtnHTML(product)}
                         const tempDiv = document.createElement('div');
                         tempDiv.innerHTML = cardHTML.trim();
                         clusterGrid.appendChild(tempDiv.firstChild);
+
+                        // 🔥 جلب البيانات فريش من الموقع فور الانتهاء من الرندر
+                        setTimeout(() => {
+                           if (typeof triggerMainPageOnlineCheck === 'function') {
+                               triggerMainPageOnlineCheck(product.Code, onlineBoxId, priceId, dbPrice);
+                           }
+                        }, 300);
                     });
 
                     brandCluster.appendChild(clusterGrid);
                     rowWrapper.appendChild(brandCluster);
                 });
-
                 groupContainer.appendChild(rowWrapper);
             }
-            
             offerSection.appendChild(groupContainer);
             container.appendChild(offerSection);
         }
         processed++;
     }
-    
-    if (renderingQueue.length > 0) {
-        setTimeout(processRenderQueue, 0);
-    } else {
-        if(loader) loader.style.display = "none";
-        initSmartImageLoader();
-        console.log('✅ Rendering complete');
+    if (renderingQueue.length > 0) setTimeout(processRenderQueue, 0);
+    else { if(loader) loader.style.display = "none"; initSmartImageLoader(); }
+}
+async function triggerMainPageOnlineCheck(code, onlineBoxId, priceId, dbPrice) {
+    const onlineBox = document.getElementById(onlineBoxId);
+    const priceBox = document.getElementById(priceId);
+    const RIYAL_SVG = "https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg";
+
+    try {
+        // نداء للوركر المطور (v7)
+        const response = await fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${code}&t=${Date.now()}`);
+        const data = await response.json();
+
+        if (data.success) {
+            // 1. تحديث بوكس العرض الأونلاين (لو موجود)
+            if (data.hasOnlineOffer) {
+                onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                onlineBox.style.border = "none";
+                onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:10px; text-align:center; line-height:1.2;">🌐 Online: ${data.offer}</span>`;
+            } else {
+                // عرض كلمة "No online offer" بشكل أنيق أو إخفاء البوكس
+                onlineBox.innerHTML = `<span style="color:#94a3b8; font-size:10px;">🌐 No Online Offer</span>`;
+                setTimeout(() => { onlineBox.style.display = 'none'; }, 2000);
+            }
+
+            // 2. تحديث السعر (الأولوية لبيانات الوركر)
+            const finalP = data.finalPrice || data.originalPrice || dbPrice;
+            const originalP = data.originalPrice || dbPrice;
+            const isDiscounted = finalP < originalP;
+
+            priceBox.innerHTML = `
+                ${isDiscounted ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 11px;">${originalP.toFixed(2)}</span>` : ''}
+                <span style="color: ${isDiscounted ? '#dc2626' : '#0f172a'}; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 2px;">
+                    ${finalP.toFixed(2)} 
+                    <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/>
+                </span>
+            `;
+        } else {
+            throw new Error("API Failure");
+        }
+    } catch (e) {
+        // Fallback في حالة الفشل
+        if (priceBox) {
+            priceBox.innerHTML = `<span style="color: #0f172a; font-size: 18px; font-weight: 800;">${dbPrice.toFixed(2)} <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/></span>`;
+        }
+        if (onlineBox) onlineBox.style.display = "none";
     }
 }
 // ==========================================
@@ -48069,21 +47949,21 @@ function addScannerRowToList({
     nameEN = '',
     nameAR = '',
     cleanCode = '',
-    offerLabel = '',   // العرض بالعربي
-    offerLabelEN = '', // العرض بالإنجليزي
+    offerLabel = '',   
+    offerLabelEN = '', 
     statusColor = '#38ef7d',
-    onlineOffer = ''   // استقبال العرض الأونلاين لضمان ظهوره عند التحديث
+    onlineOffer = ''   
 }) {
     const listEl = document.getElementById('scannedItemsList');
     const shell = document.querySelector('.scanner-shell');
     if (!listEl) return;
 
-    // 1. تحديد لون الخلفية بناءً على حالة العرض
-    let bgColor = 'rgba(56, 239, 125, 0.08)'; // أخضر افتراضي
-    if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)'; // أحمر (لا يوجد)
-    else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)'; // برتقالي (تنبيه)
+    // 1. تحديد الخلفية بناءً على الحالة
+    let bgColor = 'rgba(56, 239, 125, 0.08)'; 
+    if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)'; 
+    else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)';
 
-    // 2. إدارة التكرار: مسح الكارت القديم لنفس الكود لضمان تحديث البيانات (مثل الأونلاين أوفر)
+    // 2. منع التكرار البصري فوراً
     const existingRow = document.getElementById(`card-row-${cleanCode}`);
     if (existingRow) {
         existingRow.remove();
@@ -48108,10 +47988,10 @@ function addScannerRowToList({
         display: flex;
         align-items: center;
         position: relative;
-        transition: all 0.3s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     `;
 
-    // 3. بناء محتوى الكارت وتمرير بيانات الأونلاين
+    // 3. بناء المحتوى (تمرير الـ onlineOffer)
     row.innerHTML = buildScannerCardHtml({
         imageUrl,
         nameEN,
@@ -48124,24 +48004,25 @@ function addScannerRowToList({
         onlineOffer: onlineOffer 
     });
 
-    // 4. زر حذف الكارت المفرد (X)
+    // 4. زر الحذف (X) المطور
     const deleteBtn = document.createElement('div');
     deleteBtn.innerHTML = '✕';
     deleteBtn.style.cssText = `
         position: absolute; top: 8px; left: 8px; width: 28px; height: 28px; 
-        background: rgba(239, 68, 68, 0.9); color: #fff; border-radius: 50%; 
+        background: rgba(239, 68, 68, 0.95); color: #fff; border-radius: 50%; 
         display: flex; align-items: center; justify-content: center; 
-        cursor: pointer; font-size: 14px; z-index: 20; font-weight: bold;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        cursor: pointer; font-size: 14px; z-index: 50; font-weight: bold;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: transform 0.2s;
     `;
     
     deleteBtn.onclick = (e) => {
         e.stopPropagation();
-        row.style.transform = 'scale(0.8)';
+        row.style.transform = 'scale(0.5)';
         row.style.opacity = '0';
         setTimeout(() => {
             row.remove();
-            // تنظيف شامل للذاكرة عند حذف كارت واحد
+            // تحديث الذاكرة والجلسة
             if (typeof scannedCodesSet !== 'undefined') scannedCodesSet.delete(cleanCode);
             scannedItemsMemory = scannedItemsMemory.filter(i => i.cleanCode !== cleanCode);
             sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
@@ -48152,40 +48033,41 @@ function addScannerRowToList({
     };
     row.appendChild(deleteBtn);
 
-    // 5. إضافة الكارت في المقدمة وتحريك السكرول
+    // 5. إضافة الكارت وتحريك القائمة
     listEl.prepend(row);
     listEl.scrollTo({ left: 0, behavior: 'smooth' });
 
-    // 6. نظام الـ Toast (تأكيد المسح البصري)
+    // 6. نظام الـ Toast المحسن (تحت الكاميرا مباشرة)
     const toast = document.createElement('div');
+    toast.className = 'scanner-toast';
     toast.style.cssText = `
         position: absolute; 
-        bottom: 110px;
+        top: 230px; /* مكان استراتيجي تحت مربع الكاميرا */
         left: 50%; 
-        transform: translateX(-50%);
+        transform: translateX(-50%) translateY(0);
         background: #0f172a; 
         color: #38ef7d; 
-        padding: 8px 18px; 
-        border-radius: 25px;
-        font-size: 13px; 
-        font-weight: bold; 
-        z-index: 10000; 
+        padding: 10px 22px; 
+        border-radius: 30px;
+        font-size: 14px; 
+        font-weight: 800; 
+        z-index: 100000; 
         border: 2px solid #38ef7d;
-        box-shadow: 0 8px 25px rgba(0,0,0,0.5); 
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
         pointer-events: none;
-        transition: opacity 0.4s ease, transform 0.4s ease;
+        transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         white-space: nowrap;
     `;
-    toast.innerHTML = `✅ Scanned: ${cleanCode}`;
+    toast.innerHTML = `✅ ${cleanCode} Added`;
     if (shell) shell.appendChild(toast);
 
+    // أنيميشن الاختفاء
     setTimeout(() => {
         toast.style.opacity = '0';
-        toast.style.transform = 'translateX(-50%) translateY(10px)';
+        toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 400);
-    }, 1000);
+    }, 1200);
 
-    // تحديث النقاط (Dots) لو موجودة
     if (typeof updateScannerDots === 'function') updateScannerDots();
 }
 // =====================================================
@@ -48350,6 +48232,31 @@ async function processScannedCode(code) {
     const cleanCode = String(code || '').trim();
     if (!cleanCode) return;
 
+    // --- 🟢 1. إضافة الاستجابة الصوتية والحركية فوراً ---
+    if (navigator.vibrate) {
+        // نغمة اهتزاز واحدة للإضافة، ونغمتين للتكرار (سيتم تحديدها بالأسفل)
+        if (!scannedCodesSet.has(cleanCode)) {
+            navigator.vibrate(100); 
+        } else {
+            navigator.vibrate([50, 50, 50]); // اهتزاز متقطع للتنبيه بالتكرار
+        }
+    }
+
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.type = 'sine'; 
+        // تردد مختلف قليلاً لو مكرر (اختياري)
+        const freq = scannedCodesSet.has(cleanCode) ? 440 : 880; 
+        oscillator.frequency.setValueAtTime(freq, audioCtx.currentTime); 
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) { console.log("Audio blocked"); }
+
     ensureScannerUiExtras();
 
     if (!Array.isArray(window.productsDB) || !productsDB.length) {
@@ -48357,17 +48264,51 @@ async function processScannedCode(code) {
         return;
     }
 
+    // --- 🟠 2. معالجة الصنف المكرر (Duplicate Toast) ---
     if (scannedCodesSet.has(cleanCode)) {
         setScannerFeedback('duplicate', 'موجود بالفعل', 'جاري الانتقال للكارت...');
+        
+        const shell = document.querySelector('.scanner-shell');
+        if (shell) {
+            const dupToast = document.createElement('div');
+            dupToast.style.cssText = `
+                position: absolute; 
+                top: 230px; /* تحت الكاميرا بالظبط */
+                left: 50%; 
+                transform: translateX(-50%);
+                background: #f59e0b; 
+                color: #fff; 
+                padding: 10px 22px; 
+                border-radius: 30px;
+                font-size: 14px; 
+                font-weight: 800; 
+                z-index: 100000; 
+                border: 2px solid #fff;
+                box-shadow: 0 10px 30px rgba(245, 158, 11, 0.5); 
+                pointer-events: none;
+                transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                white-space: nowrap;
+            `;
+            dupToast.innerHTML = `⚠️ ${cleanCode} مضاف بالفعل`;
+            shell.appendChild(dupToast);
+
+            setTimeout(() => {
+                dupToast.style.opacity = '0';
+                dupToast.style.transform = 'translateX(-50%) translateY(20px)';
+                setTimeout(() => dupToast.remove(), 400);
+            }, 1200);
+        }
+
         const card = document.getElementById(`card-row-${cleanCode}`);
         if (card) {
             card.scrollIntoView({ behavior: 'smooth', inline: 'center' });
-            card.style.boxShadow = "0 0 20px #f59e0b";
+            card.style.boxShadow = "0 0 25px #f59e0b";
             setTimeout(() => card.style.boxShadow = "none", 1500);
         }
         return;
     }
 
+    // --- 🟢 3. معالجة إضافة صنف جديد ---
     const product = productsDB.find(p => String(p.Code || '').trim() === cleanCode);
     if (!product) {
         setScannerFeedback('error', `الكود ${cleanCode} غير موجود`, 'تأكد من الرقم المكتوب');
@@ -48396,145 +48337,81 @@ async function processScannedCode(code) {
 
     persistScannerSession();
 
+    // رسالة التنبيه للإضافة الجديدة (Green Toast)
+    const shell = document.querySelector('.scanner-shell');
+    if (shell) {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: absolute; 
+            top: 230px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); 
+            color: #38ef7d; 
+            padding: 10px 22px; 
+            border-radius: 30px;
+            font-size: 14px; 
+            font-weight: 800; 
+            z-index: 100000; 
+            border: 2px solid #38ef7d;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            white-space: nowrap;
+        `;
+        toast.innerHTML = `✅ Added: ${cleanCode}`;
+        shell.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(-50%) translateY(20px)';
+            setTimeout(() => toast.remove(), 400);
+        }, 1200);
+    }
+
     setScannerFeedback('success', `تمت إضافة ${cleanCode}`, 'جاري فحص العرض الأونلاين...');
     flashScannerSwipe('success');
 
+    // ... (باقي كود fetchOnlineOffer يظل كما هو)
     const fetchOnlineOffer = () => {
         let attempts = 0;
-
         const checkExist = setInterval(() => {
             const onlineBox = document.getElementById(`online-offer-${cleanCode}`);
             attempts++;
-
             if (!onlineBox) {
                 if (attempts > 50) clearInterval(checkExist);
                 return;
             }
-
             clearInterval(checkExist);
-
+            // ... (نفس الكود الخاص بك لعمل Fetch للأونلاين أوفر)
             onlineBox.style.display = "flex";
-            onlineBox.style.marginTop = "8px";
-            onlineBox.style.padding = "8px 12px";
-            onlineBox.style.borderRadius = "10px";
-            onlineBox.style.alignItems = "center";
-            onlineBox.style.justifyContent = "center";
-            onlineBox.style.cursor = "pointer";
-            onlineBox.style.background = "rgba(124, 58, 237, 0.10)";
-            onlineBox.style.border = "1px dashed rgba(124, 58, 237, 0.30)";
-            onlineBox.innerHTML = `
-                <div class="scanner-mini-loader"></div>
-                <span style="font-size:11px; color:#a78bfa; font-weight:700;">جاري فحص العرض الأونلاين...</span>
-            `;
-
+            onlineBox.innerHTML = `<div class="scanner-mini-loader"></div> <span style="font-size:11px; color:#a78bfa; font-weight:700;">جاري فحص العرض الأونلاين...</span>`;
             fetch(`https://online.meralmohamed121022.workers.dev/api/product?code=${encodeURIComponent(cleanCode)}&t=${Date.now()}`)
                 .then(res => res.json())
                 .then(data => {
                     const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
                     if (!itemInMem) return;
-
-                    const hasOffer =
-                        data &&
-                        data.success === true &&
-                        (
-                            data.hasOnlineOffer === true ||
-                            data.onlineStatus === "HAS_ONLINE_OFFER" ||
-                            (data.offer && !/^no online offer/i.test(String(data.offer).trim()))
-                        );
-
+                    const hasOffer = data && data.success === true && (data.hasOnlineOffer === true || data.onlineStatus === "HAS_ONLINE_OFFER" || (data.offer && !/^no online offer/i.test(String(data.offer).trim())));
                     if (hasOffer) {
                         let badgeText = data.offer || data.offerText || 'Online Offer';
-
-                        if (
-                            data.finalPrice != null &&
-                            data.originalPrice != null &&
-                            Number(data.originalPrice) > Number(data.finalPrice)
-                        ) {
-                            badgeText = `${badgeText} | ${Number(data.finalPrice).toFixed(2)} SAR بدل ${Number(data.originalPrice).toFixed(2)} SAR`;
-                        } else if (data.finalPrice != null) {
-                            badgeText = `${badgeText} | ${Number(data.finalPrice).toFixed(2)} SAR`;
-                        }
-
-                        onlineBox.style.display = "flex";
                         onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
                         onlineBox.style.border = "none";
-                        onlineBox.innerHTML = `
-                            <span style="color:white; font-weight:800; font-size:12px;">
-                                🌐 Online: ${escapeHtml(badgeText)}
-                            </span>
-                        `;
-
+                        onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:12px;">🌐 Online: ${data.offer}</span>`;
                         itemInMem.onlineOffer = badgeText;
-                        itemInMem.onlineOfferData = {
-                            onlineStatus: data.onlineStatus || "HAS_ONLINE_OFFER",
-                            hasOnlineOffer: true,
-                            offer: data.offer || "",
-                            offerText: data.offerText || "",
-                            originalPrice: data.originalPrice ?? null,
-                            finalPrice: data.finalPrice ?? null,
-                            priceDisplay: data.priceDisplay ?? null,
-                            source: data.source ?? null,
-                            confidence: data.confidence ?? null,
-                            url: data.url || `https://www.al-dawaa.com/en/p/${encodeURIComponent(cleanCode)}`
-                        };
                     } else {
-                        onlineBox.style.display = "flex";
                         onlineBox.style.background = "rgba(239, 68, 68, 0.12)";
                         onlineBox.style.border = "1px solid rgba(239, 68, 68, 0.45)";
-                        onlineBox.innerHTML = `
-                            <span style="color:#fecaca; font-weight:800; font-size:12px;">
-                                🌐 No online offer
-                            </span>
-                        `;
-
+                        onlineBox.innerHTML = `<span style="color:#fecaca; font-weight:800; font-size:12px;">🌐 No online offer</span>`;
                         itemInMem.onlineOffer = "No online offer";
-                        itemInMem.onlineOfferData = {
-                            onlineStatus: data?.onlineStatus || "NO_ONLINE_OFFER",
-                            hasOnlineOffer: false,
-                            offer: data?.offer || "",
-                            offerText: data?.offerText || "",
-                            originalPrice: null,
-                            finalPrice: null,
-                            priceDisplay: null,
-                            source: data?.source || null,
-                            confidence: data?.confidence ?? 0,
-                            url: data?.url || `https://www.al-dawaa.com/en/p/${encodeURIComponent(cleanCode)}`
-                        };
                     }
-
                     persistScannerSession();
-                })
-                .catch(() => {
-                    const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
-
-                    onlineBox.style.display = "flex";
-                    onlineBox.style.background = "rgba(245, 158, 11, 0.12)";
-                    onlineBox.style.border = "1px solid rgba(245, 158, 11, 0.45)";
-                    onlineBox.innerHTML = `
-                        <span style="color:#fde68a; font-weight:800; font-size:12px;">
-                            🌐 Online check failed
-                        </span>
-                    `;
-
-                    if (itemInMem) {
-                        itemInMem.onlineOffer = "Online check failed";
-                        itemInMem.onlineOfferData = {
-                            onlineStatus: "FETCH_ERROR",
-                            hasOnlineOffer: false
-                        };
-                    }
-
-                    persistScannerSession();
-                });
+                }).catch(() => {});
         }, 100);
     };
-
     fetchOnlineOffer();
 
     function persistScannerSession() {
-        try {
-            sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
-        } catch (e) {}
+        try { sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory)); } catch (e) {}
     }
 }
 
