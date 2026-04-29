@@ -5285,6 +5285,23 @@ body > div:has(> label[for="codesFileInput"]),
         </div>
     </div>
 </div>
+<div id="scannerImageGallery" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:2000000; flex-direction:column; align-items:center; justify-content:center; backdrop-filter:blur(10px);">
+    <button onclick="closeScannerGallery()" style="position:absolute; top:20px; right:20px; z-index:2000002; background:rgba(255,255,255,0.2); border:none; color:white; width:45px; height:45px; border-radius:50%; font-size:24px; cursor:pointer;">✕</button>
+    
+    <div id="galleryContainer" style="width:100%; height:80vh; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; touch-action: none;">
+        <img id="galleryImg" src="" style="max-width:95%; max-height:95%; object-fit:contain; transition: transform 0.3s ease; cursor: grab;" />
+    </div>
+
+    <div style="position:absolute; bottom:30px; display:flex; flex-direction:column; align-items:center; gap:15px; width:100%;">
+        <div id="galleryTitle" style="color:white; font-family:'Cairo'; font-weight:700; text-align:center; padding:0 20px;"></div>
+        <div style="display:flex; gap:40px; align-items:center;">
+            <button onclick="navGallery(-1)" style="background:rgba(255,255,255,0.1); border:1px solid white; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold;">❮ السابق</button>
+            <span id="galleryCounter" style="color:white; font-family:monospace; font-weight:bold; font-size:18px;">1 / 1</span>
+            <button onclick="navGallery(1)" style="background:rgba(255,255,255,0.1); border:1px solid white; color:white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:bold;">التالي ❯</button>
+        </div>
+        <div style="color:rgba(255,255,255,0.5); font-size:12px;">استخدم إصبعين للزوم أو السحب للتنقل</div>
+    </div>
+</div>
 <style>
   .btn-custom-offer{
     padding:20px 42px;  /* 📏 كبر padding */
@@ -47749,12 +47766,12 @@ function getScannerImageUrl(product) {
     ).trim();
 }
 
-function getScannerThumbMarkup(imageUrl, altText, size) {
+function getScannerThumbMarkup(imageUrl, altText, size, cleanCode) {
     const safeImageUrl = imageUrl && /^https?:\/\/+/i.test(imageUrl) ? escapeHtml(imageUrl) : '';
     const safeAlt = escapeHtml(altText || 'Product');
 
     return `
-        <div style="
+        <div onclick="openScannerGallery('${cleanCode}')" style="
             width:${size}px;
             height:${size}px;
             border-radius:16px;
@@ -47764,8 +47781,11 @@ function getScannerThumbMarkup(imageUrl, altText, size) {
             align-items:center;
             justify-content:center;
             flex-shrink:0;
-            border:1px solid #334155;
-        ">
+            border:2px solid #667eea;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: transform 0.2s ease;
+        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
             ${
                 safeImageUrl
                     ? `<img
@@ -47780,7 +47800,6 @@ function getScannerThumbMarkup(imageUrl, altText, size) {
         </div>
     `;
 }
-
 function buildScannerCardHtml({
     imageUrl = '',
     nameEN = '',
@@ -48959,4 +48978,74 @@ function executeClearAll() {
     
     console.log("🧹 Depanto session wiped clean successfully!");
 }
+let galleryIndex = 0;
+let galleryScale = 1;
+
+// 1️⃣ دالة فتح الجاليري
+function openScannerGallery(code) {
+    const items = scannedItemsMemory; // بنعتمد على الذاكرة اللي انت مخزن فيها البيانات
+    if (!items || items.length === 0) return;
+
+    galleryIndex = items.findIndex(i => i.cleanCode === code);
+    if (galleryIndex === -1) galleryIndex = 0;
+
+    updateGalleryContent();
+    document.getElementById('scannerImageGallery').style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // منع سكرول الصفحة خلف المودال
+}
+
+// 2️⃣ تحديث المحتوى داخل الجاليري
+function updateGalleryContent() {
+    const items = scannedItemsMemory;
+    const current = items[galleryIndex];
+    const imgEl = document.getElementById('galleryImg');
+    const titleEl = document.getElementById('galleryTitle');
+    const counterEl = document.getElementById('galleryCounter');
+
+    if (!current) return;
+
+    // ريسيت للزوم عند كل صورة جديدة
+    galleryScale = 1;
+    imgEl.style.transform = `scale(1)`;
+    
+    imgEl.src = current.imageUrl || createPlaceholderSVG(current.cleanCode);
+    titleEl.innerText = current.nameEN + "\n" + (current.nameAR || "");
+    counterEl.innerText = `${galleryIndex + 1} / ${items.length}`;
+}
+
+// 3️⃣ التنقل يمين وشمال
+function navGallery(dir) {
+    const items = scannedItemsMemory;
+    galleryIndex += dir;
+
+    if (galleryIndex >= items.length) galleryIndex = 0;
+    if (galleryIndex < 0) galleryIndex = items.length - 1;
+
+    updateGalleryContent();
+}
+
+// 4️⃣ قفل الجاليري
+function closeScannerGallery() {
+    document.getElementById('scannerImageGallery').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// 5️⃣ إضافة الـ Zoom (Pinch to Zoom) للموبايل
+let initialDist = 0;
+document.getElementById('galleryContainer').addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+        let dist = Math.hypot(
+            e.touches[0].pageX - e.touches[1].pageX,
+            e.touches[0].pageY - e.touches[1].pageY
+        );
+        if (initialDist === 0) {
+            initialDist = dist;
+        } else {
+            galleryScale = Math.min(Math.max(1, galleryScale + (dist - initialDist) * 0.01), 4);
+            document.getElementById('galleryImg').style.transform = `scale(${galleryScale})`;
+            initialDist = dist;
+        }
+    }
+});
+document.getElementById('galleryContainer').addEventListener('touchend', () => { initialDist = 0; });
 </script>
