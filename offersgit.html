@@ -48151,7 +48151,7 @@ async function openBarcodeScanner() {
 
     if (readerEl) {
         readerEl.innerHTML = '';
-        readerEl.style.width = '90%'; // زيادة العرض قليلاً ليعطي مساحة أكبر
+        readerEl.style.width = '90%'; 
         readerEl.style.marginLeft = 'auto';
         readerEl.style.marginRight = 'auto';
         readerEl.style.height = window.innerWidth <= 400 ? '220px' : '280px';
@@ -48164,16 +48164,21 @@ async function openBarcodeScanner() {
 
     if (printPanel) printPanel.style.display = 'none';
 
-    // 🔴 التعديل هنا: منع الكيبورد التلقائي مع السماح بفتحه عند الضغط اليدوي
+    // 🔴 التعديل هنا: استخدام inputmode="numeric" لفتح كيبورد الأرقام فقط
     if (manualInput) {
         manualInput.value = '';
         
         // 1. إيقاف الكيبورد التلقائي عند فتح المودل
         manualInput.setAttribute('inputmode', 'none'); 
+        
+        // التأكد من أن نوع الحقل text وليس number لمنع مشاكل الأسهم في المتصفح،
+        // لكننا نستخدم inputmode و pattern لفرض كيبورد الأرقام
+        manualInput.setAttribute('type', 'text');
+        manualInput.setAttribute('pattern', '[0-9]*');
 
-        // 2. لو المستخدم لمس الحقل بنفسه عشان يكتب، نسمح للكيبورد يفتح
+        // 2. لو المستخدم لمس الحقل بنفسه عشان يكتب، نفتح كيبورد الأرقام
         manualInput.addEventListener('click', function() {
-            this.removeAttribute('inputmode');
+            this.setAttribute('inputmode', 'numeric');
         });
 
         // 3. لما يطلع من الحقل، نرجع نمنع الكيبورد تاني عشان المرات الجاية
@@ -48301,7 +48306,8 @@ async function openBarcodeScanner() {
         await destroyScannerInstance();
         focusManualScannerInput(150);
     }
-}// =====================================================
+}
+
 // Process Code
 // =====================================================
 async function processScannedCode(code) {
