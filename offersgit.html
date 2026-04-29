@@ -47929,11 +47929,12 @@ function buildScannerCardHtml({
             flex-direction: column;
             background:rgba(255,255,255,0.04);
             padding:${pad};
+            padding-bottom: 0; /* نلغي الحشو السفلي هنا لنعطيه لمحتوى السكرول */
             border-radius:18px;
             border:1px solid rgba(255,255,255,0.10);
             position:relative;
-            max-height: 250px; /* 🔴 أقصى طول للكارت، عشان ميكبرش الصفحة */
-            overflow: hidden;  /* 🔴 يمنع الكارت نفسه من الخروج عن حجمه (وبالتالي الصفحة مش هتعمل سكرول) */
+            max-height: 250px; 
+            overflow: hidden; 
             width: 100%;
             box-sizing: border-box;
         ">
@@ -47941,8 +47942,9 @@ function buildScannerCardHtml({
             <!-- حاوية المحتوى (هنا بيحصل السكرول الداخلي فقط) -->
             <div class="card-content-scrollable" style="
                 width: 100%;
-                overflow-y: auto; /* 🔴 السكرول يظهر هنا فقط داخل الكارت */
-                padding-right: 6px; 
+                overflow-y: auto; 
+                padding-right: 6px;
+                padding-bottom: 15px; /* 🔴 التعديل هنا: دفع المحتوى للأعلى ليظهر بالكامل عند التمرير */
             ">
                 <style>
                     .card-content-scrollable::-webkit-scrollbar { width: 4px; }
@@ -48162,8 +48164,22 @@ async function openBarcodeScanner() {
 
     if (printPanel) printPanel.style.display = 'none';
 
+    // 🔴 التعديل هنا: منع الكيبورد التلقائي مع السماح بفتحه عند الضغط اليدوي
     if (manualInput) {
         manualInput.value = '';
+        
+        // 1. إيقاف الكيبورد التلقائي عند فتح المودل
+        manualInput.setAttribute('inputmode', 'none'); 
+
+        // 2. لو المستخدم لمس الحقل بنفسه عشان يكتب، نسمح للكيبورد يفتح
+        manualInput.addEventListener('click', function() {
+            this.removeAttribute('inputmode');
+        });
+
+        // 3. لما يطلع من الحقل، نرجع نمنع الكيبورد تاني عشان المرات الجاية
+        manualInput.addEventListener('blur', function() {
+            this.setAttribute('inputmode', 'none');
+        });
     }
 
     renderScannerSavedState();
@@ -48209,18 +48225,15 @@ async function openBarcodeScanner() {
 
         html5QrScanner = new Html5Qrcode("reader");
 
-        // --- التعديل الجوهري هنا لتوسيع منطقة المسح ---
-      const config = {
-    fps: 25, // زيادة عدد الفريمات لسرعة الاستجابة
-    qrbox: (viewfinderWidth, viewfinderHeight) => {
-        // هنا السحر: هنخلي العرض 90% من الشاشة والارتفاع صغير (مستطيل)
-        // ده بيزود مساحة القراءة العرضية جداً للموبايل
-        const width = viewfinderWidth * 0.95; 
-        const height = viewfinderHeight * 0.5; // مستطيل عرضي مريح للباركود
-        return { width: width, height: height };
-    },
-    aspectRatio: 1.0
-};
+        const config = {
+            fps: 25, 
+            qrbox: (viewfinderWidth, viewfinderHeight) => {
+                const width = viewfinderWidth * 0.95; 
+                const height = viewfinderHeight * 0.5; 
+                return { width: width, height: height };
+            },
+            aspectRatio: 1.0
+        };
 
         if (typeof Html5QrcodeSupportedFormats !== 'undefined') {
             config.formatsToSupport = [
@@ -48288,8 +48301,7 @@ async function openBarcodeScanner() {
         await destroyScannerInstance();
         focusManualScannerInput(150);
     }
-}
-// =====================================================
+}// =====================================================
 // Process Code
 // =====================================================
 async function processScannedCode(code) {
