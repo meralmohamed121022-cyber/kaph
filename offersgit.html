@@ -47866,31 +47866,38 @@ function buildScannerCardHtml({
         finalPrice != null &&
         originalPrice > finalPrice;
 
+    // تم التعديل لعرض الأسعار بجانب بعضها
     const onlineOfferHTML = hasPriceOffer
         ? `
             <div id="online-offer-${cleanCode}"
                  onclick="window.open('${productUrl}', '_blank')"
-                 style="margin-top:8px; padding:10px 12px; border-radius:12px;
+                 style="margin-top:8px; padding:8px 10px; border-radius:12px;
                         background:linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-                        border:none; display:flex; flex-direction:column; gap:6px; cursor:pointer;
-                        box-shadow:0 6px 16px rgba(124,58,237,0.35); animation:pulseOnline 2s infinite;">
+                        border:none; display:flex; flex-direction:column; gap:4px; cursor:pointer;
+                        box-shadow:0 4px 12px rgba(124,58,237,0.3); animation:pulseOnline 2s infinite;">
                 
                 <div style="display:flex; align-items:center; justify-content:center;">
-                    <span style="color:white; font-weight:800; font-size:12px; line-height:1.3; text-align:center;">
+                    <span style="color:white; font-weight:800; font-size:11px; line-height:1.2; text-align:center;">
                         🌐 Online: ${escapeHtml(offerTitle)}
                     </span>
                 </div>
 
-                <div style="display:flex; align-items:baseline; justify-content:center; gap:8px; flex-wrap:wrap;">
+                <div style="display:flex; align-items:center; justify-content:center; gap:8px; flex-wrap:wrap; margin-top:2px;">
                     ${showStrikethrough ? `
-                        <span style="color:rgba(255,255,255,0.72); font-size:11px; text-decoration:line-through; font-weight:700;">
+                        <span style="color:rgba(255,255,255,0.7); font-size:11px; text-decoration:line-through; font-weight:600;">
                             ${escapeHtml(originalPrice.toFixed(2))} SAR
                         </span>
                     ` : ''}
 
-                    <span style="color:#ffffff; font-size:${compact ? '15px' : '17px'}; font-weight:900; letter-spacing:0.2px;">
+                    <span style="color:#ffffff; font-size:${compact ? '14px' : '15px'}; font-weight:900; letter-spacing:0.5px;">
                         ${escapeHtml(finalPrice.toFixed(2))} SAR
                     </span>
+
+                    ${showStrikethrough && onlineOfferData.savingPercentage ? `
+                        <span style="background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:4px; color:#fff; font-size:10px; font-weight:700;">
+                            -${Number(onlineOfferData.savingPercentage).toFixed(0)}%
+                        </span>
+                    ` : ''}
                 </div>
             </div>`
         : hasOnlineStructuredOffer || hasOnlineTextOffer
@@ -47915,60 +47922,83 @@ function buildScannerCardHtml({
                 <span style="font-size:11px; color:#a78bfa; font-weight:700;">جاري فحص العرض أونلاين...</span>
             </div>`;
 
-    return `
+       return `
+        <!-- الكارت الأساسي اتغير لـ flex-direction: column عشان العناصر تاخد العرض كله لو حابة -->
         <div style="
             display:flex;
-            gap:12px;
-            align-items:center;
+            flex-direction: column;
+            gap:8px;
             background:rgba(255,255,255,0.04);
             padding:${pad};
             border-radius:18px;
             border:1px solid rgba(255,255,255,0.10);
             position:relative;
+            max-height: 280px; 
         ">
-            ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageSize)}
+            
+            <div class="card-content-scrollable" style="
+                flex:1; 
+                min-width:0; 
+                max-height: 250px; 
+                overflow-y: auto; 
+                padding-right: 5px; 
+            ">
+                <style>
+                    .card-content-scrollable::-webkit-scrollbar { width: 3px; }
+                    .card-content-scrollable::-webkit-scrollbar-track { background: transparent; }
+                    .card-content-scrollable::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
+                </style>
 
-            <div style="flex:1; min-width:0; text-align:right;">
-                <div style="color:${statusColor}; font-weight:800; font-size:${titleSize}; margin-bottom:6px; line-height:1.35; word-break:break-word;">
-                    ${escapeHtml(offerLabel || '')}
-                </div>
+                <!-- 💡 الجزء العلوي (الصورة على اليسار والبيانات على اليمين) -->
+                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                    
+                    ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageSize, cleanCode)}
 
-                ${offerLabelEN ? `
-                    <div style="font-size:${offerEnSize}; color:#93c5fd; font-weight:700; margin-bottom:4px; line-height:1.35; word-break:break-word;">
-                        ${escapeHtml(offerLabelEN)}
+                    <div style="flex:1; min-width:0; text-align:right;">
+                        <div style="color:${statusColor}; font-weight:800; font-size:${titleSize}; margin-bottom:6px; line-height:1.35; word-break:break-word;">
+                            ${escapeHtml(offerLabel || '')}
+                        </div>
+
+                        ${offerLabelEN ? `
+                            <div style="font-size:${offerEnSize}; color:#93c5fd; font-weight:700; margin-bottom:4px; line-height:1.35; word-break:break-word;">
+                                ${escapeHtml(offerLabelEN)}
+                            </div>
+                        ` : ''}
+
+                        <div style="font-size:${enSize}; color:#ffffff; font-weight:700; line-height:1.45; word-break:break-word;">
+                            ${escapeHtml(nameEN || 'Unknown Product')}
+                        </div>
+
+                        <div style="font-size:${arSize}; color:#fbbf24; font-family:Cairo,sans-serif; direction:rtl; margin:4px 0 0; line-height:1.45; word-break:break-word;">
+                            ${escapeHtml(nameAR || '')}
+                        </div>
+
+                        <div style="margin-top:8px;">
+                            <span style="
+                                display:inline-flex;
+                                align-items:center;
+                                gap:6px;
+                                background:rgba(15,23,42,0.95);
+                                border:1px solid rgba(148,163,184,0.35);
+                                padding:6px 10px;
+                                border-radius:999px;
+                                color:#e2e8f0;
+                                font-family:monospace;
+                                font-size:${codeSize};
+                                font-weight:700;
+                                max-width:100%;
+                                overflow:hidden;
+                                text-overflow:ellipsis;
+                            ">
+                                CODE: ${escapeHtml(cleanCode)}
+                            </span>
+                        </div>
                     </div>
-                ` : ''}
-
-                <div style="font-size:${enSize}; color:#ffffff; font-weight:700; line-height:1.45; word-break:break-word;">
-                    ${escapeHtml(nameEN || 'Unknown Product')}
                 </div>
-
-                <div style="font-size:${arSize}; color:#fbbf24; font-family:Cairo,sans-serif; direction:rtl; margin:4px 0 0; line-height:1.45; word-break:break-word;">
-                    ${escapeHtml(nameAR || '')}
-                </div>
-
+                
+                <!-- 💡 عرض الأونلاين تم نقله ليكون هنا عشان ياخد عرض الكارت بالكامل بما فيه المساحة تحت الصورة -->
                 ${onlineOfferHTML}
 
-                <div style="margin-top:8px;">
-                    <span style="
-                        display:inline-flex;
-                        align-items:center;
-                        gap:6px;
-                        background:rgba(15,23,42,0.95);
-                        border:1px solid rgba(148,163,184,0.35);
-                        padding:6px 10px;
-                        border-radius:999px;
-                        color:#e2e8f0;
-                        font-family:monospace;
-                        font-size:${codeSize};
-                        font-weight:700;
-                        max-width:100%;
-                        overflow:hidden;
-                        text-overflow:ellipsis;
-                    ">
-                        CODE: ${escapeHtml(cleanCode)}
-                    </span>
-                </div>
             </div>
         </div>
     `;
