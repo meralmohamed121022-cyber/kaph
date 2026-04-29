@@ -47866,7 +47866,7 @@ function buildScannerCardHtml({
         finalPrice != null &&
         originalPrice > finalPrice;
 
-    // تم التعديل لعرض الأسعار بجانب بعضها
+    // الأسعار بجانب بعضها كما طلبت
     const onlineOfferHTML = hasPriceOffer
         ? `
             <div id="online-offer-${cleanCode}"
@@ -47923,34 +47923,35 @@ function buildScannerCardHtml({
             </div>`;
 
        return `
-        <!-- الكارت الأساسي اتغير لـ flex-direction: column عشان العناصر تاخد العرض كله لو حابة -->
+        <!-- الكارت الأساسي -->
         <div style="
             display:flex;
             flex-direction: column;
-            gap:8px;
             background:rgba(255,255,255,0.04);
             padding:${pad};
             border-radius:18px;
             border:1px solid rgba(255,255,255,0.10);
             position:relative;
-            max-height: 280px; 
+            max-height: 250px; /* 🔴 أقصى طول للكارت، عشان ميكبرش الصفحة */
+            overflow: hidden;  /* 🔴 يمنع الكارت نفسه من الخروج عن حجمه (وبالتالي الصفحة مش هتعمل سكرول) */
+            width: 100%;
+            box-sizing: border-box;
         ">
             
+            <!-- حاوية المحتوى (هنا بيحصل السكرول الداخلي فقط) -->
             <div class="card-content-scrollable" style="
-                flex:1; 
-                min-width:0; 
-                max-height: 250px; 
-                overflow-y: auto; 
-                padding-right: 5px; 
+                width: 100%;
+                overflow-y: auto; /* 🔴 السكرول يظهر هنا فقط داخل الكارت */
+                padding-right: 6px; 
             ">
                 <style>
-                    .card-content-scrollable::-webkit-scrollbar { width: 3px; }
+                    .card-content-scrollable::-webkit-scrollbar { width: 4px; }
                     .card-content-scrollable::-webkit-scrollbar-track { background: transparent; }
                     .card-content-scrollable::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 4px; }
                 </style>
 
                 <!-- 💡 الجزء العلوي (الصورة على اليسار والبيانات على اليمين) -->
-                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%;">
+                <div style="display: flex; gap: 12px; align-items: flex-start; width: 100%; box-sizing: border-box;">
                     
                     ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageSize, cleanCode)}
 
@@ -47996,7 +47997,7 @@ function buildScannerCardHtml({
                     </div>
                 </div>
                 
-                <!-- 💡 عرض الأونلاين تم نقله ليكون هنا عشان ياخد عرض الكارت بالكامل بما فيه المساحة تحت الصورة -->
+                <!-- 💡 عرض الأونلاين (يأخذ العرض بالكامل تحت الصورة والنص) -->
                 ${onlineOfferHTML}
 
             </div>
