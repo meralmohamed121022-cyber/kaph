@@ -47759,33 +47759,42 @@ function buildNoImageBox(text) {
 }
 
 function getScannerImageUrl(product) {
-    return String(
-        product?.itemurl ||
-        product?.ItemURL ||
-        ''
-    ).trim();
+  // 1️⃣ DB: image_url (ملاها الوركر من الدواء أو النهدي)
+  // 2️⃣ DB: itemurl / ItemURL (اللينكات الموجودة أصلاً في الداتا)
+  // 3️⃣ فاضي — الوركر سيرجعها لاحقاً
+  return String(
+    product?.image_url  ||
+    product?.itemurl    ||
+    product?.ItemURL    ||
+    ""
+  ).trim();
 }
-
 function getScannerThumbMarkup(imageUrl, altText, size, cleanCode) {
-    const safeImageUrl = imageUrl && /^https?:\/\/+/i.test(imageUrl) ? escapeHtml(imageUrl) : '';
+    const safeImageUrl = imageUrl && /^https?:\/\//i.test(imageUrl) ? escapeHtml(imageUrl) : '';
     const safeAlt = escapeHtml(altText || 'Product');
 
     return `
-        <div onclick="openScannerGallery('${cleanCode}')" style="
-            width:${size}px;
-            height:${size}px;
-            border-radius:16px;
-            overflow:hidden;
-            background:#fff;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            flex-shrink:0;
-            border:2px solid #667eea;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            transition: transform 0.2s ease;
-        " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        <div 
+            class="scanner-thumb-wrap" 
+            onclick="openScannerGallery('${cleanCode}')" 
+            style="
+                width:${size}px;
+                height:${size}px;
+                border-radius:16px;
+                overflow:hidden;
+                background:#fff;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                flex-shrink:0;
+                border:2px solid #667eea;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+                transition: transform 0.2s ease;
+            " 
+            onmouseover="this.style.transform='scale(1.05)'" 
+            onmouseout="this.style.transform='scale(1)'"
+        >
             ${
                 safeImageUrl
                     ? `<img
@@ -47800,6 +47809,7 @@ function getScannerThumbMarkup(imageUrl, altText, size, cleanCode) {
         </div>
     `;
 }
+
 function buildScannerCardHtml({
     imageUrl = '',
     nameEN = '',
@@ -47965,6 +47975,7 @@ function buildScannerCardHtml({
 }
 function addScannerRowToList({
     imageUrl = '',
+    needsWorkerImage = false,  // 🆕
     nameEN = '',
     nameAR = '',
     cleanCode = '',
@@ -47974,24 +47985,19 @@ function addScannerRowToList({
     onlineOffer = ''   
 }) {
     const listEl = document.getElementById('scannedItemsList');
-    const shell = document.querySelector('.scanner-shell');
+    const shell  = document.querySelector('.scanner-shell');
     if (!listEl) return;
 
-    // 1. تحديد الخلفية بناءً على الحالة
     let bgColor = 'rgba(56, 239, 125, 0.08)'; 
     if (statusColor === '#ef4444') bgColor = 'rgba(239, 68, 68, 0.08)'; 
     else if (statusColor === '#f59e0b') bgColor = 'rgba(245, 158, 11, 0.08)';
 
-    // 2. منع التكرار البصري فوراً
     const existingRow = document.getElementById(`card-row-${cleanCode}`);
-    if (existingRow) {
-        existingRow.remove();
-    }
+    if (existingRow) existingRow.remove();
 
     const row = document.createElement('div');
-    row.id = `card-row-${cleanCode}`; 
+    row.id        = `card-row-${cleanCode}`; 
     row.className = 'new-scanned-item-flash';
-
     row.style.cssText = `
         background: ${bgColor};
         border-right: 4px solid ${statusColor};
@@ -48010,7 +48016,6 @@ function addScannerRowToList({
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     `;
 
-    // 3. بناء المحتوى (تمرير الـ onlineOffer)
     row.innerHTML = buildScannerCardHtml({
         imageUrl,
         nameEN,
@@ -48020,10 +48025,32 @@ function addScannerRowToList({
         offerLabelEN,
         statusColor,
         compact: true,
-        onlineOffer: onlineOffer 
+        onlineOffer
     });
 
-    // 4. زر الحذف (X) المطور
+    // =====================================================
+    // 🆕 استخدام .scanner-thumb-wrap بدل onclick المكسور
+    // =====================================================
+    const thumbEl = row.querySelector('.scanner-thumb-wrap');
+    if (thumbEl) {
+        thumbEl.setAttribute('data-thumb-code', cleanCode);
+
+        // لو مفيش صورة في الداتا → حوّل الـ border لـ dashed وحط placeholder
+        if (!imageUrl || needsWorkerImage) {
+            thumbEl.style.border      = '2px dashed #475569';
+            thumbEl.style.background  = '#1e293b';
+            thumbEl.innerHTML = `
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" 
+                     stroke="#475569" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <path d="m21 15-5-5L5 21"/>
+                </svg>`;
+        }
+    }
+    // =====================================================
+
+    // زر الحذف
     const deleteBtn = document.createElement('div');
     deleteBtn.innerHTML = '✕';
     deleteBtn.style.cssText = `
@@ -48034,55 +48061,42 @@ function addScannerRowToList({
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         transition: transform 0.2s;
     `;
-    
     deleteBtn.onclick = (e) => {
         e.stopPropagation();
         row.style.transform = 'scale(0.5)';
-        row.style.opacity = '0';
+        row.style.opacity   = '0';
         setTimeout(() => {
             row.remove();
-            // تحديث الذاكرة والجلسة
             if (typeof scannedCodesSet !== 'undefined') scannedCodesSet.delete(cleanCode);
             scannedItemsMemory = scannedItemsMemory.filter(i => i.cleanCode !== cleanCode);
             sessionStorage.setItem('scanned_items_session', JSON.stringify(scannedItemsMemory));
-            
-            if (typeof updateScannerDots === 'function') updateScannerDots();
-            if (typeof updateSelectedCount === 'function') updateSelectedCount();
+            if (typeof updateScannerDots    === 'function') updateScannerDots();
+            if (typeof updateSelectedCount  === 'function') updateSelectedCount();
         }, 200);
     };
     row.appendChild(deleteBtn);
 
-    // 5. إضافة الكارت وتحريك القائمة
     listEl.prepend(row);
     listEl.scrollTo({ left: 0, behavior: 'smooth' });
 
-    // 6. نظام الـ Toast المحسن (تحت الكاميرا مباشرة)
     const toast = document.createElement('div');
     toast.className = 'scanner-toast';
     toast.style.cssText = `
-        position: absolute; 
-        top: 230px; /* مكان استراتيجي تحت مربع الكاميرا */
-        left: 50%; 
+        position: absolute; top: 230px; left: 50%; 
         transform: translateX(-50%) translateY(0);
-        background: #0f172a; 
-        color: #38ef7d; 
-        padding: 10px 22px; 
-        border-radius: 30px;
-        font-size: 14px; 
-        font-weight: 800; 
-        z-index: 100000; 
+        background: #0f172a; color: #38ef7d; 
+        padding: 10px 22px; border-radius: 30px;
+        font-size: 14px; font-weight: 800; z-index: 100000; 
         border: 2px solid #38ef7d;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-        pointer-events: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.6); pointer-events: none;
         transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         white-space: nowrap;
     `;
     toast.innerHTML = `✅ ${cleanCode} Added`;
     if (shell) shell.appendChild(toast);
 
-    // أنيميشن الاختفاء
     setTimeout(() => {
-        toast.style.opacity = '0';
+        toast.style.opacity   = '0';
         toast.style.transform = 'translateX(-50%) translateY(20px)';
         setTimeout(() => toast.remove(), 400);
     }, 1200);
@@ -48322,19 +48336,29 @@ async function processScannedCode(code) {
         return;
     }
 
-    const imageUrl = getScannerImageUrl(product);
-    const offer = getOfferForScanner(cleanCode);
+    // ====================================================
+    // 🖼️ الأولوية 1: DB image_url → DB itemurl
+    // ====================================================
+    const imageUrl = String(
+        product?.image_url ||
+        product?.itemurl   ||
+        product?.ItemURL   ||
+        ""
+    ).trim();
+
+    const offer         = getOfferForScanner(cleanCode);
     const isOfferActive = isOfferCurrentlyActive(offer);
 
     const itemData = {
         imageUrl,
+        needsWorkerImage: !imageUrl,
         cleanCode,
         nameEN: product["Item Description English"] || product["Item Description"] || "Unknown",
         nameAR: product["أسم المنتج"] || "",
-        offerLabel: isOfferActive ? (offer?.offerTypeAR || 'العرض متاح') : '❌ لا يوجد عرض نشط حالياً',
-        offerLabelEN: isOfferActive ? (offer?.offerType || 'Offer Active') : 'No Active Offer',
-        statusColor: isOfferActive ? '#38ef7d' : '#ef4444',
-        onlineOffer: "",
+        offerLabel:   isOfferActive ? (offer?.offerTypeAR || 'العرض متاح')    : '❌ لا يوجد عرض نشط حالياً',
+        offerLabelEN: isOfferActive ? (offer?.offerType   || 'Offer Active')  : 'No Active Offer',
+        statusColor:  isOfferActive ? '#38ef7d' : '#ef4444',
+        onlineOffer:     "",
         onlineOfferData: null
     };
 
@@ -48371,7 +48395,7 @@ async function processScannedCode(code) {
     flashScannerSwipe('success');
 
     // =====================================================
-    // ✅ fetchOnlineOffer — النسخة المُصلحة
+    // ✅ fetchOnlineOffer — مع دعم image_url من الوركر
     // =====================================================
     const fetchOnlineOffer = () => {
         let attempts = 0;
@@ -48379,13 +48403,11 @@ async function processScannedCode(code) {
             attempts++;
             if (attempts > 50) { clearInterval(checkExist); return; }
 
-            // ✅ نستخدم querySelectorAll لتحديث كل الأماكن اللي فيها الـ ID (القائمة + الـ latest)
             const allBoxes = document.querySelectorAll(`[id="online-offer-${cleanCode}"]`);
             if (!allBoxes.length) return;
 
             clearInterval(checkExist);
 
-            // عرض اللودر في كل الصناديق
             allBoxes.forEach(box => {
                 box.style.display = "flex";
                 box.innerHTML = `<div class="scanner-mini-loader"></div><span style="font-size:11px;color:#a78bfa;font-weight:700;">جاري فحص العرض الأونلاين...</span>`;
@@ -48397,6 +48419,57 @@ async function processScannedCode(code) {
                     const itemInMem = scannedItemsMemory.find(i => i.cleanCode === cleanCode);
                     if (!itemInMem) return;
 
+                    // ====================================================
+                    // 🖼️ 2. تحديث الصورة (حتى لو موجودة بس مكسورة)
+                    // ====================================================
+                    const thumbWrap = document.querySelector(`[data-thumb-code="${cleanCode}"]`);
+                    // بنعرف إن الصورة مكسورة لو الـ onerror استبدلها بـ No Img أو No Image
+                    const isImageBroken = thumbWrap && (
+                        thumbWrap.innerHTML.includes('No Image') || 
+                        thumbWrap.innerHTML.includes('No Img') ||
+                        thumbWrap.querySelector('svg') !== null
+                    );
+
+                    console.log(`[Worker Debug] data.image_url:`, data.image_url);
+                    console.log(`[Worker Debug] itemInMem.imageUrl before:`, itemInMem.imageUrl);
+                    console.log(`[Worker Debug] isImageBroken:`, isImageBroken);
+
+                    // لو الوركر جاب صورة، وكان الداتابيز مفهاش صورة أو اللي فيها باظت
+                    if (data.image_url && (!itemInMem.imageUrl || isImageBroken || itemInMem.needsWorkerImage)) {
+                        itemInMem.imageUrl         = data.image_url;
+                        itemInMem.needsWorkerImage = false;
+
+                        if (thumbWrap) {
+                            const imgEl          = document.createElement('img');
+                            imgEl.src            = data.image_url;
+                            imgEl.alt            = 'Product';
+                            imgEl.referrerPolicy = 'no-referrer';
+                            imgEl.style.cssText  = 'width:100%;height:100%;object-fit:contain;background:#fff;';
+                            
+                            imgEl.onload = () => console.log(`[Worker Debug] Image loaded successfully in DOM:`, data.image_url);
+                            imgEl.onerror = () => {
+                                console.error(`[Worker Debug] Failed to load image in DOM! URL:`, data.image_url);
+                                thumbWrap.innerHTML = '<span style="color:#94a3b8;font-size:9px;text-align:center;padding:4px;">No Img</span>';
+                            };
+
+                            thumbWrap.innerHTML        = '';
+                            thumbWrap.style.border     = '2px solid #667eea';
+                            thumbWrap.style.background = '#fff';
+                            thumbWrap.appendChild(imgEl);
+                        }
+
+                        // حدّث الداتا بيز المحلية عشان لما يعمل ريفريش للكارت متكسرش تاني
+                        const dbProd = window.productsDB?.find(p => String(p.Code || '').trim() === cleanCode);
+                        if (dbProd) dbProd.image_url = data.image_url;
+
+                        persistScannerSession();
+                    } else if (!data.image_url) {
+                        console.warn(`[Worker Debug] No image_url returned from worker for ${cleanCode}`);
+                    } else {
+                        console.log(`[Worker Debug] Image already exists and works fine in memory for ${cleanCode}`);
+                    }
+                    // ====================================================
+
                     const hasOffer = data && data.success === true && (
                         data.hasOnlineOffer === true ||
                         data.onlineStatus === "HAS_ONLINE_OFFER" ||
@@ -48404,99 +48477,85 @@ async function processScannedCode(code) {
                     );
 
                     if (hasOffer) {
-                        // ✅ حفظ البيانات الكاملة في الذاكرة
-                        const badgeText = data.offer || data.offerText || 'Online Offer';
-                        itemInMem.onlineOffer = badgeText;
-                        itemInMem.onlineOfferData = data; // ← السطر المهم
+                        const badgeText     = data.offer || data.offerText || 'Online Offer';
+                        itemInMem.onlineOffer     = badgeText;
+                        itemInMem.onlineOfferData = data;
 
-                        const productUrl = `https://www.al-dawaa.com/en/p/${cleanCode}`;
+                        const productUrl    = `https://www.al-dawaa.com/en/p/${cleanCode}`;
                         const originalPrice = data.originalPrice != null ? Number(data.originalPrice) : null;
-                        const finalPrice = data.finalPrice != null ? Number(data.finalPrice) : null;
-                        const hasPriceOffer = originalPrice != null && finalPrice != null;
+                        const finalPrice    = data.finalPrice    != null ? Number(data.finalPrice)    : null;
+                        const hasPriceOffer     = originalPrice != null && finalPrice != null;
                         const showStrikethrough = hasPriceOffer && originalPrice > finalPrice;
 
-                       const buildOfferBoxHTML = (compact) => {
-    const priceSize = compact ? '16px' : '19px';
-    if (hasPriceOffer) {
-        const savings = (originalPrice - finalPrice).toFixed(2);
-        const savingPct = data.savingPercentage
-            ? Number(data.savingPercentage).toFixed(1)
-            : ((originalPrice - finalPrice) / originalPrice * 100).toFixed(1);
-        return `
-            <div style="display:flex;align-items:center;justify-content:center;">
-                <span style="color:rgba(255,255,255,0.9);font-weight:800;font-size:12px;line-height:1.3;text-align:center;">
-                    🌐 Online: ${escapeHtml(badgeText)}
-                </span>
-            </div>
+                        const buildOfferBoxHTML = (compact) => {
+                            const priceSize = compact ? '16px' : '19px';
+                            if (hasPriceOffer) {
+                                const savings    = (originalPrice - finalPrice).toFixed(2);
+                                const savingPct  = data.savingPercentage
+                                    ? Number(data.savingPercentage).toFixed(1)
+                                    : ((originalPrice - finalPrice) / originalPrice * 100).toFixed(1);
+                                return `
+                                    <div style="display:flex;align-items:center;justify-content:center;">
+                                        <span style="color:rgba(255,255,255,0.9);font-weight:800;font-size:12px;line-height:1.3;text-align:center;">
+                                            🌐 Online: ${escapeHtml(badgeText)}
+                                        </span>
+                                    </div>
+                                    <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:2px;">
+                                        ${showStrikethrough ? `
+                                            <span style="
+                                                color:rgba(255,255,255,0.45);
+                                                font-size:${compact ? '12px' : '13px'};
+                                                text-decoration:line-through;
+                                                text-decoration-color:rgba(255,100,100,0.8);
+                                                text-decoration-thickness:2px;
+                                                font-weight:700;
+                                            ">${originalPrice.toFixed(2)} SAR</span>
+                                        ` : ''}
+                                        <span style="
+                                            color:#4ade80;
+                                            font-size:${priceSize};
+                                            font-weight:900;
+                                            letter-spacing:0.3px;
+                                            text-shadow:0 0 12px rgba(74,222,128,0.6);
+                                        ">${finalPrice.toFixed(2)} SAR</span>
+                                    </div>
+                                    ${showStrikethrough ? `
+                                        <div style="
+                                            display:inline-flex;align-items:center;justify-content:center;
+                                            background:rgba(74,222,128,0.18);
+                                            border:1px solid rgba(74,222,128,0.4);
+                                            border-radius:999px;padding:2px 10px;margin-top:4px;gap:4px;
+                                        ">
+                                            <span style="color:#4ade80;font-size:11px;font-weight:800;">
+                                                وفّر ${savings} SAR · ${savingPct}%
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                `;
+                            } else {
+                                return `<span style="color:white;font-weight:800;font-size:12px;">🌐 Online: ${escapeHtml(badgeText)}</span>`;
+                            }
+                        };
 
-            <div style="display:flex;align-items:baseline;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:2px;">
-                ${showStrikethrough ? `
-                    <span style="
-                        color:rgba(255,255,255,0.45);
-                        font-size:${compact ? '12px' : '13px'};
-                        text-decoration:line-through;
-                        text-decoration-color:rgba(255,100,100,0.8);
-                        text-decoration-thickness:2px;
-                        font-weight:700;
-                    ">
-                        ${originalPrice.toFixed(2)} SAR
-                    </span>
-                ` : ''}
-
-                <span style="
-                    color:#4ade80;
-                    font-size:${priceSize};
-                    font-weight:900;
-                    letter-spacing:0.3px;
-                    text-shadow:0 0 12px rgba(74,222,128,0.6);
-                ">
-                    ${finalPrice.toFixed(2)} SAR
-                </span>
-            </div>
-
-            ${showStrikethrough ? `
-                <div style="
-                    display:inline-flex;
-                    align-items:center;
-                    justify-content:center;
-                    background:rgba(74,222,128,0.18);
-                    border:1px solid rgba(74,222,128,0.4);
-                    border-radius:999px;
-                    padding:2px 10px;
-                    margin-top:4px;
-                    gap:4px;
-                ">
-                    <span style="color:#4ade80;font-size:11px;font-weight:800;">
-                        وفّر ${savings} SAR · ${savingPct}%
-                    </span>
-                </div>
-            ` : ''}
-        `;
-    } else {
-        return `<span style="color:white;font-weight:800;font-size:12px;">🌐 Online: ${escapeHtml(badgeText)}</span>`;
-    }
-};
-                        // ✅ تحديث كل الصناديق (latest + list)
                         document.querySelectorAll(`[id="online-offer-${cleanCode}"]`).forEach(box => {
                             const isCompact = box.closest('#scannedItemsList') !== null;
-                            box.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-                            box.style.border = "none";
+                            box.style.background   = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+                            box.style.border        = "none";
                             box.style.flexDirection = hasPriceOffer ? "column" : "row";
-                            box.style.gap = hasPriceOffer ? "6px" : "0";
-                            box.style.cursor = "pointer";
-                            box.style.boxShadow = "0 6px 16px rgba(124,58,237,0.35)";
+                            box.style.gap           = hasPriceOffer ? "6px" : "0";
+                            box.style.cursor        = "pointer";
+                            box.style.boxShadow     = "0 6px 16px rgba(124,58,237,0.35)";
                             box.onclick = () => window.open(productUrl, '_blank');
                             box.innerHTML = buildOfferBoxHTML(isCompact);
                         });
 
                     } else {
-                        // ❌ لا يوجد عرض
-                        itemInMem.onlineOffer = "No online offer";
+                        itemInMem.onlineOffer     = "No online offer";
                         itemInMem.onlineOfferData = null;
 
                         document.querySelectorAll(`[id="online-offer-${cleanCode}"]`).forEach(box => {
-                            box.style.background = "rgba(239,68,68,0.12)";
-                            box.style.border = "1px solid rgba(239,68,68,0.45)";
+                            box.style.background   = "rgba(239,68,68,0.12)";
+                            box.style.border        = "1px solid rgba(239,68,68,0.45)";
                             box.style.flexDirection = "row";
                             box.innerHTML = `<span style="color:#fecaca;font-weight:800;font-size:12px;">🌐 No online offer</span>`;
                         });
@@ -48504,10 +48563,11 @@ async function processScannedCode(code) {
 
                     persistScannerSession();
                 })
-                .catch(() => {
+                .catch((e) => {
+                    console.error(`[Worker Debug] Fetch error for ${cleanCode}:`, e);
                     document.querySelectorAll(`[id="online-offer-${cleanCode}"]`).forEach(box => {
                         box.style.background = "rgba(100,100,100,0.1)";
-                        box.style.border = "1px dashed rgba(148,163,184,0.3)";
+                        box.style.border     = "1px dashed rgba(148,163,184,0.3)";
                         box.innerHTML = `<span style="color:#94a3b8;font-size:11px;font-weight:700;">⚠️ تعذّر الاتصال</span>`;
                     });
                 });
