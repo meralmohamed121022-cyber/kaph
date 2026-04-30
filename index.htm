@@ -1221,6 +1221,16 @@ function openLink(url) {
     if (!url || url.trim() === '#') return;
     closeAllMenus();
 
+    // 🔴 التعديل هنا: سحب رقم الصيدلية وتمريره في الرابط
+    const phNo = localStorage.getItem('pharmacy_number');
+    let finalUrl = url;
+    
+    // لو فيه رقم صيدلية، بنضيفه للرابط كـ Parameter اسمه ph
+    if (phNo) {
+        const separator = url.includes('?') ? '&' : '?';
+        finalUrl = `${url}${separator}ph=${encodeURIComponent(phNo)}`;
+    }
+
     const navButtons = document.querySelectorAll('.nav-btn');
     navButtons.forEach(btn => {
         btn.classList.remove('active');
@@ -1234,10 +1244,8 @@ function openLink(url) {
     const errorBox = document.getElementById('iframeError');
     const loader = document.getElementById('loadingOverlay');
 
-    // إخفاء أي error قديم
     errorBox.classList.remove('show');
 
-    // إظهار اللودر
     if (loader) {
         loader.style.display = 'flex';
         loader.style.opacity = '1';
@@ -1246,15 +1254,11 @@ function openLink(url) {
 
     container.classList.add('show');
 
-    // ✅ مسح الـ handlers القديمة أولاً لمنع التعارض
     iframe.onload = null;
     iframe.onerror = null;
 
-    // ✅ تحميل الـ iframe بعد delay صغير عشان about:blank ما يطلقش onload
     setTimeout(() => {
         let hasLoaded = false;
-
-        // ✅ Timeout مرفوع لـ 15 ثانية
         let loadTimeout = setTimeout(() => {
             if (!hasLoaded) {
                 hideLoaderFast(loader);
@@ -1263,13 +1267,10 @@ function openLink(url) {
         }, 15000);
 
         iframe.onload = function() {
-            // ✅ تجاهل about:blank و عدم الاعتبار كـ load ناجح
             try {
                 const frameSrc = iframe.contentWindow.location.href;
                 if (frameSrc === 'about:blank') return;
-            } catch(e) {
-                // cross-origin: يعني الصفحة اتحملت بنجاح
-            }
+            } catch(e) {}
             hasLoaded = true;
             clearTimeout(loadTimeout);
             hideLoaderFast(loader);
@@ -1282,7 +1283,8 @@ function openLink(url) {
             errorBox.classList.add('show');
         };
 
-        iframe.src = url;
+        // 🟢 نستخدم finalUrl اللي فيه رقم الصيدلية
+        iframe.src = finalUrl;
     }, 50);
 }
 function hideLoaderFast(loader) {
