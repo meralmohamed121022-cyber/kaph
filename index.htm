@@ -376,6 +376,41 @@
     from { transform: translateY(30px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
+/* --- NEW EXPIRY BUTTON STYLES --- */
+.nav-btn.new-feature {
+    position: relative;
+}
+
+.badge-new {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4b2b;
+    color: white;
+    font-size: 8px;
+    padding: 2px 5px;
+    border-radius: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
+    animation: pulse-red 1.5s infinite;
+    box-shadow: 0 0 10px rgba(255, 75, 43, 0.5);
+}
+
+@keyframes pulse-red {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7); }
+    70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255, 75, 43, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+}
+
+/* تأثير التوهج للزرار نفسه */
+.glow-effect {
+    animation: icon-glow 2s infinite alternate;
+}
+
+@keyframes icon-glow {
+    from { color: var(--text-secondary); }
+    to { color: var(--accent-orange); filter: drop-shadow(0 0 5px var(--accent-orange)); }
+}
     </style>
 </head>
 <body>
@@ -479,12 +514,22 @@
     </div>
 
     <!-- NAVIGATION -->
-    <nav id="bottomNav">
-        <button class="nav-btn" onclick="toggleSections()"><i class="fas fa-th-large"></i><span>Sections</span></button>
-        <button class="nav-btn active" onclick="goHome()"><i class="fas fa-home"></i><span>Home</span></button>
-        <button class="nav-btn" onclick="openLink('offersgit.html')"><i class="fas fa-tags"></i><span>Offers</span></button>
-        <button class="nav-btn" onclick="openLink('dev.htm')"><i class="fas fa-user-tie"></i><span>Dev</span></button>
-    </nav>
+<nav id="bottomNav">
+   
+    <button class="nav-btn" onclick="toggleSections()"><i class="fas fa-th-large"></i><span>Sections</span></button>
+  <button class="nav-btn new-feature" onclick="openLink('expiry.html')">
+        <span class="badge-new">New</span>
+        <i class="fas fa-calendar-check glow-effect"></i>
+        <span>Expiry</span>
+    </button>
+    <button class="nav-btn active" onclick="goHome()"><i class="fas fa-home"></i><span>Home</span></button>
+    
+    <!-- زرار Expiry Check الجديد -->
+   
+
+    <button class="nav-btn" onclick="openLink('offersgit.html')"><i class="fas fa-tags"></i><span>Offers</span></button>
+    <button class="nav-btn" onclick="openLink('dev.htm')"><i class="fas fa-user-tie"></i><span>Dev</span></button>
+</nav>
 
     <!-- SECTIONS MENU -->
     <div id="sectionsMenu">
