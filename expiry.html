@@ -228,12 +228,48 @@ input.search-main:focus {
         .st-btn.missing:hover, .st-btn.missing.active { background: var(--danger); color: white; border-color: var(--danger); }
 
         @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+/* 1. صندوق التوست - السنترة والوضعية */
+#toast-box { 
+    position: fixed; 
+    top: 80px; /* نزلناه لتحت شوية عشان يبعد عن الـ Header */
+    left: 0;
+    right: 0;
+    margin: 0 auto; /* سنترة أفقية مضمونة */
+    z-index: 999999; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; /* سنترة التوستات بداخل الصندوق */
+    gap: 12px; 
+    width: 100%;
+    pointer-events: none; /* عشان ما يمنعش الضغط على اللي تحته لو فاضي */
+}
 
-        /* Modals & Toasts */
-        #toast-box { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: white; padding: 16px 20px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); border-left: 5px solid; display: flex; align-items: center; gap: 15px; min-width: 300px; transform: translateX(120%); transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
-        .toast.show { transform: translateX(0); }
-        
+/* 2. تصميم وحركة التوست الفردي */
+.toast { 
+    background: white; 
+    padding: 14px 24px; 
+    border-radius: 50px; /* شكل كبسولة احترافي */
+    box-shadow: 0 15px 35px rgba(0,0,0,0.2); 
+    border-left: 6px solid; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    gap: 12px; 
+    min-width: 280px;
+    max-width: 90%;
+    pointer-events: auto; /* رجوع اللمس للتوست نفسه */
+    
+    /* الحركة: يبدأ شفاف ومرفوع لفوق */
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+}
+
+/* 3. الحالة عند الظهور */
+.toast.show { 
+    opacity: 1;
+    transform: translateY(0) scale(1); /* ينزل لمكانه الطبيعي */
+}
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 6000; display: none; align-items: center; justify-content: center; }
         .modal-box { background: white; padding: 30px; border-radius: 24px; width: 90%; max-width: 400px; text-align: center; transform: scale(0.9); opacity: 0; transition: 0.3s; }
         .modal-overlay.open .modal-box { transform: scale(1); opacity: 1; }
@@ -782,6 +818,50 @@ header {
             transform: scale(1.02);
             box-shadow: 0 6px 15px rgba(220, 38, 38, 0.3);
         }
+        /* تنسيق زر الصعود */
+.back-to-top {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 20px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    opacity: 0; /* مخفي في البداية */
+    visibility: hidden;
+    z-index: 1000;
+}
+
+.back-to-top.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: #4338CA;
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+}
+
+/* تعديل مكانه في الموبايل عشان ما يغطيش على أزرار تانية */
+@media (max-width: 768px) {
+    .back-to-top {
+        bottom: 20px;
+        right: 20px;
+        width: 45px;
+        height: 45px;
+    }
+}
     </style>
     <div id="monthNav" class="month-nav-container" style="display:none"></div>
 
@@ -827,6 +907,8 @@ header {
     <h2 style="font-family: 'Cairo', sans-serif; margin: 0;">جاري حفظ البيانات في السيرفر... ⏳</h2>
     <p style="color: #cbd5e1; font-size: 14px; margin-top: 10px;">الرجاء عدم إغلاق الصفحة</p>
 </div>
+<!-- زر الصعود لأعلى الصفحة -->
+<button id="backToTop" class="back-to-top" onclick="app.scrollToTop()">▲</button>
 <script>
     // 🛑 REPLACE WITH YOUR WORKER URL
     const WORKER_URL = "https://tracker-new.meralmohamed121022.workers.dev";
@@ -941,53 +1023,50 @@ app.getPharmacyColor = (id) => {
     console.log("Expiry System Initialized. Waiting for messages...");
 },
 // 🔴 ضع دالة notify الجديدة هنا بين الدوال
-    notify: (msg, type = 'success') => {
-        let box = document.getElementById('toast-box');
-        if (!box) {
-            box = document.createElement('div');
-            box.id = 'toast-box';
-            box.style.position = 'fixed';
-            box.style.top = '20px';
-            box.style.right = '20px';
-            box.style.zIndex = '999999';
-            box.style.display = 'flex';
-            box.style.flexDirection = 'column';
-            box.style.gap = '10px';
-            document.body.appendChild(box);
-        }
+notify: (msg, type = 'success') => {
+    let box = document.getElementById('toast-box');
+    if (!box) {
+        box = document.createElement('div');
+        box.id = 'toast-box';
+        document.body.appendChild(box);
+    }
 
-        let borderColor = 'var(--success)';
-        if (type === 'error') borderColor = 'var(--danger)';
-        if (type === 'warning') borderColor = '#F59E0B'; 
+    // تحديد اللون والأيقونة حسب النوع
+    let borderColor = 'var(--success)';
+    let icon = '✅';
+    if (type === 'error') {
+        borderColor = 'var(--danger)';
+        icon = '❌';
+    } else if (type === 'warning') {
+        borderColor = '#F59E0B';
+        icon = '⚠️';
+    }
 
-        const t = document.createElement('div');
-        t.style.cssText = `
-            background: white; 
-            padding: 16px 20px; 
-            border-radius: 12px; 
-            box-shadow: 0 10px 40px rgba(0,0,0,0.15); 
-            border-left: 5px solid ${borderColor}; 
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            min-width: 300px; 
-            color: #1E293B;
-            font-weight: 600;
-            font-size: 14px;
-            transform: translateX(120%); 
-            transition: 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        `;
-        
-        t.innerHTML = `<div>${msg}</div>`;
-        box.appendChild(t);
+    const t = document.createElement('div');
+    t.className = 'toast'; // الاعتماد على الـ CSS الخارجي للحركة
+    t.style.borderLeft = `6px solid ${borderColor}`;
+    
+    // محتوى التوست بشكل محاذي ومنسق
+    t.innerHTML = `
+        <span style="font-size: 18px;">${icon}</span>
+        <div style="color: #1E293B; font-weight: 700; font-size: 14px; line-height: 1.4;">${msg}</div>
+    `;
 
-        setTimeout(() => { t.style.transform = 'translateX(0)'; }, 10);
+    box.appendChild(t);
 
-        setTimeout(() => { 
-            t.style.transform = 'translateX(120%)';
-            setTimeout(() => t.remove(), 400); 
-        }, 4000);
-    },
+    // تفعيل فئة الظهور بعد وقت قصير جداً لتشغيل الأنميشن
+    setTimeout(() => { 
+        t.classList.add('show'); 
+    }, 50);
+
+    // الإخفاء والحذف تلقائياً بعد 4 ثوانٍ
+    setTimeout(() => { 
+        t.classList.remove('show');
+        // ننتظر انتهاء أنميشن الإخفاء قبل حذف العنصر نهائياً من الـ DOM
+        setTimeout(() => t.remove(), 500); 
+    }, 4000);
+},
+
 login: async () => {
             const id = String(document.getElementById('userId').value || '').trim();
             if (!id) return app.notify("Enter user ID", "error");
@@ -1037,8 +1116,8 @@ login: async () => {
             location.reload(); 
         },
 
-      setStatFilter: (type, el) => {
-    // إزالة التحديد من جميع الكروت وإضافته للكارت المضغطوط عليه
+setStatFilter: (type, el) => {
+    // إزالة التحديد من جميع الكروت وإضافته للكارت المختار
     document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
     if (el) el.classList.add('active');
 
@@ -1046,36 +1125,44 @@ login: async () => {
         app.exploreMode = true;
         app.statFilter = 'all'; 
 
-        // 💡 التعديل الجوهري: تحديد كل الصيدليات المسجلة أوتوماتيكياً
-        // دي بتخلي السيستم يجمع الداتا من كل اليوزرز المسجلين في app.allRegisteredUsers
+        // تحديد كل الصيدليات المسجلة أوتوماتيكياً
         app.selectedUsers = new Set(app.allRegisteredUsers);
 
-        // إخفاء حاوية الأرقام ومربع البحث تماماً لأننا مش محتاجين نختار يدوياً
+        // إخفاء حاوية الأرقام تماماً
         const container = document.getElementById('exploreUsersContainer');
         if (container) {
             container.style.display = 'none';
         }
 
         app.notify("جاري عرض جميع أصناف الصيدليات المسجلة (All PH Expiry)", "success");
+        
+        // 💡 التعديل: الانتقال لبداية الكروت عند تفعيل الاستكشاف
+        setTimeout(() => {
+            const inventorySection = document.getElementById('inventoryContainer');
+            if (inventorySection) {
+                // حساب المسافة مع ترك مساحة بسيطة في الأعلى (Offset)
+                const yOffset = -120; 
+                const y = inventorySection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }, 300); // تأخير بسيط لضمان انتهاء عملية الـ Render
+
     } else {
         // العودة للوضع العادي (صيدليتك فقط)
         app.exploreMode = false;
         app.statFilter = type;
-        
-        // تصفير قائمة المستخدمين المختارين لضمان عدم التداخل
         app.selectedUsers = new Set();
         
-        // التأكد من إبقاء الحاوية مخفية
         const container = document.getElementById('exploreUsersContainer');
         if (container) {
             container.style.display = 'none';
         }
     }
     
-    // إعادة ريندر الصفحة بالفلتر الجديد
+    // إعادة بناء الصفحة بالبيانات الجديدة
     app.render(true);
 },
-
         toggleUserSelection: (userId) => {
             if (app.selectedUsers.has(userId)) app.selectedUsers.delete(userId);
             else app.selectedUsers.add(userId);
@@ -1824,6 +1911,23 @@ confirmUpload: async () => {
     };
 
     window.onload = () => app.init();
+    // 1. دالة الصعود بنعومة
+app.scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
+
+// 2. مراقب التمرير (Scroll Listener) لإظهار السهم
+window.addEventListener('scroll', () => {
+    const btn = document.getElementById('backToTop');
+    if (window.pageYOffset > 300) {
+        btn.classList.add('show');
+    } else {
+        btn.classList.remove('show');
+    }
+});
 </script>
 </body>
 </html>
