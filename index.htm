@@ -1266,16 +1266,32 @@ function openLink(url) {
             }
         }, 15000);
 
-        iframe.onload = function() {
+iframe.onload = function() {
             try {
                 const frameSrc = iframe.contentWindow.location.href;
                 if (frameSrc === 'about:blank') return;
-            } catch(e) {}
+            } catch(e) {
+                // cross-origin: يعني الصفحة اتحملت بنجاح
+            }
             hasLoaded = true;
             clearTimeout(loadTimeout);
             hideLoaderFast(loader);
-        };
 
+            // 🚀 التعديل الجوهري هنا: إرسال الرقم عبر postMessage
+            // بنجيب الرقم اللي متسجل في المنصة الرئيسية
+            const phNo = localStorage.getItem('pharmacy_number');
+            
+            if (phNo) {
+                // بنستنى نص ثانية عشان نضمن إن الصفحة اللي جوه الـ iframe جاهزة تسمعنا
+                setTimeout(() => {
+                    console.log("Sending Pharmacy ID to iframe:", phNo);
+                    iframe.contentWindow.postMessage({ 
+                        type: 'LOGIN_DATA', 
+                        ph: phNo 
+                    }, '*'); // '*' تسمح بمرور الرسالة حتى لو الملفات محلياً
+                }, 500);
+            }
+        };
         iframe.onerror = function() {
             hasLoaded = true;
             clearTimeout(loadTimeout);
