@@ -45736,55 +45736,29 @@ document.getElementById('galleryContainer').addEventListener('touchmove', (e) =>
 });
 document.getElementById('galleryContainer').addEventListener('touchend', () => { initialDist = 0; });
 // 1. إخفاء كل شيء في الصفحة تماماً (اللودر، الجات واي، العروض، الهيدر) في أول جزء من الثانية
+// 1. إخفاء الواجهة تماماً وتركيز قوة المتصفح على السكانر فقط
 if (window.location.hash.includes('scanner')) {
     const instantStyle = document.createElement('style');
     instantStyle.id = "scannerHideStyle"; 
     instantStyle.innerHTML = `
         #loaderScreen, #gatewayView, #fixedHeader, #mainOffersContainer { 
             display: none !important; 
-            opacity: 0 !important; 
-            visibility: hidden !important; 
-            pointer-events: none !important; 
-            z-index: -1 !important; 
         }
         body { 
-            background: #0a1628 !important; /* لون كحلي غامق بدل الأبيض */
-            overflow: hidden !important; 
+            background: #0f172a !important; /* لون خلفية هادي يطابق السكانر */
         }
     `;
     document.head.appendChild(instantStyle);
 }
 
-// 2. تشغيل السكانر وبعدين إعادة العروض والهيدر في خلفية الكاميرا بهدوء
+// 2. تشغيل السكانر فوراً بدون أي تشتيت للمتصفح
 window.addEventListener("DOMContentLoaded", () => {
     if (window.location.hash.includes('scanner')) {
-        
-        // فتح السكانر بسرعة جداً
         setTimeout(() => {
             if (typeof openBarcodeScanner === 'function') {
                 openBarcodeScanner();
             }
-            
-            // بعد 500 ملي ثانية (يعني السكانر بيكون فتح خلاص وغطى الشاشة)
-            // نشيل الاستايل الإجباري ونرجع صفحة العروض في ضهره
-            setTimeout(() => {
-                const hideStyle = document.getElementById("scannerHideStyle");
-                if (hideStyle) hideStyle.remove();
-                
-                const gatewayView = document.getElementById('gatewayView');
-                const fixedHeader = document.getElementById('fixedHeader');
-                const mainOffersContainer = document.getElementById('mainOffersContainer');
-                const loader = document.getElementById('loaderScreen');
-                
-                // نضمن إن اللودر والجات واي مختفيين، والعروض معروضة ورا السكانر
-                if (gatewayView) gatewayView.style.display = 'none';
-                if (loader) loader.style.display = 'none';
-                if (fixedHeader) fixedHeader.style.display = 'flex';
-                if (mainOffersContainer) mainOffersContainer.style.display = 'block';
-                document.body.style.overflow = 'auto'; // نرجع السكرول طبيعي
-            }, 500);
-
-        }, 300);
+        }, 100); // قللنا الوقت جداً لأن مفيش عروض بتهنج المتصفح دلوقتي
     }
 });
 </script>
