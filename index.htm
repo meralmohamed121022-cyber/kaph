@@ -49,26 +49,25 @@
         }
 
         /* --- USER INFO BADGE --- */
-        #userInfoBadge {
-            position: absolute; 
-            top: 20px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: var(--glass-bg); 
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--accent-orange); 
-            color: var(--accent-orange-light);
-            padding: 8px 20px; 
-            border-radius: 20px; 
-            font-weight: bold;
-            font-size: 14px; 
-            z-index: 25000; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            display: none; 
-            align-items: center; 
-            gap: 8px;
-        }
-
+#userInfoBadge {
+    position: fixed; /* التعديل هنا بدل absolute */
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background: var(--glass-bg); 
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--accent-orange); 
+    color: var(--accent-orange-light);
+    padding: 8px 20px; 
+    border-radius: 20px; 
+    font-weight: bold;
+    font-size: 14px; 
+    z-index: 25000; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: none; 
+    align-items: center; 
+    gap: 8px;
+}
         /* --- NEW STYLES FOR ALARM & LOGIN MODALS --- */
         .custom-modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -99,16 +98,49 @@
         .hidden { display: none !important; }
 
         /* --- TOGGLE BUTTONS --- */
-        .floating-btn {
-            position: fixed; z-index: 1000; width: 50px; height: 50px;
-            border-radius: 50%; border: none; display: flex; align-items: center;
-            justify-content: center; cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: transform 0.3s, opacity 0.3s;
-        }
-        .floating-btn:active { transform: scale(0.9); }
-        .mode-toggle { top: 20px; left: 20px; background: var(--accent-orange); color: white; font-size: 20px; border: 2px solid white; }
-        .logout-btn { top: 40px; right: 20px; background: #e74c3c; color: white; font-size: 20px; border: 2px solid white; }
+        /* --- TOGGLE BUTTONS --- */
+/* --- STATIC TOP CONTROLS --- */
+.floating-btn {
+    position: absolute !important; /* التعديل الجوهري هنا عشان يثبتوا فوق بس */
+    z-index: 25000 !important;
+    width: 50px; 
+    height: 50px;
+    border-radius: 50%; 
+    border: 2px solid white; 
+    display: flex; 
+    align-items: center;
+    justify-content: center; 
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.floating-btn:active { transform: scale(0.9); }
+
+/* زرار الثيم يفضل مكانه فوق شمال */
+.mode-toggle { 
+    top: 20px !important; 
+    left: 20px !important; 
+    background: var(--accent-orange) !important; 
+    color: white !important; 
+}
+
+/* زرار اللوج أوت يفضل مكانه فوق يمين */
+.logout-btn { 
+    top: 20px !important; 
+    right: 20px !important; 
+    background: #e74c3c !important; 
+    color: white !important; 
+}
+
+/* التنبيه أو الـ Badge يثبت فوق في النص */
+#userInfoBadge {
+    position: absolute !important; 
+    top: 20px !important; 
+    left: 50% !important; 
+    transform: translateX(-50%) !important;
+    z-index: 25000 !important;
+}
         .scroll-toggle { bottom: 100px; right: 20px; background: var(--nav-bg-start); color: var(--text-primary); border: 1px solid var(--border-color); }
 
         /* IFRAME FULLSCREEN CONTAINER */
