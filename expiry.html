@@ -1276,22 +1276,22 @@ render: (resetPagination = true) => {
                 chip.innerHTML = `<div class="m-date">${mKey}</div><div class="m-count">${uniqueMonthItems.length}</div>`;
 
                 // fix السكرول: setTimeout يضمن تحديث DOM قبل السكرول
-                chip.onclick = () => {
-                    let target = document.getElementById(`sec-${mKey}`);
-                    if (!target) {
-                        app.currentPage = Math.ceil(app.fullFilteredList.length / app.displayLimit);
-                        app.renderVisiblePart();
-                    }
-                    setTimeout(() => {
-                        target = document.getElementById(`sec-${mKey}`);
-                        if (target) {
-                            const yOffset = -180;
-                            const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
-                            window.scrollTo({ top: y, behavior: 'smooth' });
-                        }
-                    }, 50);
-                };
-                navContainer.appendChild(chip);
+chip.onclick = () => {
+    // حمّل كل الـ items دايماً قبل السكرول
+    app.currentPage = Math.ceil(app.fullFilteredList.length / app.displayLimit);
+    app.renderVisiblePart();
+
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            const target = document.getElementById(`sec-${mKey}`);
+            if (target) {
+                const y = target.getBoundingClientRect().top + window.pageYOffset - 180;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        });
+    });
+};
+navContainer.appendChild(chip);
             }
         });
     } else { 
