@@ -58357,16 +58357,13 @@
         const btnList = document.getElementById('buttonsList');
         if (!btnList) return;
 
-        // الحصول على تاريخ اليوم فقط بدون ساعات لعملية المقارنة
+        btnList.innerHTML = '';
+
+        // الحصول على تاريخ اليوم فقط بدون ساعات
         const now = new Date();
         const todayTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-        const currentButtons = btnList.querySelectorAll('.gateway-btn');
-        if (currentButtons.length === 0) {
-          btnList.innerHTML = '';
-        }
-
-        ALL_PERIODS_OFFERS.forEach((period, index) => {
+        ALL_PERIODS_OFFERS.forEach(period => {
           const start = new Date(period.start);
           const startTime = new Date(start.getFullYear(), start.getMonth(), start.getDate()).getTime();
 
@@ -58374,85 +58371,47 @@
           end.setHours(23, 59, 59, 999);
           const endTime = end.getTime();
 
-          let status = 'normal';
+          let status = 'normal'; // الحالة الافتراضية
+
           if (todayTime > endTime) {
-            status = 'expired';
+            status = 'expired'; // 🔴 انتهى
           } else if (todayTime >= startTime && todayTime <= endTime) {
-            status = 'active';
+            status = 'active';  // 🟢 شغال حالياً
           }
 
-          let btn = currentButtons[index];
-          if (!btn) {
-            btn = document.createElement('div');
-            btn.className = 'gateway-btn';
-            btn.onclick = () => activatePeriod(period.id);
-            btnList.appendChild(btn);
+          const btn = document.createElement('div');
+          btn.className = 'gateway-btn';
+          btn.onclick = () => activatePeriod(period.id);
+
+          // --- تطبيق الألوان بالقوة الجبرية (Inline Styles) لضمان ظهورها ---
+          if (status === 'active') {
+            btn.classList.add('status-active');
+            btn.style.background = 'linear-gradient(135deg, #2ecc71, #27ae60)';
+            btn.style.color = 'white';
+            btn.style.borderLeft = '6px solid #1e8449';
+            btn.style.boxShadow = '0 0 20px rgba(46, 204, 113, 0.5)';
+          } else if (status === 'expired') {
+            btn.classList.add('status-expired');
+            btn.style.background = 'linear-gradient(135deg, #b91c1c, #7f1d1d)';
+            btn.style.color = 'white';
+            btn.style.borderLeft = '6px solid #450a0a';
           }
 
-          if (btn.getAttribute('data-status') !== status) {
-            btn.setAttribute('data-status', status);
-            
-            btn.classList.remove('status-active', 'status-expired');
-            btn.style.background = '';
-            btn.style.color = '';
-            btn.style.borderLeft = '';
-            btn.style.boxShadow = '';
+          const liveBadge = (status === 'active') ?
+            `<div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:10px;">
+                <div style="width:7px; height:7px; background:#fff; border-radius:50%; box-shadow:0 0 5px #fff;"></div>
+                <span style="font-size:10px; font-weight:900;">LIVE</span>
+            </div>` : '';
 
-            if (status === 'active') {
-              btn.classList.add('status-active');
-              btn.style.setProperty('background', 'linear-gradient(135deg, #2ecc71, #27ae60)', 'important');
-              btn.style.setProperty('color', 'white', 'important');
-              btn.style.setProperty('border-left', '6px solid #1e8449', 'important');
-              btn.style.setProperty('box-shadow', '0 0 20px rgba(46, 204, 113, 0.5)', 'important');
-            } else if (status === 'expired') {
-              btn.classList.add('status-expired');
-              btn.style.setProperty('background', 'linear-gradient(135deg, #b91c1c, #7f1d1d)', 'important');
-              btn.style.setProperty('color', 'white', 'important');
-              btn.style.setProperty('border-left', '6px solid #450a0a', 'important');
-            }
+          btn.innerHTML = `
+            <div class="btn-label" style="font-weight:800;">${period.label.toUpperCase()}</div>
+            ${liveBadge}
+        `;
 
-            const liveBadge = (status === 'active') ?
-              `<div style="display:flex; align-items:center; gap:5px; background:rgba(255,255,255,0.2); padding:3px 8px; border-radius:10px;">
-                  <div style="width:7px; height:7px; background:#fff; border-radius:50%; box-shadow:0 0 5px #fff; animation: pulse 1.5s infinite;"></div>
-                  <span style="font-size:10px; font-weight:900;">LIVE</span>
-              </div>` : '';
-
-            btn.innerHTML = `
-              <div class="btn-label" style="font-weight:800;">${period.label.toUpperCase()}</div>
-              ${liveBadge}
-            `;
-          }
+          btnList.appendChild(btn);
         });
-      }
 
-      // 🔄 دالة لتحديث حالة الأصناف في السكانر "لايف" بدون ريفريش
-      function refreshScannerLiveStatus() {
-        if (typeof scannedItemsMemory === 'undefined' || !scannedItemsMemory.length) return;
-
-        scannedItemsMemory.forEach(item => {
-          const offer = (typeof getOfferForScanner === 'function') ? getOfferForScanner(item.cleanCode) : null;
-          const isOfferActive = (typeof isOfferCurrentlyActive === 'function') ? isOfferCurrentlyActive(offer) : false;
-
-          const newStatusColor = isOfferActive ? '#38ef7d' : '#ef4444';
-          const newLabel = isOfferActive ? (offer?.offerTypeAR || 'العرض متاح') : '❌ لا يوجد عرض نشط حالياً';
-
-          const row = document.getElementById(`card-row-${item.cleanCode}`);
-          if (row) {
-            if (row.style.borderRightColor !== newStatusColor) {
-              row.style.borderRightColor = newStatusColor;
-              row.style.background = isOfferActive ? 'rgba(56, 239, 125, 0.08)' : 'rgba(239, 68, 68, 0.08)';
-
-              const labels = row.querySelectorAll('div');
-              labels.forEach(div => {
-                const text = div.textContent.trim();
-                if (text.includes('لا يوجد عرض') || text.includes('العرض متاح') || (offer && text.includes(offer.offerTypeAR))) {
-                  div.style.color = newStatusColor;
-                  div.innerHTML = escapeHtml(newLabel);
-                }
-              });
-            }
-          }
-        });
+        console.log("🎨 Buttons rendered with status colors applied.");
       }
       // 3. التشغيل عند تحميل الصفحة
       applyDynamicBackgrounds();
@@ -61195,27 +61154,47 @@
         const priceBox = document.getElementById(priceId);
         const RIYAL_SVG = "https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg";
 
-        // 🛑 [تم التعطيل التلقائي لتقليل الضغط على الـ API]
-        // سيتم جلب العروض الأونلاين فقط عند استخدام السكانر كما هو مطلوب
-        
-        // 1. عرض السعر المحلي من الداتا بيز فوراً
-        if (priceBox) {
-          priceBox.innerHTML = `<span style="color: #0f172a; font-size: 18px; font-weight: 800;">${dbPrice.toFixed(2)} <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/></span>`;
-        }
+        // ✅ جيب التوكن
+        const _tk = sessionStorage.getItem("_tk") || "";
 
-        // 2. إخفاء بوكس العرض الأونلاين التلقائي
-        if (onlineBox) {
-          onlineBox.style.display = 'none';
-        }
+        try {
+          const response = await fetch(
+            `https://online.meralmohamed121022.workers.dev/api/product?code=${code}&t=${Date.now()}`,
+            {
+              headers: { "x-session-token": _tk }
+            }
+          );
+          const data = await response.json();
 
-        // التحقق إذا كان لدينا بيانات كاش بالفعل (لو تم جلبها مسبقاً بالسكانر مثلاً)
-        const existingP = window.productsDB?.find(p => String(p.Code).trim() === String(code));
-        if (existingP && typeof existingP.onlineOffer !== "undefined" && existingP.onlineOffer) {
-           if (onlineBox) {
-             onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-             onlineBox.style.display = "flex";
-             onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:10px; text-align:center; line-height:1.2;">🌐 Online: ${existingP.onlineOffer}</span>`;
-           }
+          if (data.success) {
+            if (data.hasOnlineOffer) {
+              onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
+              onlineBox.style.border = "none";
+              onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:10px; text-align:center; line-height:1.2;">🌐 Online: ${data.offer}</span>`;
+            } else {
+              onlineBox.innerHTML = `<span style="color:#94a3b8; font-size:10px;">🌐 No Online Offer</span>`;
+              setTimeout(() => { onlineBox.style.display = 'none'; }, 2000);
+            }
+
+            const finalP = data.finalPrice || data.originalPrice || dbPrice;
+            const originalP = data.originalPrice || dbPrice;
+            const isDiscounted = finalP < originalP;
+
+            priceBox.innerHTML = `
+                ${isDiscounted ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 11px;">${originalP.toFixed(2)}</span>` : ''}
+                <span style="color: ${isDiscounted ? '#dc2626' : '#0f172a'}; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 2px;">
+                    ${finalP.toFixed(2)} 
+                    <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/>
+                </span>
+            `;
+          } else {
+            throw new Error("API Failure");
+          }
+        } catch (e) {
+          if (priceBox) {
+            priceBox.innerHTML = `<span style="color: #0f172a; font-size: 18px; font-weight: 800;">${dbPrice.toFixed(2)} <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/></span>`;
+          }
+          if (onlineBox) onlineBox.style.display = "none";
         }
       }
       // ==========================================
@@ -63580,20 +63559,10 @@
           minutesEl.textContent = String(minutes).padStart(2, '0');
           secondsEl.textContent = String(seconds).padStart(2, '0');
 
-          // 🟢 >> تغيير الخلفية للون أخضر (Active) لايف << 🟢
+          // >> تغيير الخلفية للون أخضر مميز <<
           if (containerEl) {
-            containerEl.style.setProperty('background', 'linear-gradient(135deg, #065f46 0%, #059669 100%)', 'important');
-            containerEl.style.setProperty('border', '2px solid #34d399', 'important');
-          }
-
-          // 🔄 تحديث حالة الأصناف في السكانر لايف (لو الوقت اتغير والعرض اشتغل)
-          if (typeof refreshScannerLiveStatus === 'function') {
-            refreshScannerLiveStatus();
-          }
-
-          // 🔄 تحديث حالة الأزرار في الواجهة الرئيسية لايف
-          if (typeof renderGatewayButtons === 'function') {
-            renderGatewayButtons();
+            containerEl.style.backgroundColor = 'rgba(56, 239, 125, 0.2)';
+            containerEl.style.borderColor = '#38ef7d';
           }
 
           return;
