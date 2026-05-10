@@ -58508,51 +58508,29 @@
 
             if (!code) return;
 
-            // دالة مساعدة لتشغيل الوركر (API) في حالة الفشل أو عدم وجود رابط
-            const loadFromWorker = () => {
-              fetchProductImage(code).then(imageUrl => {
-                if (imageUrl) {
-                  img.src = imageUrl;
-                  img.onload = () => {
-                    img.style.opacity = '1';
-                    img.classList.add('loaded');
-                  };
-                  img.onerror = () => {
-                    img.src = createPlaceholderSVG(code);
-                    img.style.opacity = '1';
-                  };
-                } else {
-                  img.src = createPlaceholderSVG(code);
-                  img.style.opacity = '1';
-                }
-              }).catch(() => {
-                img.src = createPlaceholderSVG(code);
-                img.style.opacity = '1';
-              });
+            // دالة مساعدة لتحميل اللوجو الافتراضي (بدلاً من الوركر لتوفير الرصيد)
+            const loadFallback = () => {
+              const brand = img.dataset.brand || 'Generic';
+              tryLoadBrandLogo(brand, img);
             };
 
             // 2. اللوجيك الجديد: الأولوية للرابط المباشر
             if (dbUrl && dbUrl !== "null" && dbUrl.trim() !== "") {
-
-              // نجرب نحط الرابط المباشر
+              img.referrerPolicy = "no-referrer";
               img.src = dbUrl;
 
-              // لو اشتغل تمام
               img.onload = () => {
                 img.style.opacity = '1';
                 img.classList.add('loaded');
-                // كدا وفرنا ريكويست الوركر
               };
 
-              // لو الرابط بايظ (404 مثلاً) -> شغل الوركر كبديل
               img.onerror = () => {
-                console.warn(`⚠️ DB image failed for ${code}, falling back to Worker.`);
-                loadFromWorker();
+                console.warn(`⚠️ DB image failed for ${code}, loading brand logo fallback.`);
+                loadFallback();
               };
 
             } else {
-              // مفيش رابط في الداتا بيز أصلاً -> شغل الوركر
-              loadFromWorker();
+              loadFallback();
             }
 
             observer.unobserve(img);
@@ -60914,6 +60892,7 @@
                       <img 
                         data-code="${firstProduct.Code}" 
                         class="product-image lazy-image" 
+                        referrerpolicy="no-referrer"
                         style="width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s ease; opacity: 0;" 
                         alt="${brandName}"
                       />
@@ -61101,7 +61080,7 @@
                                 <div style="position: absolute; top: 10px; left: 10px; background: #dc2626; color: white; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px; z-index: 10; direction: ltr !important;">
                                     ${shortOfferType}
                                 </div>
-                                <img data-code="${product.Code}" data-brand="${product.Brand || 'Generic'}" data-itemurl="${product.itemurl || ''}" class="product-image smart-lazy-img" style="max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s;" alt="${product["Item Description"]}"/>
+                                <img data-code="${product.Code}" data-brand="${product.Brand || 'Generic'}" data-itemurl="${product.itemurl || ''}" referrerpolicy="no-referrer" class="product-image smart-lazy-img" style="max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s;" alt="${product["Item Description"]}"/>
                             </div>
                             <div style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; background: #fff;">
                                 <div>
@@ -61154,48 +61133,12 @@
         const priceBox = document.getElementById(priceId);
         const RIYAL_SVG = "https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg";
 
-        // ✅ جيب التوكن
-        const _tk = sessionStorage.getItem("_tk") || "";
-
-        try {
-          const response = await fetch(
-            `https://online.meralmohamed121022.workers.dev/api/product?code=${code}&t=${Date.now()}`,
-            {
-              headers: { "x-session-token": _tk }
-            }
-          );
-          const data = await response.json();
-
-          if (data.success) {
-            if (data.hasOnlineOffer) {
-              onlineBox.style.background = "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)";
-              onlineBox.style.border = "none";
-              onlineBox.innerHTML = `<span style="color:white; font-weight:800; font-size:10px; text-align:center; line-height:1.2;">🌐 Online: ${data.offer}</span>`;
-            } else {
-              onlineBox.innerHTML = `<span style="color:#94a3b8; font-size:10px;">🌐 No Online Offer</span>`;
-              setTimeout(() => { onlineBox.style.display = 'none'; }, 2000);
-            }
-
-            const finalP = data.finalPrice || data.originalPrice || dbPrice;
-            const originalP = data.originalPrice || dbPrice;
-            const isDiscounted = finalP < originalP;
-
-            priceBox.innerHTML = `
-                ${isDiscounted ? `<span style="text-decoration: line-through; color: #94a3b8; font-size: 11px;">${originalP.toFixed(2)}</span>` : ''}
-                <span style="color: ${isDiscounted ? '#dc2626' : '#0f172a'}; font-size: 18px; font-weight: 800; display: flex; align-items: center; gap: 2px;">
-                    ${finalP.toFixed(2)} 
-                    <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/>
-                </span>
-            `;
-          } else {
-            throw new Error("API Failure");
-          }
-        } catch (e) {
-          if (priceBox) {
-            priceBox.innerHTML = `<span style="color: #0f172a; font-size: 18px; font-weight: 800;">${dbPrice.toFixed(2)} <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/></span>`;
-          }
-          if (onlineBox) onlineBox.style.display = "none";
+        // ✅ إيقاف الطلب التلقائي للوركر في الصفحة الرئيسية لتوفير الرصيد
+        // نعتمد فقط على سعر الداتا بيز
+        if (priceBox) {
+          priceBox.innerHTML = `<span style="color: #0f172a; font-size: 18px; font-weight: 800;">${dbPrice.toFixed(2)} <img src="${RIYAL_SVG}" style="width:14px!important;height:14px!important;display:inline-block!important;"/></span>`;
         }
+        if (onlineBox) onlineBox.style.display = "none";
       }
       // ==========================================
       // 2️⃣ دالة التحميل الذكي (Smart Loader) - معدلة لتدعم رابط الداتا بيز
@@ -65255,15 +65198,15 @@
             displayImages.forEach((p, idx) => {
               const pImg = p.itemurl || p.Image || '';
               if (pImg && pImg !== 'null') {
-                imageHTML += `<img src="${pImg}" class="stack-img img-${idx} ${compressClass}" crossorigin="anonymous" />`;
+                imageHTML += `<img src="${pImg}" class="stack-img img-${idx} ${compressClass}" referrerpolicy="no-referrer" />`;
               }
             });
             imageHTML += '</div>';
           } else {
             if (imgSrc) {
-              imageHTML = `<img src="${imgSrc}" class="single-img ${compressClass}" crossorigin="anonymous" />`;
+              imageHTML = `<img src="${imgSrc}" class="single-img ${compressClass}" referrerpolicy="no-referrer" />`;
             } else if (brandLogoSrc) {
-              imageHTML = `<div class="brand-logo-box"><img src="${brandLogoSrc}" class="brand-logo-img ${compressClass}" crossorigin="anonymous" /></div>`;
+              imageHTML = `<div class="brand-logo-box"><img src="${brandLogoSrc}" class="brand-logo-img ${compressClass}" referrerpolicy="no-referrer" /></div>`;
             } else {
               imageHTML = `<div class="brand-text-fallback"><span class="fallback-brand-name">${brand}</span></div>`;
             }
