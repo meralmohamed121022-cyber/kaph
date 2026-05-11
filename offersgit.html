@@ -36,8 +36,8 @@
     })();
   </script>
   <style>
-    /* When scanner mode is active, hide everything in the body except the container holding the scanner */
-    html.scanner-direct-active body>*:not(#mainOffersContainer):not(#scannerImageGallery):not(script):not(style) {
+    /* When scanner mode is active, hide everything in the body except the container holding the scanner and the print container */
+    html.scanner-direct-active body>*:not(#mainOffersContainer):not(#scannerImageGallery):not(#printContainer):not(script):not(style) {
       display: none !important;
       opacity: 0 !important;
       visibility: hidden !important;
@@ -67902,13 +67902,17 @@
           return;
         }
 
-        // استخدام الخريطة (Map) لضمان أن ترتيب المنتجات في الطباعة يتبع نفس ترتيب المسح (scannedCodes)
-        const productsToPrint = scannedCodes.map(code =>
-          productsDB.find(p => String(p.Code || "").trim() === code)
-        ).filter(Boolean);
+        // إنشاء خريطة (Map) سريعة للبحث بدلاً من find المتكرر لتسريع العملية خاصة في الموبايل
+        const pMap = new Map();
+        productsDB.forEach(p => {
+          const c = String(p.Code || "").trim();
+          if (c && !pMap.has(c)) pMap.set(c, p);
+        });
+
+        const productsToPrint = scannedCodes.map(code => pMap.get(code)).filter(Boolean);
 
         if (!productsToPrint.length) {
-          alert("⚠️ لم يتم العثور على المنتجات الممسوحة للطباعة.");
+          alert("⚠️ لم يتم العثور على المنتجات الممسوحة للطباعة (تأكد أن الأصناف الممسوحة لها عروض نشطة).");
           return;
         }
 
