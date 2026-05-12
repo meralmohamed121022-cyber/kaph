@@ -1537,26 +1537,54 @@
 
         async function autoScheduleReminders() {
             if (!currentPharmacy) return;
-            for (let offer of START_OFFERS) {
-                const offerStartTime = new Date(offer.start_date);
-                const triggerTimes = [
-                    { id: offer.id + '_30min', time: new Date(offerStartTime.getTime() - (30 * 60000)) },
-                    { id: offer.id + '_exact', time: offerStartTime }
-                ];
-                for (let t of triggerTimes) {
-                    console.log(`[System] Scheduling ${t.id} at ${t.time.toLocaleString()}`);
-                    // حذف الموعد القديم أولاً
-                    await supabaseClient.from('reminders').delete().eq('pharmacy_number', currentPharmacy).eq('offer_id', t.id);
 
-                    // إضافة الموعد الجديد
-                    await supabaseClient.from('reminders').insert([{
-                        pharmacy_number: currentPharmacy,
-                        offer_id: t.id,
-                        offer_title: offer.title,
-                        trigger_time: t.time.toISOString(),
-                        status: 'pending'
-                    }]);
+            try {
+                // 1. تجميع كل الـ IDs الحالية (30 دقيقة والوقت الفعلي) لعمل تنظيف
+                const activeOfferIds = [];
+                START_OFFERS.forEach(offer => {
+                    activeOfferIds.push(offer.id + '_30min');
+                    activeOfferIds.push(offer.id + '_exact');
+                });
+
+                // 2. حذف أي تنبيهات "معلقة" لم تعد موجودة في مصفوفة العروض الحالية (لحذف القديم تماماً)
+                await supabaseClient.from('reminders')
+                    .delete()
+                    .eq('pharmacy_number', currentPharmacy)
+                    .eq('status', 'pending')
+                    .not('offer_id', 'in', `(${activeOfferIds.join(',')})`);
+
+                const now = new Date();
+
+                for (let offer of START_OFFERS) {
+                    const offerStartTime = new Date(offer.start_date);
+                    const triggerTimes = [
+                        { id: offer.id + '_30min', time: new Date(offerStartTime.getTime() - (30 * 60000)) },
+                        { id: offer.id + '_exact', time: offerStartTime }
+                    ];
+
+                    for (let t of triggerTimes) {
+                        // 3. منع جدولة أي تنبيه فات وقته بأكثر من 5 دقائق لتجنب التنبيهات المزعجة القديمة
+                        if (t.time.getTime() < now.getTime() - (5 * 60000)) {
+                            // إذا كان التنبيه قديماً، نتأكد من أنه ليس "معلقاً" في القاعدة أو نحذفه
+                            await supabaseClient.from('reminders').delete().eq('pharmacy_number', currentPharmacy).eq('offer_id', t.id).eq('status', 'pending');
+                            continue;
+                        }
+
+                        console.log(`[System] Scheduling/Updating ${t.id} at ${t.time.toLocaleString()}`);
+                        
+                        // 4. استخدام upsert لضمان تحديث التنبيه الموجود بدلاً من إضافة جديد
+                        // ملاحظة: يتطلب هذا وجود Unique Constraint على (pharmacy_number, offer_id) في سوبابيز
+                        await supabaseClient.from('reminders').upsert({
+                            pharmacy_number: currentPharmacy,
+                            offer_id: t.id,
+                            offer_title: offer.title,
+                            trigger_time: t.time.toISOString(),
+                            status: 'pending'
+                        }, { onConflict: 'pharmacy_number,offer_id' });
+                    }
                 }
+            } catch (err) {
+                console.error("Error in autoScheduleReminders:", err);
             }
         }
 
@@ -2091,7 +2119,7 @@
                 const nowMs = new Date().getTime();
                 userReminders.forEach((rem) => {
                     const trigTimeMs = new Date(rem.trigger_time).getTime();
-                    const isTooOld = (nowMs - trigTimeMs) > (60 * 60 * 1000);
+                    const isTooOld = (nowMs - trigTimeMs) > (15 * 60 * 1000); // تقليل المدة لـ 15 دقيقة فقط لتجنب التنبيهات القديمة جداً
                     if ((rem.status === 'pending' || rem.status === 'snoozed') && nowMs >= trigTimeMs && !isTooOld) {
                         console.log(`Triggering alarm: ${rem.offer_title}`);
                         rem.status = 'firing';
