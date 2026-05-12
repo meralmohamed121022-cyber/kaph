@@ -1164,6 +1164,11 @@
             <p style="font-size: 14px; margin-top: 10px; color: var(--text-secondary);">
                 Enter your pharmacy number
             </p>
+            <div id="app-version-info"
+                style="font-size: 11px; color: var(--accent-orange); margin: 5px 0 15px 0; opacity: 0.8; cursor: pointer;"
+                onclick="window.location.reload(true)">
+                Version 1.1.6 (Click to update)
+            </div>
             <input type="text" id="pharmacyInput" placeholder="Pharmacy Number (e.g. 1234)">
             <button onclick="doLogin()" style="background: var(--accent-orange);">
                 Login <i class="fas fa-sign-in-alt"></i>
@@ -1307,96 +1312,50 @@
     <script>
         "use strict";
 
-        const swCode = `
-let swReminders = [];
-let pharmacyNumber = null;
-const SUPABASE_URL = 'https://uzydzvfcrlqmtondugte.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6eWR6dmZjcmxxbXRvbmR1Z3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTA1MzMsImV4cCI6MjA5MjM2NjUzM30.z7-eKWrYjW9cbzTcoyyKprgXbcqCHk_kF6ETHokudzo';
-
-self.addEventListener('install', (event) => {
-    self.skipWaiting();
-});
-
-self.addEventListener('activate', (event) => {
-    event.waitUntil(clients.claim());
-});
-
-async function fetchRemindersFromSW() {
-    if (!pharmacyNumber) return;
-    try {
-        const response = await fetch(\`\${SUPABASE_URL}/rest/v1/reminders?pharmacy_number=eq.\${pharmacyNumber}&status=in.(pending,snoozed)\`, {
-            headers: {
-                'apikey': SUPABASE_KEY,
-                'Authorization': \`Bearer \${SUPABASE_KEY}\`
-            }
-        });
-        if (response.ok) {
-            swReminders = await response.json();
-            console.log('SW fetched reminders:', swReminders.length);
-        }
-    } catch (err) {
-        console.error('SW fetch error:', err);
-    }
-}
-
-self.addEventListener('message', (event) => {
-    if (event.data) {
-        if (event.data.type === 'UPDATE_REMINDERS') {
-            swReminders = event.data.reminders;
-            pharmacyNumber = event.data.pharmacy_number;
-            console.log('SW Reminders updated:', swReminders.length);
-        }
-        if (event.data.type === 'SHOW_NOTIFICATION') {
-            self.registration.showNotification(event.data.title, {
-                body: event.data.body,
-                icon: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png',
-                vibrate: [200, 100, 200],
-                badge: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png'
-            });
-        }
-    }
-});
-
-setInterval(() => {
-    if (swReminders.length === 0 && pharmacyNumber) {
-        fetchRemindersFromSW();
-    }
-
-    const now = Date.now();
-    swReminders.forEach(rem => {
-        const trigTime = new Date(rem.trigger_time).getTime();
-        if (now >= trigTime && (now - trigTime) < 600000) {
-            const isExact = rem.offer_id.includes('_exact');
-            const message = isExact 
-                ? rem.offer_title + " بدأ الآن! 🔥" 
-                : rem.offer_title + " سيبدأ خلال 30 دقيقة! ⏳";
-            
-            self.registration.showNotification("تنبيه MONO SYSTEM", {
-                body: message,
-                icon: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png',
-                vibrate: [200, 100, 200],
-                badge: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png',
-                tag: rem.id
-            });
-            
-            swReminders = swReminders.filter(r => r.id !== rem.id);
-        }
-    });
-}, 10000);
-`;
+        const APP_VERSION = '1.1.6';
 
         if ('serviceWorker' in navigator) {
-            const blob = new Blob([swCode], { type: 'text/javascript' });
-            const swUrl = URL.createObjectURL(blob);
-            navigator.serviceWorker.register(swUrl)
-                .then(() => console.log('Service Worker Active (Single File Mode)'))
+            // إضافة إصدار للملف لإجبار الكروم على تحميل النسخة الجديدة
+            navigator.serviceWorker.register('sw.js?v=' + APP_VERSION)
+                .then(reg => {
+                    console.log('Service Worker Registered (sw.js) v' + APP_VERSION);
+
+                    // التحقق من وجود تحديث جديد
+                    reg.onupdatefound = () => {
+                        const installingWorker = reg.installing;
+                        installingWorker.onstatechange = () => {
+                            if (installingWorker.state === 'installed') {
+                                if (navigator.serviceWorker.controller) {
+                                    console.log('New update available. Reloading...');
+                                    window.location.reload();
+                                }
+                            }
+                        };
+                    };
+                })
                 .catch(err => console.error('SW Error:', err));
         }
 
+
         const START_OFFERS = [
-            { id: 'offer_may_10_test_v2', title: 'MAY 10 TEST OFFER', start_date: '2026-05-10T01:50:00' },
-            { id: 'offer_alert_may_15', title: 'MID-MONTH OFFERS', start_date: '2026-05-15T00:00:00' },
-            { id: 'offer_alert_may_25', title: 'MONTHLY OFFERS', start_date: '2026-05-25T00:00:00' }
+            {
+                id: 'offer_may_10_test_v2',
+                title: 'MAY 10 TEST OFFER',
+                start_date: '2026-05-10T03:26:00',
+                image: 'https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/25%20april%20offers%20photof.png'
+            },
+            {
+                id: 'offer_alert_may_15',
+                title: 'MID-MONTH OFFERS',
+                start_date: '2026-05-18T00:00:00',
+                image: 'https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/Gemini_Generated_Image_qhlri8qhlri8qhlr.png'
+            },
+            {
+                id: 'offer_alert_may_25',
+                title: 'MONTHLY OFFERS',
+                start_date: '2026-06-05T00:00:00',
+                image: 'https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/25%20april%20offers%20photof.png'
+            }
         ];
 
         const LOCAL_BANNERS = [
@@ -1585,7 +1544,8 @@ setInterval(() => {
                     { id: offer.id + '_exact', time: offerStartTime }
                 ];
                 for (let t of triggerTimes) {
-                    // حذف الموعد القديم أولاً لضمان التحديث في حال تغيير التوقيت (حل مشكلة عدم وجود unique constraint)
+                    console.log(`[System] Scheduling ${t.id} at ${t.time.toLocaleString()}`);
+                    // حذف الموعد القديم أولاً
                     await supabaseClient.from('reminders').delete().eq('pharmacy_number', currentPharmacy).eq('offer_id', t.id);
 
                     // إضافة الموعد الجديد
@@ -1605,8 +1565,21 @@ setInterval(() => {
             const { data, error } = await supabaseClient.from('reminders').select('*').eq('pharmacy_number', currentPharmacy).in('status', ['pending', 'snoozed']);
             if (!error && data) {
                 userReminders = data;
-                // إرسال التنبيهات للـ Service Worker ليعمل في الخلفية مع رقم الصيدلية
-                const msgData = { type: 'UPDATE_REMINDERS', reminders: data, pharmacy_number: currentPharmacy };
+
+                // تجهيز خريطة الصور لإرسالها للـ Service Worker
+                const offerImages = {};
+                START_OFFERS.forEach(off => {
+                    if (off.image) offerImages[off.id] = off.image;
+                });
+
+                // إرسال التنبيهات والصور للـ Service Worker ليعمل في الخلفية
+                const msgData = {
+                    type: 'UPDATE_REMINDERS',
+                    reminders: data,
+                    pharmacy_number: currentPharmacy,
+                    offer_images: offerImages
+                };
+
                 if (navigator.serviceWorker.controller) {
                     navigator.serviceWorker.controller.postMessage(msgData);
                 } else {
