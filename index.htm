@@ -12,6 +12,28 @@
     <link rel="apple-touch-icon"
         href="https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png">
 
+    <script>
+        if (window.location.href.indexOf('mode=scanner') !== -1) {
+            document.documentElement.classList.add('scanner-mode-active');
+        }
+    </script>
+    <style>
+        .scanner-mode-active #loginOverlay,
+        .scanner-mode-active #homePage,
+        .scanner-mode-active #bottomNav,
+        .scanner-mode-active #modeToggle,
+        .scanner-mode-active #scrollBtn,
+        .scanner-mode-active #userInfoBadge {
+            display: none !important;
+        }
+        .scanner-mode-active #iframeContainer {
+            display: block !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 999999 !important;
+        }
+    </style>
+
     <style>
         @media screen and (max-width: 0px) {}
 
@@ -2132,6 +2154,12 @@
         function openScannerDirectly() {
             openLink('offersgit.html?mode=scanner');
         }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            if (window.location.href.indexOf('mode=scanner') !== -1) {
+                openScannerDirectly();
+            }
+        });
     </script>
 </body>
 
