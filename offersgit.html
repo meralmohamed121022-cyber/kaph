@@ -1185,13 +1185,13 @@
         -moz-appearance: none !important;
         appearance: none !important;
 
-        /* Size - Fixed & Visible */
-        width: 20px !important;
-        height: 20px !important;
-        min-width: 20px !important;
-        min-height: 20px !important;
-        max-width: 20px !important;
-        max-height: 20px !important;
+        /* Size - BIGGER & BOLDER */
+        width: 25px !important;
+        height: 25px !important;
+        min-width: 25px !important;
+        min-height: 25px !important;
+        max-width: 25px !important;
+        max-height: 25px !important;
 
         /* Display */
         display: inline-block !important;
@@ -1230,31 +1230,27 @@
         background: #ffffff !important;
       }
 
-      /* Checked State - VISIBLE in ALL modes */
+      /* Checked State - MAXIMUM CONTRAST (Black on White) */
       .custom-options-list .custom-option input[type="checkbox"]:checked,
       .custom-option input[type="checkbox"]:checked {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
-        border-color: #11998e !important;
-        border-width: 3px !important;
-        box-shadow:
-          0 4px 16px rgba(17, 153, 142, 0.7),
-          inset 0 1px 5px rgba(255, 255, 255, 0.3) !important;
+        background: #ffffff !important; 
+        border-color: #ffffff !important;
+        border-width: 0 !important;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8) !important;
       }
 
-      /* Checkmark - BOLD & VISIBLE */
+      /* Checkmark - BLACK & HUGE */
       .custom-options-list .custom-option input[type="checkbox"]:checked::after,
       .custom-option input[type="checkbox"]:checked::after {
-        content: '✓' !important;
+        content: '✔' !important; 
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        color: #ffffff !important;
-        font-size: 16px !important;
+        color: #000000 !important; /* Pure black on white background */
+        font-size: 22px !important; 
         font-weight: 900 !important;
-        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
         line-height: 1 !important;
-        animation: checkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
       }
 
       /* Animation */
@@ -1317,8 +1313,8 @@
       body[data-theme="dark"] .custom-option input[type="checkbox"]:checked,
       [data-theme="dark"] .custom-option input[type="checkbox"]:checked,
       .dark-mode .custom-option input[type="checkbox"]:checked {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%) !important;
-        border-color: #11998e !important;
+        background: #ffffff !important;
+        border-color: #ffffff !important;
       }
 
       body[data-theme="dark"] .custom-option span,
@@ -64137,14 +64133,7 @@
                    id="offer-${safeId}" 
                    onchange="saveCustomModalData(); updateCustomOfferTypesTrigger();"
                    ${isChecked ? 'checked' : ''}
-                   style="
-                        width: 22px; 
-                        height: 22px; 
-                        cursor: pointer; 
-                        accent-color: #38ef7d; 
-                        -webkit-appearance: checkbox;
-                        margin-right: 12px;
-                   ">
+                   style="margin-right: 12px;">
             <div style="display: flex; flex-direction: column; line-height: 1.2; cursor: pointer; flex: 1;" 
                  onclick="selectOfferForManualBuilder('${type.en.replace(/'/g, "\\'")}', '${type.ar.replace(/'/g, "\\'")}')">
                 <strong style="color: #ffffff !important; font-size: 14px; font-weight: 800; display: block;">${type.en}</strong>
