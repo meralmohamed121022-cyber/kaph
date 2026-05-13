@@ -6291,8 +6291,7 @@
           <div class="alert-message" style="direction: rtl; padding: 10px 20px;"></div>
           <div style="display: flex; gap: 10px; justify-content: center;">
             <button id="alertConfirmBtn" class="alert-close-btn"
-              style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">Yes, View
-              Now</button>
+              style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">OK, Understood</button>
             <button class="alert-close-btn" onclick="closeStatusAlert()">Close</button>
           </div>
         </div>
@@ -57699,18 +57698,18 @@
             const diffInMs = startDate - now;
             const diffInHours = diffInMs / (1000 * 60 * 60);
 
-            // 1. حالة العرض لسه مجهزش (تم إلغاء الحظر بناءً على طلب المستخدم)
-            /*
+            // 1. حالة العرض لسه مجهزش (تم تفعيل الحظر بناءً على طلب المستخدم)
             if (diffInHours > 48) {
               showCustomStatusAlert(
                 "Coming Soon! ✨",
                 "يتم حالياً تجهيز هذه العروض، وسيتم إتاحتها تلقائياً قبل موعد البدء الرسمي بـ 48 ساعة. يرجى الانتظار.",
                 true,
-                periodId
+                periodId,
+                "OK, Understood",
+                true // flag to only close
               );
               return;
             }
-            */
 
             // 2. حالة العرض منتهي (تاريخ اللحظة الحالية تجاوز تاريخ النهاية)
             if (now > endDate) {
@@ -57718,7 +57717,9 @@
                 "Expired Offer! 🚩",
                 "هذا العرض انتهى، هل أنت متأكد أنك تريد استعراضه؟",
                 true,
-                periodId
+                periodId,
+                "Yes, View Now",
+                false
               );
               return;
             }
@@ -57753,20 +57754,31 @@
         }
 
         // دالة إظهار التنبيه الموحد
-        function showCustomStatusAlert(title, message, showConfirmBtn, periodId) {
+        function showCustomStatusAlert(title, message, showConfirmBtn, periodId, confirmText = "OK, Understood", onlyClose = false) {
           const overlay = document.getElementById('statusAlertOverlay');
           overlay.querySelector('.alert-title').innerText = title;
           overlay.querySelector('.alert-message').innerText = message;
 
           const confirmBtn = document.getElementById('alertConfirmBtn');
+          confirmBtn.innerText = confirmText;
+
           if (showConfirmBtn) {
             confirmBtn.style.display = 'inline-block';
             confirmBtn.onclick = () => {
-              const period = ALL_PERIODS_OFFERS.find(p => p.id === periodId);
-              proceedToOffers(period);
+              if (onlyClose) {
+                closeStatusAlert();
+              } else {
+                const period = ALL_PERIODS_OFFERS.find(p => p.id === periodId);
+                proceedToOffers(period);
+              }
             };
           } else {
             confirmBtn.style.display = 'none';
+          }
+
+          const secondaryCloseBtn = overlay.querySelector('button[onclick="closeStatusAlert()"]');
+          if (secondaryCloseBtn) {
+            secondaryCloseBtn.style.display = onlyClose ? 'none' : 'inline-block';
           }
 
           overlay.style.display = 'flex';
