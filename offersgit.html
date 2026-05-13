@@ -32,7 +32,9 @@
   <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <script>
+    window.stagedOffers = [];
     if (window.location.href.indexOf('mode=scanner') !== -1) {
+
       document.documentElement.classList.add('scanner-mode-active');
     }
   </script>
@@ -161,6 +163,12 @@
         z-index: -1;
         pointer-events: none;
       }
+
+      @keyframes slideIn {
+        from { opacity: 0; transform: translateX(-10px); }
+        to { opacity: 1; transform: translateX(0); }
+      }
+
 
       [data-theme="dark"] {
         --bg-body: #121212;
@@ -6127,12 +6135,67 @@
             </div>
           </div>
 
+          <!-- 🛠️ Offer Builder (Enhanced) -->
+          <div style="margin-bottom:20px; background:rgba(255,255,255,0.03); padding:15px; border-radius:15px; border:1px solid rgba(212,175,55,0.2);">
+            <label style="color:#d4af37; display:block; margin-bottom:12px; font-weight:bold; font-size:14px; text-align:center;">🛠️ Offer Builder (Quick Tap)</label>
+            
+            <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:12px;">
+              <button onclick="appendToCustomOffer('Buy ')" style="padding:6px 8px; background:#1e293b; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:45px;">Buy</button>
+              <button onclick="appendToCustomOffer('Get ')" style="padding:6px 8px; background:#1e293b; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:45px;">Get</button>
+              <button onclick="appendToCustomOffer('Free')" style="padding:6px 8px; background:#1e293b; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:45px;">Free</button>
+              <button onclick="appendToCustomOffer('Full Box ')" style="padding:6px 8px; background:#1e293b; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:65px;">Full Box</button>
+              <button onclick="appendToCustomOffer(' @ ')" style="padding:6px 8px; background:#1e293b; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:35px;">@</button>
+              <button onclick="appendToCustomOffer(' % ')" style="padding:6px 8px; background:#1e293b; color:#fff; border:1px solid #444; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:35px;">%</button>
+              <button onclick="appendToCustomOffer('SAR')" style="padding:6px 8px; background:#10b981; color:#fff; border:1px solid #059669; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:45px;">SAR</button>
+              <button onclick="appendToCustomOffer('Halala')" style="padding:6px 8px; background:#10b981; color:#fff; border:1px solid #059669; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:55px;">Halala</button>
+              <button onclick="appendToCustomOffer('Pcs')" style="padding:6px 8px; background:#3b82f6; color:#fff; border:1px solid #2563eb; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:45px;">Pcs</button>
+              <button onclick="appendToCustomOffer('sec')" style="padding:6px 8px; background:#3b82f6; color:#fff; border:1px solid #2563eb; border-radius:6px; cursor:pointer; font-size:11px; font-weight:bold; min-width:45px;">sec</button>
+            </div>
+
+
+
+            <div style="display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-bottom:12px;">
+              <button onclick="appendToCustomOffer('1')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">1</button>
+              <button onclick="appendToCustomOffer('2')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">2</button>
+              <button onclick="appendToCustomOffer('3')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">3</button>
+              <button onclick="appendToCustomOffer('4')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">4</button>
+              <button onclick="appendToCustomOffer('5')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">5</button>
+              <button onclick="appendToCustomOffer('6')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">6</button>
+              <button onclick="appendToCustomOffer('7')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">7</button>
+              <button onclick="appendToCustomOffer('8')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">8</button>
+              <button onclick="appendToCustomOffer('9')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">9</button>
+              <button onclick="appendToCustomOffer('0')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">0</button>
+              <button onclick="appendToCustomOffer('10')" style="width:30px; height:30px; background:#334155; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:12px;">10</button>
+              <button onclick="clearCustomOffer()" style="padding:0 10px; height:30px; background:#ef4444; color:#fff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; font-size:11px;">Clear</button>
+
+            </div>
+
+            <button onclick="addCurrentToStagedOffers()" 
+              style="width:100%; padding:12px; background:linear-gradient(135deg, #d4af37 0%, #b8860b 100%); color:#000; border:none; border-radius:10px; font-weight:900; cursor:pointer; font-size:14px; box-shadow:0 4px 12px rgba(212,175,55,0.2);">
+              ➕ ADD TO PRINT LIST
+            </button>
+          </div>
+
+
+          <!-- 📋 Staged Offers List (The Scrollable Box) -->
+          <div id="stagedOffersSection" style="display:none; margin-bottom:20px;">
+            <label style="color:#fff; display:block; margin-bottom:10px; font-weight:bold; font-size:14px;">📋 List to Print:</label>
+            <div id="stagedOffersList" style="max-height:180px; overflow-y:auto; background:rgba(0,0,0,0.4); border-radius:12px; padding:12px; border:1px solid rgba(255,255,255,0.1); scrollbar-width: thin; scrollbar-color: #d4af37 transparent;">
+              <!-- Staged items will appear here -->
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+               <span id="stagedCountDisplay" style="color:#d4af37; font-size:12px; font-weight:bold;"></span>
+               <button onclick="clearStagedOffers()" style="background:transparent; color:#ef4444; border:none; font-size:12px; cursor:pointer; font-weight:bold;">🗑️ Clear List</button>
+            </div>
+          </div>
+
           <div
             style="margin-bottom:20px; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: space-between; gap: 15px;">
-            <label style="color:#fff; margin:0; font-weight:bold; font-size: 14px;">🔢 Cards to Print:</label>
+            <label style="color:#fff; margin:0; font-weight:bold; font-size: 14px;">🔢 Cards Per Offer:</label>
             <input type="number" id="customQuantity" value="6" min="1" oninput="updateCustomOfferTypesTrigger()"
               style="width:80px; padding:10px; background:#0f172a; border:1px solid #d4af37; color:#fff; border-radius:8px; outline:none; font-size: 16px; font-weight: bold; text-align: center;">
           </div>
+
 
           <!-- 🔥 ملخص ديناميكي لعدد الكروت -->
           <div id="printSummaryDisplay" style="
@@ -6242,13 +6305,7 @@
         <div class="arrow-up"></div>
       </button>
 
-      <div class="products-section" id="productsContainer"></div>
-      <div id="loadingIndicator" style="text-align:center; padding:20px; display:none;">
-        <div class="spinner" style="display:inline-block;"></div>
-        <div>Loading more products...</div>
-      </div>
-
-      <div class="print-container" id="printContainer"></div>
+      <div id="deleteConfirmOverlay"
 
 
 
@@ -6282,6 +6339,8 @@
       <script src="https://unpkg.com/html2canvas@latest/dist/html2canvas.min.js"></script>
       <script>
         let productsDB = [];
+
+
         // 1. إعدادات سوبابيز
         // ========== DATA ==========
         async function fetchProductsFromSupabase() {
@@ -60743,6 +60802,134 @@
           if (modal) modal.style.display = 'none';
         }
 
+        // --- 🛠️ Offer Builder Helpers ---
+        function appendToCustomOffer(text) {
+          const enInput = document.getElementById('customOfferEN');
+          const arInput = document.getElementById('customOfferAR');
+          if (enInput) enInput.value += text;
+          
+          const arMap = {
+            'Buy ': 'اشتري ',
+            'Get ': 'احصل على ',
+            'Free': 'مجاناً',
+            'FBOX ': 'بوكس ',
+            'SAR': 'ريال',
+            'Halala': 'هللة',
+            'Pcs': 'حبة',
+            'sec': 'الحبة الثانية',
+            ' % ': ' % ',
+
+            ' + ': ' + ',
+            ' @ ': ' @ '
+          };
+
+          
+          if (arInput) {
+             if (arMap[text]) {
+                arInput.value += arMap[text];
+             } else if (/^\d+$/.test(text.trim())) {
+                arInput.value += text;
+             } else if (text === ' @ ' || text === ' + ' || text === ' % ') {
+                arInput.value += text;
+             }
+          }
+          saveCustomModalData();
+        }
+
+        function clearCustomOffer() {
+          const enInput = document.getElementById('customOfferEN');
+          const arInput = document.getElementById('customOfferAR');
+          if (enInput) enInput.value = '';
+          if (arInput) arInput.value = '';
+          saveCustomModalData();
+        }
+
+        function addCurrentToStagedOffers() {
+          const en = document.getElementById('customOfferEN').value.trim();
+          const ar = document.getElementById('customOfferAR').value.trim();
+          if (!en && !ar) {
+             alert('⚠️ برجاء كتابة أو بناء العرض أولاً!');
+             return;
+          }
+          
+          if (!window.stagedOffers) window.stagedOffers = [];
+          window.stagedOffers.push({ en, ar });
+          updateStagedOffersUI();
+          clearCustomOffer();
+
+          
+          // Micro-animation feedback
+          const btn = event.currentTarget;
+          const originalText = btn.innerHTML;
+          btn.innerHTML = '✅ ADDED!';
+          btn.style.background = '#10b981';
+          setTimeout(() => {
+             btn.innerHTML = originalText;
+             btn.style.background = '';
+          }, 1000);
+        }
+
+        function updateStagedOffersUI() {
+          const container = document.getElementById('stagedOffersList');
+          const section = document.getElementById('stagedOffersSection');
+          const countDisp = document.getElementById('stagedCountDisplay');
+          if (!container || !section) return;
+
+          if (!window.stagedOffers) window.stagedOffers = [];
+          if (window.stagedOffers.length === 0) {
+            section.style.display = 'none';
+            return;
+          }
+
+
+          section.style.display = 'block';
+          if (countDisp) countDisp.textContent = `Total: ${window.stagedOffers.length} offer(s)`;
+          
+          container.innerHTML = window.stagedOffers.map((off, index) => `
+
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:rgba(255,255,255,0.06); margin-bottom:8px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); animation: slideIn 0.3s ease;">
+              <div style="font-size:13px; color:#fff; flex:1;">
+                <div style="font-weight:900; color:#d4af37; letter-spacing:0.5px;">${off.en}</div>
+                <div style="color:#eee; font-family:'Cairo', sans-serif; font-size:12px; margin-top:2px;">${off.ar}</div>
+              </div>
+              <button onclick="removeStagedOffer(${index})" style="background:rgba(239, 68, 68, 0.1); border:none; color:#ef4444; width:28px; height:28px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; transition:0.2s;">&times;</button>
+            </div>
+          `).join('');
+        }
+
+        function removeStagedOffer(index) {
+          if (window.stagedOffers) {
+            window.stagedOffers.splice(index, 1);
+            updateStagedOffersUI();
+          }
+        }
+
+
+        function clearStagedOffers() {
+          if (window.stagedOffers && window.stagedOffers.length > 0 && confirm('⚠️ هل تريد مسح كل العروض المضافة؟')) {
+             window.stagedOffers = [];
+             updateStagedOffersUI();
+          }
+        }
+
+
+        function selectOfferForManualBuilder(en, ar) {
+          const enInput = document.getElementById('customOfferEN');
+          const arInput = document.getElementById('customOfferAR');
+          if (enInput) enInput.value = en;
+          if (arInput) arInput.value = ar;
+          saveCustomModalData();
+          
+          // Highlight feedback
+          enInput.style.borderColor = '#d4af37';
+          arInput.style.borderColor = '#d4af37';
+          setTimeout(() => {
+             enInput.style.borderColor = '';
+             arInput.style.borderColor = '';
+          }, 1000);
+        }
+
+
         function updateQuantityDisplay() {
           const codes = document.getElementById('customCode').value.trim();
           const quantityContainer = document.getElementById('quantityContainer');
@@ -60837,32 +61024,43 @@
           imgs.forEach(el => { if (el.dataset.originalSrc) el.src = el.dataset.originalSrc; });
         }
         // كود لإجبار المتصفح على تحميل كل الصور قبل الطباعة
-        async function prepareForPrint() {
-          const images = document.querySelectorAll('img[loading="lazy"]');
-          images.forEach(img => {
-            img.removeAttribute('loading'); // إلغاء التحميل المتأخر
-            img.src = img.src; // إعادة تعيين المصدر لإجبار التحميل
+        async function waitForPrintAssets() {
+          const images = document.querySelectorAll('#printContainer img');
+          const promises = Array.from(images).map(img => {
+            if (img.complete) return Promise.resolve();
+            return new Promise(resolve => {
+              img.onload = resolve;
+              img.onerror = resolve;
+              // تفعيل التحميل
+              img.src = img.src;
+            });
           });
-
-          // استراحة بسيطة عشان ندي فرصة للمتصفح يحمل
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          window.print();
+          
+          // انتظار الصور أو بحد أقصى ثانية واحدة
+          await Promise.race([
+            Promise.all(promises),
+            new Promise(resolve => setTimeout(resolve, 1500))
+          ]);
         }
+
         // =====================
         // 3) Main: Print flow
         // =====================
         async function printCustomCardsDirectly() {
           injectPrintStylesOnce();
           let codes = document.getElementById('customCode') ? document.getElementById('customCode').value.trim() : '';
+          let codesList = codes.split(/[,\s]+/).filter(c => c.length > 0);
 
           // Get selections
           const selectedOfferTypes = getSelectedOfferTypes();
           const manualOfferEN = document.getElementById('customOfferEN') ? document.getElementById('customOfferEN').value.trim() : '';
           const manualOfferAR = document.getElementById('customOfferAR') ? document.getElementById('customOfferAR').value.trim() : '';
 
-          // توحيد العروض: نعتمد على القائمة أولاً، لو فاضية نعتمد على الكتابة اليدوية السفلية
+          // توحيد العروض: نعتمد على القائمة المجهزة أولاً، ثم المحددة، ثم اليدوية
           let finalOffers = [];
-          if (selectedOfferTypes.length > 0) {
+          if (window.stagedOffers && window.stagedOffers.length > 0) {
+            finalOffers = [...window.stagedOffers];
+          } else if (selectedOfferTypes.length > 0) {
             finalOffers = selectedOfferTypes;
           } else if (manualOfferEN || manualOfferAR) {
             finalOffers = [{ en: manualOfferEN, ar: manualOfferAR }];
@@ -60874,10 +61072,12 @@
             return;
           }
 
-          let codesList = codes.split(/[,\s]+/).filter(c => c.length > 0);
 
-          // 🔥 الذكاء الاصطناعي: لو مفيش أكواد، نحدد هنسحب إيه بناءً على الفلاتر النشطة
-          if (codesList.length === 0) {
+          const isGenericStagedMode = window.stagedOffers && window.stagedOffers.length > 0;
+          const isGenericMode = isGenericStagedMode || selectedOfferTypes.length > 0 || (manualOfferEN || manualOfferAR);
+
+          if (codesList.length === 0 && !isGenericMode) {
+
             const hasActiveFilters = document.getElementById('activeFiltersSummary')?.style.display === 'block';
 
             if (hasActiveFilters) {
@@ -60921,31 +61121,34 @@
           };
 
           const customCards = [];
-          const uniqueCodes = [...new Set(codesList)];
+          const uniqueCodes = (codesList && codesList.length > 0) ? [...new Set(codesList)] : [];
 
-          if (selectedOfferTypes.length > 0) {
-            // 🔥 التعديل المطلوب: الطباعة بناءً على نوع العرض وليس الكود
-            selectedOfferTypes.forEach(off => {
+          if (uniqueCodes.length > 0) {
+            // Case A: Printing specific products with offers
+            uniqueCodes.forEach(code => {
+              const product = productsDB.find(p => String(p.Code).trim() === String(code).trim());
+              finalOffers.forEach(off => {
+                for (let i = 0; i < quantity; i++) {
+                  customCards.push({
+                    Code: code,
+                    Product: product || null,
+                    customData: { ...customData, offerEN: off.en, offerAR: off.ar }
+                  });
+                }
+              });
+            });
+          } else {
+            // Case B: Printing generic offer cards (No specific products)
+            finalOffers.forEach(off => {
               for (let i = 0; i < quantity; i++) {
                 customCards.push({
-                  Code: "", // لا نحتاج كود محدد لأنها كروت عرض عامة
-                  customData: {
-                    ...customData,
-                    offerEN: off.en,
-                    offerAR: off.ar
-                  }
+                  Code: "",
+                  customData: { ...customData, offerEN: off.en, offerAR: off.ar }
                 });
               }
             });
-          } else if (manualOfferEN || manualOfferAR) {
-            // لو كاتب يدوي
-            for (let i = 0; i < quantity; i++) {
-              customCards.push({
-                Code: "",
-                customData: { ...customData, offerEN: manualOfferEN, offerAR: manualOfferAR }
-              });
-            }
           }
+
 
           if (!customCards.length) {
             alert('⚠️ لم يتم العثور على أكواد للطباعة. يرجى إدخال أكواد يدوياً أو تفعيل فلاتر في الصفحة الرئيسية.');
@@ -60967,15 +61170,28 @@
             try {
               renderCustomPrint(customCards);
               await exportRiyalSymbolsForPrint();
-            } catch (err) {
-              console.error("حدث خطأ أثناء تجهيز الطباعة:", err);
-            } finally {
-              if (loader) loader.style.display = 'none';
+              
+              // ✅ انتظار تحميل الصور والرموز
+              await waitForPrintAssets();
+              
+              // ✅ إغلاق المودال
               closeCustomPrintModal();
               saveCustomModalData();
-              window.print();
+              
+              // ✅ فتح نافذة الطباعة
+              setTimeout(() => {
+                window.print();
+              }, 100);
+
+            } catch (err) {
+              console.error("حدث خطأ أثناء تجهيز الطباعة:", err);
+              if (loader) loader.style.display = 'none';
+            } finally {
+              if (loader) loader.style.display = 'none';
             }
-          }, 150);
+          }, 300);
+
+
         }
 
         window.addEventListener("afterprint", restoreRiyalSymbolsAfterPrint);
@@ -61232,7 +61448,10 @@
 
           // 1. توليد المحتوى الداخلي
           const circleContent = getCircleContent(customData.offerEN, customData.offerAR);
-          const meta = customData.category ? `${cardData.Code} - ${customData.category}` : cardData.Code;
+          const pEN = cardData.Product ? cardData.Product.NameEN : customData.productEN;
+          const pAR = cardData.Product ? cardData.Product.NameAR : customData.productAR;
+          const pCat = cardData.Product ? cardData.Product.Category : customData.category;
+          const meta = pCat ? `${cardData.Code} - ${pCat}` : cardData.Code;
 
           if (!circleContent) return document.createElement('div');
 
@@ -61261,8 +61480,8 @@
       
       <div style="border-top:1px dashed #ccc; margin:2mm 10mm;"></div>
 
-      ${customData.productEN ? `<div style="font-size:10pt;font-weight:600;margin-bottom:1mm;height:16px;overflow:hidden;">${customData.productEN}</div>` : ''}
-      ${customData.productAR ? `<div style="font-family:'Cairo';font-size:10pt;font-weight:600;direction:rtl;height:18px;overflow:hidden;">${customData.productAR}</div>` : ''}
+      ${pEN ? `<div style="font-size:10pt;font-weight:600;margin-bottom:1mm;height:16px;overflow:hidden;">${pEN}</div>` : ''}
+      ${pAR ? `<div style="font-family:'Cairo';font-size:10pt;font-weight:600;direction:rtl;height:18px;overflow:hidden;">${pAR}</div>` : ''}
       
       <div class="print-product-meta" style="font-size:9pt;color:#888;margin-top:2mm;">${meta}</div>
     </div>
@@ -63392,7 +63611,7 @@
             }
           });
         });
-        // ====== 🔄 RENDER MAGAZINE MODE - WITH HALALA FIX ======
+
         async function renderMagazineMode(filteredProducts) {
           const container = document.getElementById('productsContainer');
           const loader = document.getElementById('loadingIndicator');
@@ -63717,32 +63936,6 @@
         }
 
         // فنكشن goToCategoryPage تفضل زي ما هي
-        function goToCategoryPage(catName) {
-          const categoryBlocks = magazineSettings.categoryBlocks || [];
-          const catIndex = categoryBlocks.findIndex(block =>
-            block.catA.toLowerCase().includes(catName.toLowerCase())
-          );
-
-          if (catIndex !== -1) {
-            const blocksPerPage = magazineSettings.rowsPerPage * magazineSettings.itemsPerRow || 12;
-            const targetPage = Math.floor(catIndex / blocksPerPage) + 1;
-
-            magazineSettings.currentPage = targetPage;
-            renderMagazinePage(targetPage);
-            updateMagazineNav();
-
-            document.querySelectorAll('.magazine-cat-btn').forEach(btn => {
-              btn.style.transform = 'scale(1)';
-              btn.style.boxShadow = '0 4px 15px rgba(102,126,234,0.4)';
-            });
-            event.target.style.transform = 'scale(1.05)';
-            event.target.style.boxShadow = '0 6px 20px rgba(102,126,234,0.6)';
-
-            console.log(`🚀 Navigated to ${catName} - Page ${targetPage}`);
-          } else {
-            console.log(`❌ Category ${catName} not found`);
-          }
-        }
 
 
         function goToCategoryPage(catName) {
@@ -63900,17 +64093,13 @@
                         -webkit-appearance: checkbox;
                         margin-right: 12px;
                    ">
-            <label for="offer-${safeId}" style="
-                display: flex; 
-                flex-direction: column; 
-                line-height: 1.2; 
-                cursor: pointer; 
-                flex: 1;
-            ">
+            <div style="display: flex; flex-direction: column; line-height: 1.2; cursor: pointer; flex: 1;" 
+                 onclick="selectOfferForManualBuilder('${type.en.replace(/'/g, "\\'")}', '${type.ar.replace(/'/g, "\\'")}')">
                 <strong style="color: #ffffff !important; font-size: 14px; font-weight: 800; display: block;">${type.en}</strong>
                 <small style="color: #ffd700 !important; font-size: 11px; font-weight: 700;">${type.ar}</small>
-            </label>
+            </div>
         `;
+
             container.appendChild(option);
           });
           console.log(`✅ Loaded ${offerTypes.length} offer types. Restored ${savedSelections.length} selections.`);
