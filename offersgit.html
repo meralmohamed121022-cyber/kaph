@@ -1233,7 +1233,7 @@
       /* Checked State - MAXIMUM CONTRAST (Black on White) */
       .custom-options-list .custom-option input[type="checkbox"]:checked,
       .custom-option input[type="checkbox"]:checked {
-        background: #ffffff !important; 
+        background: #ffffff !important;
         border-color: #ffffff !important;
         border-width: 0 !important;
         box-shadow: 0 0 15px rgba(255, 255, 255, 0.8) !important;
@@ -1242,13 +1242,14 @@
       /* Checkmark - BLACK & HUGE */
       .custom-options-list .custom-option input[type="checkbox"]:checked::after,
       .custom-option input[type="checkbox"]:checked::after {
-        content: '✔' !important; 
+        content: '✔' !important;
         position: absolute !important;
         top: 50% !important;
         left: 50% !important;
         transform: translate(-50%, -50%) !important;
-        color: #000000 !important; /* Pure black on white background */
-        font-size: 22px !important; 
+        color: #000000 !important;
+        /* Pure black on white background */
+        font-size: 22px !important;
         font-weight: 900 !important;
         line-height: 1 !important;
       }
@@ -6287,7 +6288,8 @@
           <div class="alert-message" style="direction: rtl; padding: 10px 20px;"></div>
           <div style="display: flex; gap: 10px; justify-content: center;">
             <button id="alertConfirmBtn" class="alert-close-btn"
-              style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">OK, Understood</button>
+              style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">OK,
+              Understood</button>
             <button class="alert-close-btn" onclick="closeStatusAlert()">Close</button>
           </div>
         </div>
@@ -66662,37 +66664,39 @@
           try {
             await destroyScannerInstance();
 
-            const cameras = await Html5Qrcode.getCameras();
-            if (!cameras || !cameras.length) {
-              throw new Error("NO CAMERA FOUND");
-            }
-
-            const preferredCamera = cameras.find(cam =>
-              /back|rear|environment/i.test(cam.label || '')
-            ) || cameras[0];
-
             html5QrScanner = new Html5Qrcode("reader");
 
             const config = {
-              fps: 25,
+              fps: 30,
               qrbox: (viewfinderWidth, viewfinderHeight) => {
-                const width = viewfinderWidth * 0.95;
-                const height = viewfinderHeight * 0.5;
-                return { width: width, height: height };
+                // تكبير مساحة المسح لتشمل أغلب الشاشة كما طلب المستخدم
+                const w = Math.min(viewfinderWidth * 0.95, 600);
+                const h = Math.min(viewfinderHeight * 0.85, 600);
+                return { width: w, height: h };
               },
-              aspectRatio: 1.0
+              // إزالة aspectRatio الثابت لتجنب أي تمطيط في الصورة على بعض الأجهزة
+              experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+              }
             };
 
             if (typeof Html5QrcodeSupportedFormats !== 'undefined') {
+              // إضافة التنسيقات بكل المسميات الممكنة (بشرطة وبدون) لضمان العمل على أي نسخة
               config.formatsToSupport = [
-                Html5QrcodeSupportedFormats.DATAMATRIX,
-                Html5QrcodeSupportedFormats.QRCODE,
-                Html5QrcodeSupportedFormats.CODE128
-              ];
+                Html5QrcodeSupportedFormats.QR_CODE, Html5QrcodeSupportedFormats.QRCODE,
+                Html5QrcodeSupportedFormats.CODE_128, Html5QrcodeSupportedFormats.CODE128,
+                Html5QrcodeSupportedFormats.CODE_39, Html5QrcodeSupportedFormats.CODE39,
+                Html5QrcodeSupportedFormats.EAN_13, Html5QrcodeSupportedFormats.EAN13,
+                Html5QrcodeSupportedFormats.EAN_8, Html5QrcodeSupportedFormats.EAN8,
+                Html5QrcodeSupportedFormats.UPC_A, Html5QrcodeSupportedFormats.UPCA,
+                Html5QrcodeSupportedFormats.UPC_E, Html5QrcodeSupportedFormats.UPCE,
+                Html5QrcodeSupportedFormats.DATA_MATRIX, Html5QrcodeSupportedFormats.DATAMATRIX,
+                Html5QrcodeSupportedFormats.ITF
+              ].filter(f => f !== undefined);
             }
 
             await html5QrScanner.start(
-              preferredCamera.id,
+              { facingMode: "environment" },
               config,
               (decodedText) => {
                 const cleanDecoded = String(decodedText || "").trim();
