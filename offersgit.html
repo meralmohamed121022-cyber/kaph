@@ -54796,6 +54796,7 @@
         var exclusiveOffersDB = currentDataInstance.exclusive;
         var CURRENT_OFFER_START = new Date(currentDataInstance.start);
         var CURRENT_OFFER_END = new Date(currentDataInstance.end);
+        CURRENT_OFFER_END.setHours(23, 59, 59, 999);
         // --- دالة لإظهار التنبيه الفني الجديد ---
 
 
@@ -54858,6 +54859,7 @@
           exclusiveOffersDB = period.exclusive || [];
           CURRENT_OFFER_START = new Date(period.start);
           CURRENT_OFFER_END = new Date(period.end);
+          CURRENT_OFFER_END.setHours(23, 59, 59, 999);
 
           if (typeof initOffersMap === 'function') initOffersMap();
           if (typeof updateDatesInHTML === 'function') updateDatesInHTML();
