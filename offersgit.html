@@ -55163,14 +55163,26 @@
           }
         }
 
+        function hasValidProductImage(p) {
+          if (!p) return false;
+          const url = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || p.imageurl || p.imageUrl || p.ImageURL || p.itemURL;
+          return url && url !== null && url !== "null" && String(url).trim() !== "" && String(url).trim() !== "1" && String(url).startsWith("http");
+        }
+
         // ====== LAZY LOADING OBSERVER (MODIFIED) ======
         const imageObserver = new IntersectionObserver((entries, observer) => {
           entries.forEach(entry => {
             if (entry.isIntersecting) {
               const img = entry.target;
               const code = img.dataset.code;
-              // 1. نجيب رابط الصورة من الداتا بيز (لازم تكون ضايف data-itemurl في HTML)
-              const dbUrl = img.dataset.itemurl;
+              // 1. نجيب رابط الصورة من الداتا بيز أو من الذاكرة
+              let dbUrl = img.dataset.itemurl;
+              if ((!dbUrl || dbUrl === "null" || dbUrl.trim() === "") && code) {
+                const prod = window.productsDB?.find(p => String(p.Code).trim() === String(code).trim());
+                if (prod) {
+                  dbUrl = prod.image_url || prod.itemurl || prod.ItemURL || prod.Image || prod.image || prod.imageurl || prod.imageUrl || prod.ImageURL || prod.itemURL;
+                }
+              }
 
               if (!code) return;
 
@@ -55191,12 +55203,12 @@
                 };
 
                 img.onerror = () => {
-                  console.warn(`⚠️ DB image failed for ${code}, loading brand logo fallback.`);
-                  loadFallback();
+                  console.warn(`⚠️ DB image failed for ${code}, attempting auto-repair.`);
+                  autoRepairBrokenImage(code, img, img.dataset.brand);
                 };
 
               } else {
-                loadFallback();
+                autoRepairBrokenImage(code, img, img.dataset.brand);
               }
 
               observer.unobserve(img);
@@ -55296,37 +55308,70 @@
           });
         }
 
-        async function tryLoadBrandLogo(brand, imgElement) {
-          if (!brand || brand === 'GENERIC' || brand === 'N/A') {
-            imgElement.src = getBrandPlaceholderSVG('NO LOGO');
-            imgElement.style.maxWidth = '65%';
-            imgElement.style.maxHeight = '65%';
-            imgElement.style.mixBlendMode = 'normal';
-            imgElement.style.opacity = '1';
-            imgElement.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
+        // Global cache for successfully repaired images
+        window.repairedImages = window.repairedImages || {};
+
+        async function autoRepairBrokenImage(code, imgElement, brand) {
+          if (!code) {
+            imgElement.src = getBrandPlaceholderSVG(brand || 'Brand');
             return;
           }
 
-          const logoUrls = getBrandLogoUrls(brand);
-
-          for (const logoUrl of logoUrls) {
-            try {
-              const success = await testImageLoad(logoUrl);
-              if (success) {
-                imgElement.src = logoUrl;
-                imgElement.style.maxWidth = '65%';
-                imgElement.style.maxHeight = '65%';
-                imgElement.style.mixBlendMode = 'normal';
-                imgElement.style.opacity = '1';
-                imgElement.style.filter = 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))';
-                return;
-              }
-            } catch (error) {
-              continue;
+          const cleanCode = String(code).trim();
+          if (window.repairedImages[cleanCode]) {
+            if (window.repairedImages[cleanCode] === 'FAILED') {
+              imgElement.src = getBrandPlaceholderSVG(brand || 'Brand');
+            } else {
+              imgElement.src = window.repairedImages[cleanCode];
             }
+            return;
           }
 
-          imgElement.src = getBrandPlaceholderSVG(brand);
+          try {
+            const res = await fetch(`https://stgprevapi.al-dawaa.com/occ/v2/aldawaa/products/${cleanCode}`);
+            if (!res.ok) throw new Error('API failed');
+            const data = await res.json();
+            const images = data.images || [];
+
+            // Priority order of formats
+            const formats = ['superZoom', 'zoom', 'product', 'thumbnail'];
+            let foundUrl = null;
+
+            for (const format of formats) {
+              const imgObj = images.find(img => img.format === format && img.imageType === 'PRIMARY');
+              if (imgObj && imgObj.url) {
+                foundUrl = imgObj.url;
+                break;
+              }
+            }
+
+            if (!foundUrl) {
+              // Try gallery if primary is not found
+              for (const format of formats) {
+                const imgObj = images.find(img => img.format === format && img.imageType === 'GALLERY');
+                if (imgObj && imgObj.url) {
+                  foundUrl = imgObj.url;
+                  break;
+                }
+              }
+            }
+
+            if (foundUrl) {
+              const fullUrl = foundUrl.startsWith('http') ? foundUrl : `https://stgprevapi.al-dawaa.com${foundUrl}`;
+              window.repairedImages[cleanCode] = fullUrl;
+              imgElement.src = fullUrl;
+              imgElement.style.opacity = '1';
+            } else {
+              throw new Error('No images found');
+            }
+          } catch (err) {
+            window.repairedImages[cleanCode] = 'FAILED';
+            imgElement.src = getBrandPlaceholderSVG(brand || 'Brand');
+          }
+        }
+
+        async function tryLoadBrandLogo(brand, imgElement) {
+          imgElement.src = getBrandPlaceholderSVG(brand || 'Brand');
           imgElement.style.maxWidth = '65%';
           imgElement.style.maxHeight = '65%';
           imgElement.style.mixBlendMode = 'normal';
@@ -55872,29 +55917,7 @@
 
         // Try loading brand logo with fallbacks
         async function tryLoadBrandLogo(brand, imgElement) {
-          if (!brand || brand === 'GENERIC') {
-            imgElement.src = getPlaceholderSVG('NO LOGO');
-            imgElement.style.opacity = '1';
-            return;
-          }
-
-          const logoUrls = getBrandLogoUrls(brand);
-
-          for (const logoUrl of logoUrls) {
-            try {
-              const success = await testImageLoad(logoUrl);
-              if (success) {
-                imgElement.src = logoUrl;
-                imgElement.style.opacity = '1';
-                imgElement.style.mixBlendMode = 'normal';
-                return;
-              }
-            } catch (error) {
-              continue;
-            }
-          }
-
-          imgElement.src = getPlaceholderSVG(brand);
+          imgElement.src = getPlaceholderSVG(brand || 'Brand');
           imgElement.style.opacity = '1';
         }
 
@@ -55923,26 +55946,35 @@
               if (entry.isIntersecting) {
                 const img = entry.target;
                 const code = img.dataset.code;
-                const brand = img.dataset.brand;
+                const brand = img.dataset.brand || 'Generic';
 
-                fetchProductImage(code).then(imageUrl => {
-                  if (imageUrl) {
-                    testImageLoad(imageUrl).then(success => {
-                      if (success) {
-                        img.src = imageUrl;
-                        img.onload = () => {
-                          img.style.opacity = '1';
-                        };
-                      } else {
-                        tryLoadBrandLogo(brand, img);
-                      }
-                    });
-                  } else {
-                    tryLoadBrandLogo(brand, img);
+                // Look up in productsDB first
+                let dbUrl = img.dataset.itemurl;
+                if ((!dbUrl || dbUrl === "null" || dbUrl.trim() === "") && code) {
+                  const prod = window.productsDB?.find(p => String(p.Code).trim() === String(code).trim());
+                  if (prod) {
+                    dbUrl = prod.image_url || prod.itemurl || prod.ItemURL || prod.Image || prod.image || prod.imageurl || prod.imageUrl || prod.ImageURL || prod.itemURL;
                   }
-                }).catch(() => {
-                  tryLoadBrandLogo(brand, img);
-                });
+                }
+
+                const isValidUrl = dbUrl
+                  && dbUrl !== "null"
+                  && dbUrl !== "undefined"
+                  && dbUrl.trim() !== ""
+                  && dbUrl.trim() !== "1"
+                  && dbUrl.startsWith("http");
+
+                if (isValidUrl) {
+                  img.src = dbUrl;
+                  img.onload = () => {
+                    img.style.opacity = '1';
+                  };
+                  img.onerror = () => {
+                    autoRepairBrokenImage(code, img, brand);
+                  };
+                } else {
+                  autoRepairBrokenImage(code, img, brand);
+                }
 
                 observer.unobserve(img);
               }
@@ -56113,8 +56145,8 @@
                 // ✅ 2. تحديد مصدر الصورة
                 const getImgSrc = (p) => {
                   const target = p.product || p;
-                  const url = target.itemurl || target.ItemURL;
-                  if (url && url !== null && url !== "null" && url.trim() !== "") {
+                  const url = target.image_url || target.itemurl || target.ItemURL || target.Image || target.image || target.imageurl || target.imageUrl || target.ImageURL || target.itemURL;
+                  if (url && url !== null && url !== "null" && String(url).trim() !== "" && String(url).trim() !== "1") {
                     return url;
                   }
                   return fallbackVector;
@@ -56126,11 +56158,13 @@
                   imageHTML = `<div class="magazine-images-stack" data-count="${offerProducts.length}">`;
                   offerProducts.forEach((p, idx) => {
                     const directSrc = getImgSrc(p);
+                    const pUrl = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || p.imageurl || p.imageUrl || p.ImageURL || p.itemURL || '';
                     imageHTML += `
               <img 
                 src="${directSrc}"
                 data-code="${p.Code}" 
                 data-brand="${brand}" 
+                data-itemurl="${pUrl}"
                 class="magazine-lazy-img stack-img stack-item-${idx + 1}" 
                 alt="${brand} ${idx + 1}" 
                 referrerpolicy="no-referrer"
@@ -56141,12 +56175,14 @@
                 } else {
                   // ✅ صورة مفردة
                   const directSrc = getImgSrc(product);
+                  const prodUrl = product.image_url || product.itemurl || product.ItemURL || product.Image || product.image || product.imageurl || product.imageUrl || product.ImageURL || product.itemURL || '';
                   imageHTML = `
             <div class="magazine-product-image-wrapper">
               <img 
                 src="${directSrc}" 
                 data-code="${product.Code}" 
                 data-brand="${brand}" 
+                data-itemurl="${prodUrl}"
                 class="magazine-lazy-img" 
                 alt="${brand}"
                 referrerpolicy="no-referrer"
@@ -57589,6 +57625,14 @@
                 const brands = catDs[catD];
                 Object.keys(brands).sort().forEach(brandName => {
                   const brandProducts = brands[brandName];
+                  // Prioritize products with valid images
+                  brandProducts.sort((a, b) => {
+                    const hasA = hasValidProductImage(a);
+                    const hasB = hasValidProductImage(b);
+                    if (hasA && !hasB) return -1;
+                    if (!hasA && hasB) return 1;
+                    return 0;
+                  });
                   const firstProduct = brandProducts[0];
                   const productsCount = brandProducts.length;
 
@@ -57604,6 +57648,8 @@
                     <div style="position: relative; width: 100%; height: 180px; background: linear-gradient(90deg, #f0f0f0 0%, #e0e0e0 50%, #f0f0f0 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px 8px 0 0; overflow: hidden; margin-bottom: 10px;">
                       <img 
                         data-code="${firstProduct.Code}" 
+                        data-itemurl="${firstProduct.image_url || firstProduct.itemurl || firstProduct.ItemURL || firstProduct.Image || firstProduct.image || firstProduct.imageurl || firstProduct.imageUrl || firstProduct.ImageURL || firstProduct.itemURL || ''}"
+                        data-brand="${brandName}"
                         class="product-image lazy-image" 
                         referrerpolicy="no-referrer"
                         style="width: 100%; height: 100%; object-fit: contain; transition: opacity 0.3s ease; opacity: 0;" 
@@ -57758,6 +57804,14 @@
 
                 Object.keys(rowBrands).forEach(brandName => {
                   const productsInThisCluster = rowBrands[brandName];
+                  // Prioritize products with valid images
+                  productsInThisCluster.sort((a, b) => {
+                    const hasA = hasValidProductImage(a);
+                    const hasB = hasValidProductImage(b);
+                    if (hasA && !hasB) return -1;
+                    if (!hasA && hasB) return 1;
+                    return 0;
+                  });
                   const count = productsInThisCluster.length;
                   const widthPercent = (count / ITEMS_PER_ROW) * 100;
                   const brandColor = stringToColor(brandName);
@@ -57793,7 +57847,7 @@
                                 <div style="position: absolute; top: 10px; left: 10px; background: #dc2626; color: white; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px; z-index: 10; direction: ltr !important;">
                                     ${shortOfferType}
                                 </div>
-                                <img data-code="${product.Code}" data-brand="${product.Brand || 'Generic'}" data-itemurl="${product.itemurl || ''}" referrerpolicy="no-referrer" class="product-image smart-lazy-img" style="max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s;" alt="${product["Item Description"]}"/>
+                                <img data-code="${product.Code}" data-brand="${product.Brand || 'Generic'}" data-itemurl="${product.image_url || product.itemurl || product.ItemURL || product.Image || product.image || product.imageurl || product.imageUrl || product.ImageURL || product.itemURL || ''}" referrerpolicy="no-referrer" class="product-image smart-lazy-img" style="max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s;" alt="${product["Item Description"]}"/>
                             </div>
                             <div style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; background: #fff;">
                                 <div>
@@ -57863,7 +57917,13 @@
                 const img = entry.target;
                 const code = img.dataset.code;
                 const brand = img.dataset.brand || 'Generic';
-                const dbUrl = img.dataset.itemurl;
+                let dbUrl = img.dataset.itemurl;
+                if ((!dbUrl || dbUrl === "null" || dbUrl.trim() === "") && code) {
+                  const prod = window.productsDB?.find(p => String(p.Code).trim() === String(code).trim());
+                  if (prod) {
+                    dbUrl = prod.image_url || prod.itemurl || prod.ItemURL || prod.Image || prod.image || prod.imageurl || prod.imageUrl || prod.ImageURL || prod.itemURL;
+                  }
+                }
 
                 const loadFallback = () => {
                   tryLoadBrandLogoSmart(brand, img);
@@ -57907,7 +57967,14 @@
 
               if (isNotLoaded) {
                 const brand = img.dataset.brand || 'Generic';
-                const dbUrl = img.dataset.itemurl;
+                const code = img.dataset.code;
+                let dbUrl = img.dataset.itemurl;
+                if ((!dbUrl || dbUrl === "null" || dbUrl.trim() === "") && code) {
+                  const prod = window.productsDB?.find(p => String(p.Code).trim() === String(code).trim());
+                  if (prod) {
+                    dbUrl = prod.image_url || prod.itemurl || prod.ItemURL || prod.Image || prod.image || prod.imageurl || prod.imageUrl || prod.ImageURL || prod.itemURL;
+                  }
+                }
 
                 const isValidUrl = dbUrl
                   && dbUrl !== "null"
@@ -57919,9 +57986,9 @@
                 if (isValidUrl) {
                   img.src = dbUrl;
                   img.onload = () => { img.style.opacity = '1'; };
-                  img.onerror = () => { tryLoadBrandLogoSmart(brand, img); };
+                  img.onerror = () => { autoRepairBrokenImage(code, img, brand); };
                 } else {
-                  tryLoadBrandLogoSmart(brand, img);
+                  autoRepairBrokenImage(code, img, brand);
                 }
               }
             });
@@ -57992,32 +58059,6 @@
         // ==========================================
         async function tryLoadBrandLogoSmart(brand, imgElement) {
           const cleanBrand = (brand || 'GENERIC').trim();
-
-          if (!cleanBrand || cleanBrand === 'GENERIC' || cleanBrand === 'N/A') {
-            imgElement.src = getBrandVectorSVG(cleanBrand);
-            imgElement.style.opacity = '1';
-            return;
-          }
-
-          const logoUrls = [
-            `https://logo.clearbit.com/${cleanBrand.toLowerCase()}.com`,
-            `https://img.logo.dev/${cleanBrand.toLowerCase()}.com?token=pk_X-NOM1TdQVaFy4SSRQoMjQ`,
-            `https://cdn.brandfetch.io/${cleanBrand.toLowerCase()}.com/w/400/h/400/fallback/lettermark`
-          ];
-
-          for (const url of logoUrls) {
-            try {
-              const isValid = await testImageLoad(url);
-              if (isValid) {
-                imgElement.src = url;
-                imgElement.style.opacity = '1';
-                imgElement.style.padding = "25px";
-                return;
-              }
-            } catch (e) { continue; }
-          }
-
-          console.log(`🎨 Generating Vector for: ${cleanBrand}`);
           imgElement.src = getBrandVectorSVG(cleanBrand);
           imgElement.style.opacity = '1';
           imgElement.style.padding = "0";
@@ -60910,6 +60951,15 @@
             try {
               const productsWithOffers = filteredProducts.filter(p => getOffer(p.Code) !== null);
 
+              // Sort to prioritize products with valid images
+              productsWithOffers.sort((a, b) => {
+                const hasA = hasValidProductImage(a);
+                const hasB = hasValidProductImage(b);
+                if (hasA && !hasB) return -1;
+                if (!hasA && hasB) return 1;
+                return 0;
+              });
+
               if (productsWithOffers.length === 0) {
                 container.innerHTML = '<div style="padding:40px;text-align:center;font-size:20px;color:#666">No offers available</div>';
                 if (loader) loader.style.display = 'none';
@@ -61037,6 +61087,14 @@
 
                     for (const offerType of sortedOfferTypes) {
                       const productsWithThisOffer = offersForBrand[offerType];
+                      // Double check sort to make absolutely sure products with valid images are first
+                      productsWithThisOffer.sort((a, b) => {
+                        const hasA = hasValidProductImage(a);
+                        const hasB = hasValidProductImage(b);
+                        if (hasA && !hasB) return -1;
+                        if (!hasA && hasB) return 1;
+                        return 0;
+                      });
                       const representative = productsWithThisOffer[0];
                       const key = `${catA}_${brand}_${offerType}`;
 
@@ -61150,9 +61208,10 @@
           const processed = new Set();
 
           productsWithOffers.forEach(product => {
-            const brand = product.Brand;
-            const offerType = getOffer(product.Code)?.offerType;
-            const key = `${brand}_${offerType}`;
+            const brand = product.Brand || 'GENERIC';
+            const catA = product["Category Level A"] || product["Category A"] || 'Uncategorized';
+            const offerType = getOffer(product.Code)?.offerType || 'NONE';
+            const key = `${catA}_${brand}_${offerType}`;
 
             if (!processed.has(key)) {
               processed.add(key);
@@ -61160,12 +61219,22 @@
               const uniqueCodes = new Set();
 
               productsWithOffers.forEach(p => {
-                if (p.Brand === brand && getOffer(p.Code)?.offerType === offerType) {
+                const pCatA = p["Category Level A"] || p["Category A"] || 'Uncategorized';
+                if (p.Brand === brand && pCatA === catA && getOffer(p.Code)?.offerType === offerType) {
                   if (!uniqueCodes.has(p.Code)) {
                     uniqueCodes.add(p.Code);
                     brandProducts.push(p);
                   }
                 }
+              });
+
+              // Sort brandProducts by valid image priority
+              brandProducts.sort((a, b) => {
+                const hasA = hasValidProductImage(a);
+                const hasB = hasValidProductImage(b);
+                if (hasA && !hasB) return -1;
+                if (!hasA && hasB) return 1;
+                return 0;
               });
 
               stackData[key] = brandProducts.slice(0, 3);
@@ -62239,7 +62308,7 @@
 
             // 📦 تجهيز الكارت
             const { product, brand, productsCount, offerProducts } = item;
-            let imgSrc = product.itemurl || product.Image || item.itemurl;
+            let imgSrc = product.image_url || product.itemurl || product.ItemURL || product.Image || product.image || product.imageurl || product.imageUrl || product.ImageURL || product.itemURL || item.image_url || item.itemurl || '';
             if (!imgSrc || imgSrc === 'null') imgSrc = '';
             let brandLogoSrc = product.BrandLogo || product.brand_logo || item.BrandLogo || '';
             if (brandLogoSrc === 'null') brandLogoSrc = '';
@@ -62252,7 +62321,7 @@
               const stackClass = displayImages.length === 2 ? 'stack-2' : 'stack-3';
               imageHTML = `<div class="card-images-stack ${stackClass}">`;
               displayImages.forEach((p, idx) => {
-                const pImg = p.itemurl || p.Image || '';
+                const pImg = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || p.imageurl || p.imageUrl || p.ImageURL || p.itemURL || '';
                 if (pImg && pImg !== 'null') {
                   imageHTML += `<img src="${pImg}" class="stack-img img-${idx} ${compressClass}" crossorigin="anonymous" />`;
                 }
