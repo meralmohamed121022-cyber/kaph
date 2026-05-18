@@ -59708,8 +59708,8 @@
             // --- Row 1 (Standard) ---
             const row1 = document.createElement("div");
             row1.className = "print-row";
-            // ✅ إزاحة الصف كامل ناحية اليمين بـ 4mm (2mm + 2mm إضافية)
-            row1.style.cssText = "display: flex !important; justify-content: space-between !important; margin-top: -2mm !important;";
+            // ✅ إزاحة الصف كامل ناحية اليمين بـ 4mm ورفعه للأعلى بـ 6px إضافية كما طلب العميل
+            row1.style.cssText = "display: flex !important; justify-content: space-between !important; margin-top: calc(-2mm - 6px) !important;";
 
             for (let j = 0; j < itemsPerRow && (i + j) < filteredProducts.length; j++) {
               const card = createPrintCard(filteredProducts[i + j]);
@@ -59717,9 +59717,9 @@
               if (j === 0) {
                 card.style.marginLeft = "2mm";
               }
-              // ✅ إزاحة الكارت الثالث ناحية اليسار بـ 2mm لحمايته من الهامش غير القابل للطباعة
+              // ✅ إزاحة الكارت الثالث ناحية اليسار بـ 2mm + 5px إضافية (دخل الكروت لجوه) لحمايته من الهامش ويظهر الباركود كاملاً
               if (j === 2) {
-                card.style.marginRight = "2mm";
+                card.style.marginRight = "calc(2mm + 5px)";
               }
               row1.appendChild(card);
             }
@@ -59734,8 +59734,8 @@
             // --- Row 2 (Absolute Bottom) ---
             const row2 = document.createElement("div");
             row2.className = "print-row";
-            // ✅ إزاحة الصف كامل ناحية اليمين بـ 4mm + رفع لفوق 2mm (من 3mm إلى 5mm)
-            row2.style.cssText = "position: absolute !important; bottom: 15mm !important; left: 0 !important; width: 100% !important; display: flex !important; justify-content: space-between !important; z-index: 2 !important;";
+            // ✅ الصف الثاني يرتفع للأعلى بمقدار نصف حجم الـ QR (16 بكسل إضافية ليصل لـ 24px) لمنع قص الـ QR كود نهائياً أثناء الطباعة
+            row2.style.cssText = "position: absolute !important; bottom: 24px !important; left: 0 !important; width: 100% !important; display: flex !important; justify-content: space-between !important; z-index: 2 !important;";
 
             for (let j = 0; j < itemsPerRow && (i + itemsPerRow + j) < filteredProducts.length; j++) {
               const card = createPrintCard(filteredProducts[i + itemsPerRow + j]);
@@ -59743,9 +59743,9 @@
               if (j === 0) {
                 card.style.marginLeft = "2mm";
               }
-              // ✅ إزاحة الكارت الثالث ناحية اليسار بـ 2mm لحمايته من الهامش غير القابل للطباعة
+              // ✅ إزاحة الكارت الثالث ناحية اليسار بـ 2mm + 5px إضافية (دخل الكروت لجوه) لحمايته من الهامش ويظهر الباركود كاملاً
               if (j === 2) {
-                card.style.marginRight = "2mm";
+                card.style.marginRight = "calc(2mm + 5px)";
               }
               row2.appendChild(card);
             }
