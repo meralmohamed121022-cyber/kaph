@@ -5548,6 +5548,99 @@
         appearance: checkbox !important;
         opacity: 1 !important;
       }
+
+      /* Premium Styling for Scanner Delete Confirmation Modal */
+      .confirm-card {
+        background: rgba(20, 20, 30, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 30px;
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(10px);
+        transform: scale(0.9);
+        animation: confirmModalScale 0.3s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      @keyframes confirmModalScale {
+        to {
+          transform: scale(1);
+        }
+      }
+
+      .warning-icon-art {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, #ef4444, #b91c1c);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+      }
+
+      .exclamation-mark {
+        color: #fff;
+        font-size: 32px;
+        font-weight: bold;
+        font-family: 'Outfit', sans-serif;
+      }
+
+      .confirm-title {
+        color: #ffffff;
+        font-family: 'Cairo', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 24px 0;
+      }
+
+      .confirm-btns {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+      }
+
+      .btn-confirm-yes {
+        background: #ef4444;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-family: 'Cairo', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+      }
+
+      .btn-confirm-yes:hover {
+        background: #dc2626;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+      }
+
+      .btn-confirm-no {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e5e7eb;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-family: 'Cairo', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-confirm-no:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: translateY(-2px);
+      }
     </style>
     </head>
 
@@ -6360,7 +6453,7 @@
         <div class="arrow-up"></div>
       </button>
 
-      <div id="deleteConfirmOverlay" <div id="deleteConfirmOverlay"
+      <div id="deleteConfirmOverlay"
         style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:200000; align-items:center; justify-content:center; backdrop-filter:blur(8px);">
         <div class="confirm-card">
           <div class="warning-icon-art">
