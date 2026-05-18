@@ -58552,7 +58552,16 @@
 
             for (let j = 0; j < 3; j++) {
               if (pageCards[j]) {
-                row1.appendChild(createCustomPrintCard(pageCards[j]));
+                const card = createCustomPrintCard(pageCards[j]);
+                // ✅ إزاحة الكارت الأول فقط ناحية اليمين بمقدار عرض الباركود (8mm)
+                if (j === 0) {
+                  card.style.marginLeft = "8mm";
+                }
+                // ✅ إزاحة الكارت الثالث ناحية اليسار بمقدار عرض الباركود (8mm)
+                if (j === 2) {
+                  card.style.marginRight = "8mm";
+                }
+                row1.appendChild(card);
               } else {
                 const empty = document.createElement('div');
                 empty.className = 'print-card';
@@ -58572,7 +58581,16 @@
 
             for (let j = 3; j < 6; j++) {
               if (pageCards[j]) {
-                row2.appendChild(createCustomPrintCard(pageCards[j]));
+                const card = createCustomPrintCard(pageCards[j]);
+                // ✅ إزاحة الكارت الأول فقط ناحية اليمين بمقدار عرض الباركود (8mm)
+                if (j === 3) {
+                  card.style.marginLeft = "8mm";
+                }
+                // ✅ إزاحة الكارت الثالث ناحية اليسار بمقدار عرض الباركود (8mm)
+                if (j === 5) {
+                  card.style.marginRight = "8mm";
+                }
+                row2.appendChild(card);
               } else {
                 const empty = document.createElement('div');
                 empty.className = 'print-card';
