@@ -59713,13 +59713,13 @@
 
             for (let j = 0; j < itemsPerRow && (i + j) < filteredProducts.length; j++) {
               const card = createPrintCard(filteredProducts[i + j]);
-              // ✅ إزاحة الكارت الأول فقط ناحية اليمين بـ 2mm إضافية
+              // ✅ إزاحة الكارت الأول فقط ناحية اليمين بمقدار عرض الباركود (8mm)
               if (j === 0) {
-                card.style.marginLeft = "2mm";
+                card.style.marginLeft = "8mm";
               }
-              // ✅ إزاحة الكارت الثالث ناحية اليسار بـ 2mm + 5px إضافية (دخل الكروت لجوه) لحمايته من الهامش ويظهر الباركود كاملاً
+              // ✅ إزاحة الكارت الثالث ناحية اليسار بمقدار عرض الباركود (8mm)
               if (j === 2) {
-                card.style.marginRight = "calc(2mm + 5px)";
+                card.style.marginRight = "8mm";
               }
               row1.appendChild(card);
             }
@@ -59739,13 +59739,13 @@
 
             for (let j = 0; j < itemsPerRow && (i + itemsPerRow + j) < filteredProducts.length; j++) {
               const card = createPrintCard(filteredProducts[i + itemsPerRow + j]);
-              // ✅ إزاحة الكارت الأول فقط ناحية اليمين بـ 2mm إضافية
+              // ✅ إزاحة الكارت الأول فقط ناحية اليمين بمقدار عرض الباركود (8mm)
               if (j === 0) {
-                card.style.marginLeft = "2mm";
+                card.style.marginLeft = "8mm";
               }
-              // ✅ إزاحة الكارت الثالث ناحية اليسار بـ 2mm + 5px إضافية (دخل الكروت لجوه) لحمايته من الهامش ويظهر الباركود كاملاً
+              // ✅ إزاحة الكارت الثالث ناحية اليسار بمقدار عرض الباركود (8mm)
               if (j === 2) {
-                card.style.marginRight = "calc(2mm + 5px)";
+                card.style.marginRight = "8mm";
               }
               row2.appendChild(card);
             }
