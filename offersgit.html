@@ -34522,29 +34522,42 @@
     }
   },
   {
-    "offerType": "x- y",
-    "offerTypeAR": "x- y",
+    "offerType": "Buy 508519 Get 508520",
+    "offerTypeAR": "Buy 508519 Get 508520",
     "codes": [
-      "230899",
-      "230900",
       "508519",
-      "508520",
+      "508520"
+    ],
+    "styleClass": "offer-custom",
+    "badgeClass": "offer-custom",
+    "offerPrice": {
+      "508519": "508520"
+    }
+  },
+  {
+    "offerType": "Buy 508521 Get 508522",
+    "offerTypeAR": "Buy 508521 Get 508522",
+    "codes": [
       "508521",
-      "508522",
+      "508522"
+    ],
+    "styleClass": "offer-custom",
+    "badgeClass": "offer-custom",
+    "offerPrice": {
+      "508521": "508522"
+    }
+  },
+  {
+    "offerType": "Buy 508523 Get 508524",
+    "offerTypeAR": "Buy 508523 Get 508524",
+    "codes": [
       "508523",
       "508524"
     ],
     "styleClass": "offer-custom",
     "badgeClass": "offer-custom",
     "offerPrice": {
-      "230899": "230900",
-      "230900": "230900",
-      "508519": "1",
-      "508520": "1",
-      "508521": "1",
-      "508522": "1",
-      "508523": "1",
-      "508524": "1"
+      "508523": "508524"
     }
   },
   {
@@ -42247,10 +42260,38 @@
             formData.append("file", file);
 
             if (typeof productsDB !== 'undefined') {
+              // Get active brands and codes for the CURRENT period
+              let activeBrands = new Set();
+              let activeCodes = new Set();
+              
+              if (typeof exclusiveOffersDB !== 'undefined') {
+                exclusiveOffersDB.forEach(offer => {
+                  if (offer.codes) offer.codes.forEach(b => activeBrands.add(b.trim().toUpperCase()));
+                });
+              }
+              
+              if (typeof offersDB !== 'undefined') {
+                offersDB.forEach(offer => {
+                  if (offer.codes) {
+                    offer.codes.forEach(c => {
+                      const cleanCode = String(c).trim().replace(/\s+/g, '');
+                      activeCodes.add(cleanCode);
+                      let p = productsDB.find(prod => String(prod.Code).trim() === cleanCode);
+                      if (!p && /^\d+$/.test(cleanCode)) {
+                        p = productsDB.find(prod => parseInt(prod.Code) === parseInt(cleanCode, 10));
+                      }
+                      if (p && p.Brand) activeBrands.add(p.Brand.trim().toUpperCase());
+                    });
+                  }
+                });
+              }
+
               const knownBrands = [...new Set(productsDB.map(p => p.Brand))]
-                .filter(b => b && b.length > 2);
-              console.log("📚 knownBrands count:", knownBrands.length);
+                .filter(b => b && b.length > 2 && activeBrands.has(b.trim().toUpperCase()));
+                
+              console.log("📚 active knownBrands count:", knownBrands.length);
               formData.append("brands", knownBrands.join(','));
+              formData.append("codes", Array.from(activeCodes).join(','));
             } else {
               console.log("⚠️ productsDB غير معرف في الصفحة دي");
             }
