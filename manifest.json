@@ -1,0 +1,17 @@
+{
+  "name": "MONO SYSTEM - صيدلية وعروض",
+  "short_name": "MONO SYSTEM",
+  "start_url": "./index.htm",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#ff6b35",
+  "description": "نظام إدارة الصيدلية الذكي، يوفر كل العروض والمعلومات الطبية.",
+  "icons": [
+    {
+      "src": "app-icon.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

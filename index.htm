@@ -7,10 +7,9 @@
     <title>MONO SYSTEM</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="icon"
-        href="https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png">
-    <link rel="apple-touch-icon"
-        href="https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="app-icon.jpg">
+    <link rel="apple-touch-icon" href="app-icon.jpg">
 
     <script>
         if (window.location.href.indexOf('mode=scanner') !== -1) {
@@ -1474,11 +1473,11 @@ body.day-mode .sadaqa-badge {
     </div>
 
     <!-- شريط تثبيت التطبيق -->
-    <div id="installAppBanner" class="hidden">
+    <div id="installAppBanner">
         <div class="install-app-content" onclick="promptAppInstall()">
             <i class="fas fa-mobile-alt install-app-icon"></i>
             <div class="install-app-text">
-                <span>تثبيت التطبيق</span>
+                <span>تثبيت الموقع كتطبيق</span>
                 <span>تنزيل نسخة للموبايل لتجربة أسرع</span>
             </div>
         </div>
@@ -1595,14 +1594,10 @@ body.day-mode .sadaqa-badge {
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            const banner = document.getElementById('installAppBanner');
-            if(banner) {
-                setTimeout(() => banner.classList.remove('hidden'), 1500);
-            }
         });
 
         function closeInstallBanner() {
-            document.getElementById('installAppBanner').classList.add('hidden');
+            document.getElementById('installAppBanner').style.display = 'none';
         }
 
         function promptAppInstall() {
@@ -1616,7 +1611,8 @@ body.day-mode .sadaqa-badge {
                     closeInstallBanner();
                 });
             } else {
-                alert('يمكنك إضافة هذا الموقع إلى الشاشة الرئيسية من خلال إعدادات المتصفح (Add to Home screen)');
+                // If it doesn't trigger natively, guide the user
+                alert('لتثبيت التطبيق على جهازك:\n\nفي الايفون (Safari): اضغط على أيقونة المشاركة بالأسفل ⍗ ثم اختر "Add to Home Screen".\n\nفي الاندرويد (Chrome): اضغط على القائمة (⋮) ثم اختر "Add to Home Screen" أو "Install App".');
             }
         }
 
