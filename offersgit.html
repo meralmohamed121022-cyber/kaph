@@ -6491,29 +6491,33 @@
           const loader = document.getElementById("loadingIndicator");
           if (loader) loader.style.display = "block";
 
-          const url1 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/offerstestgit/refs/heads/main/products1.json";
-          const url2 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/offerstestgit/refs/heads/main/products2.json";
+          const url1 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master1.json";
+          const url2 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master2.json";
+          const url3 = "https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master3.json";
 
           try {
             console.log("⏳ جاري تحميل قاعدة بيانات الأدوية من GitHub...");
 
-            const [res1, res2] = await Promise.all([
+            const [res1, res2, res3] = await Promise.all([
               fetch(url1),
-              fetch(url2)
+              fetch(url2),
+              fetch(url3)
             ]);
 
-            if (!res1.ok || !res2.ok) {
+            if (!res1.ok || !res2.ok || !res3.ok) {
               throw new Error("فشل في تحميل أحد الملفات من GitHub");
             }
 
-            const [data1, data2] = await Promise.all([
+            const [data1, data2, data3] = await Promise.all([
               res1.json(),
-              res2.json()
+              res2.json(),
+              res3.json()
             ]);
 
             const combinedData = [
               ...(Array.isArray(data1) ? data1 : []),
-              ...(Array.isArray(data2) ? data2 : [])
+              ...(Array.isArray(data2) ? data2 : []),
+              ...(Array.isArray(data3) ? data3 : [])
             ];
 
             productsDB = combinedData.map(p => ({
@@ -52032,7 +52036,7 @@
             let currentGroup = null;
 
             rowProducts.forEach(item => {
-              const catD = item.catD || (item.product && item.product["Category Level D"]) || 'OTHER';
+              const catD = item.catD || (item.product && item.product["Category Level C"]) || 'OTHER';
 
               if (!currentGroup || currentGroup.catD !== catD) {
                 currentGroup = { catD, items: [] };
@@ -57004,7 +57008,7 @@
 
                 chunk.forEach(product => {
                   const catA = product["Category Level A"] || product["Category A"] || "Uncategorized";
-                  const catD = product["Category Level D"] || product["Category D"] || "Uncategorized";
+                  const catD = product["Category Level C"] || product["Category C"] || "Uncategorized";
                   const brand = product.Brand || "GENERIC";
                   const offer = getOffer(product.Code);
                   const offerType = offer ? (offer.offerType || offer.type) : null;
