@@ -60576,8 +60576,16 @@
 
             // 📦 تجهيز الكارت
             const { product, brand, productsCount, offerProducts } = item;
-            let imgSrc = product.image_url || product.itemurl || product.ItemURL || product.Image || product.image || product.imageurl || product.imageUrl || product.ImageURL || product.itemURL || item.image_url || item.itemurl || '';
+            
+            let imgSrc = '';
+            if (product.Code) {
+                const exist = document.querySelector(`img[data-code="${product.Code}"]`);
+                if (exist && exist.src && !exist.src.includes('data:image/svg') && !exist.src.includes(window.location.href)) imgSrc = exist.src;
+                else if (typeof imageCache !== 'undefined' && imageCache.has(product.Code)) imgSrc = imageCache.get(product.Code);
+            }
+            if (!imgSrc) imgSrc = product.image_url || product.itemurl || product.ItemURL || product.Image || product.image || product.imageurl || product.imageUrl || product.ImageURL || product.itemURL || item.image_url || item.itemurl || '';
             if (!imgSrc || imgSrc === 'null') imgSrc = '';
+            
             let brandLogoSrc = product.BrandLogo || product.brand_logo || item.BrandLogo || '';
             if (brandLogoSrc === 'null') brandLogoSrc = '';
 
@@ -60589,7 +60597,14 @@
               const stackClass = displayImages.length === 2 ? 'stack-2' : 'stack-3';
               imageHTML = `<div class="card-images-stack ${stackClass}">`;
               displayImages.forEach((p, idx) => {
-                const pImg = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || p.imageurl || p.imageUrl || p.ImageURL || p.itemURL || '';
+                let pImg = '';
+                if (p.Code) {
+                    const exist = document.querySelector(`img[data-code="${p.Code}"]`);
+                    if (exist && exist.src && !exist.src.includes('data:image/svg') && !exist.src.includes(window.location.href)) pImg = exist.src;
+                    else if (typeof imageCache !== 'undefined' && imageCache.has(p.Code)) pImg = imageCache.get(p.Code);
+                }
+                if (!pImg) pImg = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || p.imageurl || p.imageUrl || p.ImageURL || p.itemURL || '';
+                
                 if (pImg && pImg !== 'null') {
                   imageHTML += `<img src="${pImg}" class="stack-img img-${idx} ${compressClass}" crossorigin="anonymous" />`;
                 }
