@@ -10,6 +10,7 @@
     <link rel="icon" type="image/png" href="https://github.com/meralmohamed121022-cyber/photos/blob/main/expiry.png?raw=true">
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
     <style>
         :root {
             --primary: #4F46E5; --primary-light: #EEF2FF;
@@ -21,6 +22,12 @@
         body { background: var(--bg); color: var(--text-main); min-height: 100vh; font-size: 14px; padding-bottom: 50px; }
 
         /* --- Components --- */
+        #btnExploreCard, #btnReturnCard { border-color: #CBD5E1 !important; background: #F1F5F9 !important; transition: all 0.3s; }
+        #btnExploreCard *, #btnReturnCard * { color: #64748B !important; transition: all 0.3s; }
+        
+        #btnExploreCard.active, #btnReturnCard.active { border-color: #10B981 !important; background: #ECFDF5 !important; }
+        #btnExploreCard.active *, #btnReturnCard.active * { color: #047857 !important; }
+        
         .btn { padding: 8px 16px; border-radius: 8px; border: none; font-weight: 600; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
         .btn:hover { transform: translateY(-1px); filter: brightness(0.95); }
         .btn-primary { background: var(--primary); color: white; }
@@ -502,18 +509,34 @@ header {
 <!-- تأكد أن هذا الجزء مخفي تماماً في الكود عندك -->
 <div id="exploreUsersContainer" style="display: none !important;"></div>
 
-        <!-- 👈 كارت الاستكشاف تحته صندوق قائمة الصيدليات (Horizontal Scroll) -->
-       <div style="margin-bottom: 25px;">
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div class="stat-card" onclick="app.setStatFilter('explore', this)" style="flex: 1; border: 2px solid #8B5CF6; background: #F5F3FF; display: flex; justify-content: center; align-items: center; gap: 20px; padding: 15px;">
-               <span class="stat-label" id="lblExplore" style="color:#6D28D9; font-size:1.1rem;">🌍 استكشاف الصيدليات (Explore Pharmacies) ⚕️</span>
-                <span class="stat-value" style="color:#7C3AED; margin:0;" id="stExplore">0</span>
+        <!-- أزرار الأوضاع (استكشاف / صيدليتي) و الماسح -->
+        <div style="display: flex; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; align-items: stretch;">
+            <!-- Mode Switcher -->
+            <div style="display: flex; flex: 1; min-width: 300px; background: #F1F5F9; border-radius: 16px; padding: 6px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);">
+                <div class="stat-card active" id="btnReturnCard" onclick="app.resetFilters()" style="flex: 1; border: none; background: transparent; padding: 12px; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: all 0.3s; margin: 0; box-shadow: none;">
+                    <span style="font-size: 1.2rem;">🏠</span>
+                    <span id="btnReturnToPharmacyText" style="font-size: 1rem; font-weight: bold; margin: 0; color: inherit;">العودة لصيدليتي</span>
+                </div>
+                <div class="stat-card" id="btnExploreCard" onclick="app.setStatFilter('explore', this)" style="flex: 1; border: none; background: transparent; padding: 12px; border-radius: 12px; display: flex; justify-content: center; align-items: center; gap: 10px; cursor: pointer; transition: all 0.3s; margin: 0; box-shadow: none;">
+                    <span style="font-size: 1.2rem;">🌍</span>
+                    <span id="lblExplore" style="font-size: 1rem; font-weight: bold; color: inherit;">استكشاف الصيدليات</span>
+                    <span id="stExplore" style="background: rgba(0,0,0,0.1); padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: bold;">0</span>
+                </div>
             </div>
             
-            <div class="stat-card" onclick="app.resetFilters()" style="flex: 0 0 auto; min-width: 180px; border: 2px solid #10B981; background: #ECFDF5; display: flex; justify-content: center; align-items: center; padding: 15px; cursor: pointer; border-radius: 16px;">
-               <span class="stat-label" id="btnReturnToPharmacyText" style="color:#047857; font-size:1.1rem; font-weight: bold; margin:0;">🏠 العودة لصيدليتي</span>
-            </div>
+            <!-- Scanner Button -->
+            <button id="btnToggleScanner" onclick="app.toggleScanner()" style="flex: 0 0 auto; background: linear-gradient(135deg, #3B82F6, #2563EB); color: white; border: none; border-radius: 16px; padding: 0 30px; min-height: 56px; font-weight: bold; font-size: 1.1rem; display: flex; align-items: center; gap: 10px; cursor: pointer; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3); transition: all 0.2s;">
+                <span id="btnScannerText">مسح الباركود</span>
+            </button>
         </div>
+        
+        <style>
+            #btnReturnCard.active { background: white !important; color: #10B981 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.08) !important; border: 2px solid #10B981 !important; }
+            #btnReturnCard:not(.active) { color: #64748B !important; border: 2px solid transparent !important; }
+            #btnExploreCard.active { background: white !important; color: #3B82F6 !important; box-shadow: 0 4px 10px rgba(0,0,0,0.08) !important; border: 2px solid #3B82F6 !important; }
+            #btnExploreCard:not(.active) { color: #64748B !important; border: 2px solid transparent !important; }
+            #btnToggleScanner.active { background: linear-gradient(135deg, #1D4ED8, #1E3A8A) !important; box-shadow: inset 0 4px 10px rgba(0,0,0,0.3) !important; transform: scale(0.97); }
+        </style>
         
         <!-- صندوق قائمة الصيدليات يظهر تحته مباشرة (سلايد يمين وشمال) -->
         <div id="exploreUsersContainer" style="display: none; padding: 15px; background: #fff; border-radius: 16px; border: 1px dashed #C4B5FD; box-shadow: 0 4px 10px rgba(0,0,0,0.03); width: 100%; overflow: hidden;">
@@ -533,7 +556,6 @@ header {
                 </div>
             </div>
             
-            <!-- الكونتينر الخاص بالسكرول الأفقي للأزرار -->
             <div id="usersGrid" style="
                 display: flex; 
                 flex-wrap: nowrap; 
@@ -545,6 +567,28 @@ header {
                 <!-- الأزرار ستُرسم هنا عبر الجافاسكريبت -->
             </div>
         </div>
+        
+        <!-- صندوق الكاميرا والبحث بالباركود تم نقله للأسفل هنا -->
+        <div id="scannerContainer" style="display: none; padding: 15px; background: #fff; border-radius: 16px; border: 1px dashed #3B82F6; box-shadow: 0 4px 10px rgba(0,0,0,0.03); width: 100%; margin-top: 15px; margin-bottom: 15px; text-align: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; background: #F8FAFC; padding: 8px 12px; border-radius: 10px; flex-wrap: wrap; gap: 10px;">
+                <div style="font-size: 14px; font-weight: bold; color: var(--text-main);" id="lblScannerTitle">
+                    📷 امسح الباركود بالكاميرا أو ادخل الكود يدوياً
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-success" onclick="app.startScanner()" id="btnStartScanner" style="display:none; background:#10B981; color:white; padding: 4px 12px; font-size: 13px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">تشغيل الكاميرا 📷</button>
+                    <button class="btn btn-ghost" onclick="app.toggleScanner()" style="background:#E2E8F0; color:#475569; padding: 4px 12px; font-size: 13px; font-weight: bold; border-radius: 8px; border: none; cursor: pointer;">إغلاق الواجهة ✖</button>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center; max-width: 400px; margin: 0 auto 15px auto;">
+                <input type="text" id="manualBarcode" dir="ltr" placeholder="Code or GTIN..." style="flex: 1; padding: 10px 14px; border: 1.5px solid #E2E8F0; border-radius: 10px; outline: none; text-align: left;" onkeydown="if(event.key==='Enter') app.searchBarcode(this.value)">
+                <button class="btn btn-primary" style="background:#3B82F6; color:#fff;" onclick="app.searchBarcode(document.getElementById('manualBarcode').value)" id="btnSearchBarcode">بحث</button>
+            </div>
+            <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto; border-radius: 10px; overflow: hidden; border: 1px solid #E2E8F0;"></div>
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-danger" onclick="app.stopScanner()" id="btnStopScanner" style="display:none;">إيقاف الكاميرا ❌</button>
+            </div>
+        </div>
+        
     </div>
 
     <!-- إضافة ستايل بسيط لتحسين شكل شريط السحب (Scrollbar) للبوكس ده فقط -->
@@ -558,7 +602,7 @@ header {
       <div class="filters-row">
     <div class="filter-box">
         <span class="filter-label" id="lblSearch">🔍 Search</span>
-        <input type="text" class="search-main" id="search" placeholder="Code or Name..." oninput="app.render()">
+        <input type="text" class="search-main" id="search" dir="ltr" placeholder="Code or Name..." oninput="app.render()" style="text-align: left;">
     </div>
     <div class="filter-box">
         <span class="filter-label" id="lblCatA">📂 Category A</span>
@@ -911,8 +955,8 @@ header {
         </div>
 
         <div class="upload-actions">
-            <button class="btn-cancel" onclick="app.cancelUpload()">Cancel ❌</button>
-            <button class="btn-confirm" onclick="app.confirmUpload()">Confirm & Save ✅</button>
+            <button class="btn-cancel" onclick="app.cancelUpload()">Cancel</button>
+            <button class="btn-confirm" onclick="app.confirmUpload()">Confirm & Save</button>
         </div>
     </div>
 </div>
@@ -946,17 +990,19 @@ const ONLINE_WORKER_URL = "https://online.meralmohamed121022.workers.dev";
         i18n: {
             ar: {
                 total: "إجمالي الأصناف", found: "تم العثور", missing: "مفقودات", pending: "قيد الانتظار",
-                expired: "منتهي (+1)", nearExp: "قريب الانتهاء", search: "بحث بالاسم أو الكود...",
+                expired: "منتهي", nearExp: "قريب الانتهاء", search: "بحث بالاسم أو الكود...",
                 catA: "القسم الرئيسي", catB: "القسم الفرعي", catC: "القسم الفرعي ٢", brand: "البراند", month: "شهر الانتهاء",
                 status: "الحالة", reset: "إعادة ضبط الفلاتر", upload: "رفع ملف", export: "تصدير",
                 sync: "متصل • مزامنة", logout: "خروج", deleteGrp: "حذف المجموعة", noData: "لا توجد بيانات مطابقة",
-                langToggleBtn: "English 🌐", explore: "🌍 استكشاف الصيدليات ⚕️", added: "تم النسخ لحسابك",
+                langToggleBtn: "English", explore: "استكشاف الصيدليات", added: "تم النسخ لحسابك",
                 selectUsers: "اختر الصيدلية لعرض الاكواد:", empty: "(فارغ)",
-                returnToPharmacy: "🏠 العودة لصيدليتي",
+                returnToPharmacy: "العودة لصيدليتي",
                 importTitle: "رفع البيانات", importDrop: "اضغط لرفع ملف إكسيل",
                 exportTitle: "تصدير البيانات", exportBtn: "إكسيل",
                 dangerTitle: "منطقة الخطر", dangerWarning: "احذر، مسح قاعدة البيانات لا يمكن التراجع عنه أبداً.", dangerBtn: "💣 مسح جميع البيانات",
-                exploreNoticeTitle: "🌍 استكشاف الصيدليات (Explore Pharmacies) ⚕️", exploreNoticeDesc: "جاري عرض جميع أصناف الصيدليات المسجلة (All PH Expiry)"
+                exploreNoticeTitle: "🌍 استكشاف الصيدليات (Explore Pharmacies) ⚕️", exploreNoticeDesc: "جاري عرض جميع أصناف الصيدليات المسجلة (All PH Expiry)",
+                btnScannerText: "📷 مسح الباركود", lblScannerTitle: "📷 امسح الباركود بالكاميرا أو ادخل الكود يدوياً",
+                btnSearchBarcode: "بحث", btnStopScanner: "إغلاق الكاميرا ❌", manualBarcodePlaceholder: "ابحث بالكود أو GTIN..."
             },
             en: {
                 total: "Total Items", found: "Found", missing: "Missing", pending: "Pending",
@@ -970,16 +1016,18 @@ const ONLINE_WORKER_URL = "https://online.meralmohamed121022.workers.dev";
                 importTitle: "IMPORT DATA", importDrop: "CLICK TO IMPORT EXCEL",
                 exportTitle: "EXPORT DATA", exportBtn: "EXCEL",
                 dangerTitle: "DANGER ZONE", dangerWarning: "Warning, clearing the database cannot be undone.", dangerBtn: "💣 Clear All Database",
-                exploreNoticeTitle: "🌍 Explore Pharmacies ⚕️", exploreNoticeDesc: "Currently showing all registered pharmacies items (All PH Expiry)"
+                exploreNoticeTitle: "🌍 Explore Pharmacies ⚕️", exploreNoticeDesc: "Currently showing all registered pharmacies items (All PH Expiry)",
+                btnScannerText: "📷 Scan Barcode", lblScannerTitle: "📷 Scan barcode with camera or enter code manually",
+                btnSearchBarcode: "Search", btnStopScanner: "Close Camera ❌", manualBarcodePlaceholder: "Code or GTIN..."
             }
         },
 
         loadExternalDB: async () => {
             try {
                 const [res1, res2, res3] = await Promise.all([
-                    fetch('https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master1.json'),
-                    fetch('https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master2.json'),
-                    fetch('https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master3.json')
+                    fetch(atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21lcmFsbW9oYW1lZDEyMTAyMi1jeWJlci90ZXN0LW1vbm9zeXN0ZW0vcmVmcy9oZWFkcy9tYWluL21hc3RlcjEuanNvbg==')),
+                    fetch(atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21lcmFsbW9oYW1lZDEyMTAyMi1jeWJlci90ZXN0LW1vbm9zeXN0ZW0vcmVmcy9oZWFkcy9tYWluL21hc3RlcjIuanNvbg==')),
+                    fetch(atob('aHR0cHM6Ly9yYXcuZ2l0aHVidXNlcmNvbnRlbnQuY29tL21lcmFsbW9oYW1lZDEyMTAyMi1jeWJlci90ZXN0LW1vbm9zeXN0ZW0vcmVmcy9oZWFkcy9tYWluL21hc3RlcjMuanNvbg=='))
                 ]);
                 const data1 = await res1.json(); 
                 const data2 = await res2.json();
@@ -1125,7 +1173,8 @@ login: async () => {
                         brand: local ? local.Brand : (p.brand || "OTHER"),
                         catA: local ? local['Category Level A'] : 'Uncategorized',
                         catB: local ? local['Category Level B'] : 'Uncategorized',
-                        catC: local ? local['Category Level C'] : 'Uncategorized'
+                        catC: local ? local['Category Level C'] : 'Uncategorized',
+                        GTIN: local ? (local.GTIN || local.gtin || local.Gtin || []) : []
                     };
                 });
                 await app.loadAllUsersData(); 
@@ -1201,7 +1250,16 @@ setStatFilter: (type, el) => {
 render: (resetPagination = true) => {
     if (resetPagination) app.currentPage = 1;
     const t = app.i18n[app.language];
-    const search = document.getElementById('search').value.toLowerCase().trim();
+    
+    let search = document.getElementById('search').value.trim();
+    
+    // استخدم الباركود المحلل للبحث بدون تغيير النص في مربع البحث فوراً (عشان الاسكانر اليدوي بيكتب بسرعة)
+    let parsedSearch = search;
+    if (parsedSearch.length >= 15 || parsedSearch.startsWith("]")) {
+        parsedSearch = app.parseBarcode(parsedSearch);
+    } else {
+        parsedSearch = parsedSearch.toLowerCase();
+    }
 
     // 1. فلترة الأصناف الذكية
     let baseData = app.exploreMode ? 
@@ -1223,6 +1281,7 @@ render: (resetPagination = true) => {
                 catA: local ? local['Category Level A'] : 'Uncategorized',
                 catB: local ? local['Category Level B'] : 'Uncategorized',
                 catC: local ? local['Category Level C'] : 'Uncategorized',
+                GTIN: local ? (local.GTIN || local.gtin || local.Gtin || []) : [],
                 isExplore: true, 
                 ownerId: it.userId 
             };
@@ -1281,12 +1340,88 @@ render: (resetPagination = true) => {
         return true;
     });
 
-    if (search) {
-        app.fullFilteredList = app.fullFilteredList.filter(item => 
-            String(item.nameEn).toLowerCase().includes(search) || 
-            String(item.nameAr).includes(search) ||
-            String(item.code).includes(search)
-        );
+    if (parsedSearch) {
+        app.fullFilteredList = app.fullFilteredList.filter(item => {
+            let match = String(item.nameEn).toLowerCase().includes(parsedSearch) || 
+                        String(item.nameAr).includes(parsedSearch) ||
+                        String(item.code).includes(parsedSearch);
+                        
+            if (!match && item.GTIN) {
+                const gtinArray = Array.isArray(item.GTIN) ? item.GTIN : [item.GTIN];
+                const searchNoZeros = parsedSearch.replace(/^0+/, '');
+                if (searchNoZeros.length >= 3) {
+                    match = gtinArray.some(g => {
+                        const gStr = String(g).trim().replace(/^0+/, '');
+                        return gStr === searchNoZeros; // المطابقة التامة
+                    });
+                }
+            }
+            return match;
+        });
+    }
+
+    // عرض البوب أب للصنف الذي ليس له إكسابيري (فقط عند البحث برقم باركود وليس نص)
+    if (parsedSearch && parsedSearch.length >= 8 && parsedSearch.match(/^\d+$/)) {
+        const foundInMaster = LOCAL_DB.filter(localItem => {
+            if (!localItem.GTIN) return false;
+            const gtinArray = Array.isArray(localItem.GTIN) ? localItem.GTIN : [localItem.GTIN];
+            const searchNoZeros = parsedSearch.replace(/^0+/, '');
+            return gtinArray.some(g => String(g).trim().replace(/^0+/, '') === searchNoZeros);
+        });
+
+        foundInMaster.forEach(localItem => {
+            const exists = app.fullFilteredList.some(i => String(i.code) === String(localItem.Code));
+            if (!exists) {
+                // منع التكرار للبوب أب لنفس الصنف
+                if (app.lastPopupCode !== localItem.Code) {
+                    app.lastPopupCode = localItem.Code;
+                    
+                    // إنشاء وعرض البوب أب
+                    let modal = document.getElementById('noExpiryModal');
+                    if (!modal) {
+                        modal = document.createElement('div');
+                        modal.id = 'noExpiryModal';
+                        modal.innerHTML = `
+                            <div style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:99999; backdrop-filter:blur(3px);">
+                                <div style="background:#fff; border-radius:20px; padding:30px; max-width:400px; width:90%; text-align:center; box-shadow:0 20px 40px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);" id="neModalContent">
+                                    <div style="font-size:60px; margin-bottom:10px;">🚫</div>
+                                    <div style="color:#DC2626; font-size:24px; font-weight:900; margin-bottom:5px;">
+                                        ${app.language === 'ar' ? 'لا يوجد تاريخ انتهاء' : 'No Expiry Date'}
+                                    </div>
+                                    <div style="color:#6B7280; font-size:14px; margin-bottom:20px; padding:0 20px;">
+                                        ${app.language === 'ar' ? 'هذا الصنف لم يتم تسجيل تاريخ انتهاء له في جردك' : 'This item has no recorded expiry date in your inventory.'}
+                                    </div>
+                                    <div style="background:#F3F4F6; border-radius:12px; padding:15px; margin-bottom:25px; border:1px dashed #D1D5DB;">
+                                        <div style="margin-bottom:10px; height:120px; display:flex; justify-content:center; align-items:center;">
+                                            <img id="neModalImg" style="max-height:100%; max-width:100%; object-fit:contain; border-radius:8px;">
+                                        </div>
+                                        <div style="font-weight:bold; font-size:16px; margin-bottom:8px; color:#111;" id="neModalName"></div>
+                                        <div style="color:#4B5563; font-size:14px; font-family:monospace; background:#fff; display:inline-block; padding:4px 10px; border-radius:6px; border:1px solid #E5E7EB;" id="neModalCode"></div>
+                                    </div>
+                                    <button onclick="document.getElementById('noExpiryModal').style.opacity='0'; setTimeout(()=>document.getElementById('noExpiryModal').style.display='none', 200);" style="background:#DC2626; color:white; border:none; padding:12px 25px; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; width:100%; transition:background 0.2s;">
+                                        ${app.language === 'ar' ? 'حسناً، إغلاق' : 'Okay, Close'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        document.body.appendChild(modal);
+                    }
+                    
+                    document.getElementById('neModalName').innerText = app.language === 'ar' ? (localItem['أسم المنتج'] || localItem['Item Description']) : (localItem['Item Description'] || localItem['أسم المنتج']);
+                    document.getElementById('neModalCode').innerText = "Code: " + localItem.Code;
+                    
+                    const modalImg = document.getElementById('neModalImg');
+                    modalImg.src = '';
+                    modalImg.dataset.code = localItem.Code;
+                    modalImg.classList.remove('loaded');
+                    app.loadImage(modalImg);
+
+                    modal.style.display = 'block';
+                    modal.style.opacity = '1';
+                    setTimeout(() => { document.getElementById('neModalContent').style.transform = 'scale(1)'; }, 10);
+                }
+            }
+        });
     }
 
     // 4. شريط الشهور العلوي
@@ -1423,7 +1558,7 @@ renderVisiblePart: () => {
 
                     <div class="name-en"><b>${item.nameEn}</b></div>
                     <div class="name-ar">${item.nameAr}</div>
-
+                    
                     <div class="status-actions">
                         <button class="st-btn found ${item.status === 'found' ? 'active' : ''}" 
                                 style="${item.status === 'found' ? `background:${phColor} !important; border-color:${phColor} !important; color:white !important;` : ''}"
@@ -1699,6 +1834,111 @@ update: async (code, date, actionStatus, isExplore = false, ownerId = null) => {
             app.render(true);
         },
 
+        scannerObj: null,
+        toggleScanner: () => {
+            const container = document.getElementById('scannerContainer');
+            const btn = document.getElementById('btnToggleScanner');
+            if (container.style.display === 'none' || container.style.display === '') {
+                container.style.display = 'block';
+                if(btn) btn.classList.add('active');
+                app.startScanner();
+            } else {
+                app.stopScanner();
+                container.style.display = 'none';
+                if(btn) btn.classList.remove('active');
+            }
+        },
+        startScanner: () => {
+            if (app.scannerObj) return;
+            const btnStop = document.getElementById('btnStopScanner');
+            if (btnStop) btnStop.style.display = 'inline-block';
+            const btnStart = document.getElementById('btnStartScanner');
+            if (btnStart) btnStart.style.display = 'none';
+            
+            app.scannerObj = new Html5Qrcode("qr-reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+            
+            app.scannerObj.start(
+                { facingMode: "environment" },
+                config,
+                (decodedText) => {
+                    // Success callback
+                    document.getElementById('manualBarcode').value = decodedText;
+                    app.searchBarcode(decodedText);
+                    app.stopScanner();
+                },
+                (errorMessage) => {
+                    // ignore failures
+                }
+            ).catch(err => {
+                console.error("Camera start failed:", err);
+                app.notify(app.language === 'ar' ? "فشل تشغيل الكاميرا" : "Failed to start camera", "error");
+                if (btnStop) btnStop.style.display = 'none';
+                if (btnStart) btnStart.style.display = 'inline-block';
+            });
+        },
+        stopScanner: () => {
+            const btnStop = document.getElementById('btnStopScanner');
+            const btnStart = document.getElementById('btnStartScanner');
+            if (app.scannerObj) {
+                app.scannerObj.stop().then(() => {
+                    app.scannerObj.clear();
+                    app.scannerObj = null;
+                    if (btnStop) btnStop.style.display = 'none';
+                    if (btnStart) btnStart.style.display = 'inline-block';
+                }).catch(err => console.error(err));
+            } else {
+                if (btnStop) btnStop.style.display = 'none';
+                if (btnStart) btnStart.style.display = 'inline-block';
+            }
+        },
+        parseBarcode: (code) => {
+            if (!code) return "";
+            code = String(code).trim();
+            
+            // تنظيف أي رموز غير مرئية في البداية (مثل GS character وغيرها)
+            code = code.replace(/^[^a-zA-Z0-9\](]+/, "");
+            
+            // إزالة بادئات أجهزة الاسكانر (Symbology Identifiers)
+            if (code.startsWith("]C1") || code.startsWith("]d2") || code.startsWith("]e0")) {
+                code = code.substring(3);
+            }
+            
+            // تنظيف إضافي لأي رموز قبل الأرقام
+            code = code.replace(/^[^0-9]+/, "");
+            
+            // 1. DataMatrix / GS1-128 (يبدأ بـ 01 وأطول من 15 رقم، نأخذ 14 رقم بعد 01)
+            if (code.startsWith("01") && code.length > 15) {
+                let gtin = code.substring(2, 16);
+                // إذا كان الـ GTIN المستخلص يبدأ بصفر، نحذفه ليبحث بـ 13 رقم
+                if (gtin.startsWith("0")) {
+                    gtin = gtin.substring(1);
+                }
+                return gtin;
+            }
+            // 2. باركود 15 رقم يبدأ بـ 0، نحذف الصفر
+            if (code.length === 15 && code.startsWith("0")) {
+                return code.substring(1);
+            }
+            return code.toLowerCase();
+        },
+        searchBarcode: (rawCode) => {
+            if (!rawCode) return;
+            const code = app.parseBarcode(rawCode);
+            
+            app.resetFilters();
+            
+            const searchInput = document.getElementById('search');
+            if (searchInput) searchInput.value = code;
+            
+            app.render(true);
+            
+            setTimeout(() => {
+                const itemsContainer = document.querySelector('.data-hub-panel');
+                if (itemsContainer) itemsContainer.scrollIntoView({ behavior: 'smooth' });
+            }, 300);
+        },
+
         applyLanguageUI: () => {
             document.body.classList.toggle('rtl', app.language === 'ar');
             const t = app.i18n[app.language];
@@ -1746,6 +1986,13 @@ update: async (code, date, actionStatus, isExplore = false, ownerId = null) => {
             if (searchPharm) searchPharm.placeholder = (app.language === 'ar' ? "🔍 ابحث برقم الصيدلية..." : "🔍 Search by pharmacy number...");
             
             setText('lblSelectUsers', t.selectUsers);
+            
+            setText('btnScannerText', t.btnScannerText);
+            setText('lblScannerTitle', t.lblScannerTitle);
+            setText('btnSearchBarcode', t.btnSearchBarcode);
+            setText('btnStopScanner', t.btnStopScanner);
+            const manualBarcode = document.getElementById('manualBarcode');
+            if (manualBarcode) manualBarcode.placeholder = t.manualBarcodePlaceholder;
         },
 
         toggleLanguage: () => {
@@ -1967,8 +2214,13 @@ confirmUpload: async () => {
             app.exploreMode = false;
             app.selectedUsers = new Set();
             document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
-            // نعلم على أول كارت (Total Items) ليكون هو الفعال
-            const firstStatCard = document.querySelector('.stat-card');
+            
+            // تحديد كارت العودة لصيدليتي كنشط
+            const btnReturn = document.getElementById('btnReturnCard');
+            if (btnReturn) btnReturn.classList.add('active');
+            
+            // تحديد أول كارت إحصائيات (Total Items) ليكون هو الفعال
+            const firstStatCard = document.querySelector('.stat-card:not(#btnReturnCard):not(#btnExploreCard)');
             if (firstStatCard) firstStatCard.classList.add('active');
 
             // 4. إعادة بناء الأقسام الفرعية بناءً على أن القسم الرئيسي فارغ
