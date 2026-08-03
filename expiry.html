@@ -565,6 +565,10 @@ header {
         <select id="catB" multiple onchange="app.render()"></select>
     </div>
     <div class="filter-box">
+        <span class="filter-label">📁 Category C</span>
+        <select id="catC" multiple onchange="app.render()"></select>
+    </div>
+    <div class="filter-box">
         <span class="filter-label">🏷️ Brand</span>
         <select id="brand" multiple onchange="app.render()"></select>
     </div>
@@ -960,9 +964,15 @@ const ONLINE_WORKER_URL = "https://online.meralmohamed121022.workers.dev";
 
         loadExternalDB: async () => {
             try {
-                const [res1, res2] = await Promise.all([fetch('products1.json'), fetch('products2.json')]);
-                const data1 = await res1.json(); const data2 = await res2.json();
-                LOCAL_DB = [...data1, ...data2];
+                const [res1, res2, res3] = await Promise.all([
+                    fetch('https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master1.json'),
+                    fetch('https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master2.json'),
+                    fetch('https://raw.githubusercontent.com/meralmohamed121022-cyber/test-monosystem/refs/heads/main/master3.json')
+                ]);
+                const data1 = await res1.json(); 
+                const data2 = await res2.json();
+                const data3 = await res3.json();
+                LOCAL_DB = [...data1, ...data2, ...data3];
                 DB_MAP = new Map(LOCAL_DB.map(i => [String(i.Code), i]));
             } catch (e) { console.error("JSON Load Error", e); }
         },
@@ -1102,7 +1112,8 @@ login: async () => {
                         nameAr: local ? local['أسم المنتج'] : '',
                         brand: local ? local.Brand : (p.brand || "OTHER"),
                         catA: local ? local['Category Level A'] : 'Uncategorized',
-                        catB: local ? local['Category Level B'] : 'Uncategorized'
+                        catB: local ? local['Category Level B'] : 'Uncategorized',
+                        catC: local ? local['Category Level C'] : 'Uncategorized'
                     };
                 });
                 await app.loadAllUsersData(); 
@@ -1193,6 +1204,7 @@ render: (resetPagination = true) => {
                 brand: local ? local.Brand : 'OTHER', 
                 catA: local ? local['Category Level A'] : 'Uncategorized',
                 catB: local ? local['Category Level B'] : 'Uncategorized',
+                catC: local ? local['Category Level C'] : 'Uncategorized',
                 isExplore: true, 
                 ownerId: it.userId 
             };
@@ -1237,12 +1249,14 @@ render: (resetPagination = true) => {
         const monthFilters  = app.tomSelectInstances['month']?.getValue()  || [];
         const catAFilters   = app.tomSelectInstances['catA']?.getValue()   || [];
         const catBFilters   = app.tomSelectInstances['catB']?.getValue()   || [];
+        const catCFilters   = app.tomSelectInstances['catC']?.getValue()   || [];
         const brandFilters  = app.tomSelectInstances['brand']?.getValue()  || [];
         const statusFilters = app.tomSelectInstances['status']?.getValue() || [];
 
         if (monthFilters.length  > 0 && !monthFilters.includes(item.expiryDate.slice(0, 7))) return false;
         if (catAFilters.length   > 0 && !catAFilters.includes(item.catA))   return false;
         if (catBFilters.length   > 0 && !catBFilters.includes(item.catB))   return false;
+        if (catCFilters.length   > 0 && !catCFilters.includes(item.catC))   return false;
         if (brandFilters.length  > 0 && !brandFilters.includes(item.brand)) return false;
         if (statusFilters.length > 0 && !statusFilters.includes(item.status)) return false;
 
@@ -1330,8 +1344,10 @@ renderVisiblePart: () => {
     const grouped = {};
     visibleList.forEach(it => {
         const mKey = it.expiryDate.slice(0, 7);
-        if (!grouped[mKey]) grouped[mKey] = [];
-        grouped[mKey].push(it);
+        if (!grouped[mKey]) grouped[mKey] = {};
+        const catC = it.catC || 'Uncategorized';
+        if (!grouped[mKey][catC]) grouped[mKey][catC] = [];
+        grouped[mKey][catC].push(it);
     });
 
     let finalHtml = "";
@@ -1341,11 +1357,14 @@ renderVisiblePart: () => {
 
         finalHtml += `
         <div class="date-section" id="sec-${mKey}">
-            <div class="date-header ${headerClass}">📅 ${mKey}</div>
-            <div class="date-grid">`;
+            <div class="date-header ${headerClass}">📅 ${mKey}</div>`;
 
-        grouped[mKey].forEach(item => {
-            const phColor = item.isExplore ? getPhColor(item.ownerId) : 'var(--primary)';
+        Object.keys(grouped[mKey]).sort().forEach(catC => {
+            finalHtml += `<h3 style="margin: 10px 0; color: var(--text-main); font-size: 15px; display: inline-block; padding: 4px 10px; background: #e0e7ff; border-radius: 6px;">📁 ${catC}</h3>`;
+            finalHtml += `<div class="date-grid" style="margin-bottom: 20px;">`;
+            
+            grouped[mKey][catC].forEach(item => {
+                const phColor = item.isExplore ? getPhColor(item.ownerId) : 'var(--primary)';
             const cardStyle = item.isExplore 
                 ? `border: 2.5px solid ${phColor}; background: #fdfdfd; box-shadow: 0 4px 15px ${phColor}20;` 
                 : '';
@@ -1400,8 +1419,10 @@ renderVisiblePart: () => {
                     </div>
                 </div>
             </div>`;
+            });
+            finalHtml += `</div>`;
         });
-        finalHtml += `</div></div>`;
+        finalHtml += `</div>`;
     });
 
     resultContainer.innerHTML = finalHtml;
@@ -1446,7 +1467,8 @@ update: async (code, date, actionStatus, isExplore = false, ownerId = null) => {
                         nameAr: local['أسم المنتج'] || '',
                         brand: local.Brand || 'OTHER',
                         catA: local['Category Level A'] || 'Uncategorized',
-                        catB: local['Category Level B'] || 'Uncategorized'
+                        catB: local['Category Level B'] || 'Uncategorized',
+                        catC: local['Category Level C'] || 'Uncategorized'
                     });
 
                     await fetch(`${WORKER_URL}/api/inventory/upsert`, {
@@ -1567,11 +1589,13 @@ update: async (code, date, actionStatus, isExplore = false, ownerId = null) => {
             
             const brands = [...new Set(app.data.map(i => i.brand))].filter(Boolean).sort();
             const catAs = [...new Set(app.data.map(i => i.catA))].filter(Boolean).sort();
+            const catCs = [...new Set(app.data.map(i => i.catC))].filter(Boolean).sort();
             const months = [...new Set(app.data.map(i => i.expiryDate ? i.expiryDate.slice(0, 7) : null))].filter(Boolean).sort();
             
             // تهيئة الفلاتر المتعددة
             app.fillSelect('brand', brands, t.brand);
             app.fillSelect('catA', catAs, t.catA);
+            app.fillSelect('catC', catCs, 'Category C');
             app.fillSelect('month', months, t.month);
 
             // تهيئة حالة الصنف (Status) كفلتر متعدد
@@ -1584,45 +1608,75 @@ update: async (code, date, actionStatus, isExplore = false, ownerId = null) => {
                 });
             }
             
-            app.handleCatAChange();
+            app.handleCascadeChange('catA');
         },
 
         fillSelect: (id, arr, placeholderText) => {
             const el = document.getElementById(id);
             if (!el) return;
 
-            // نعطيه الـ options فقط بدون option "All" لأن Tom Select بيتعامل مع الفراغ على أنه All
-            el.innerHTML = arr.map(v => `<option value="${v}">${v}</option>`).join('');
-
-            // لو كان فيه نسخة شغالة قبل كده ندمرها عشان نحدثها
+            let currentSelected = [];
             if (app.tomSelectInstances[id]) {
+                currentSelected = app.tomSelectInstances[id].getValue();
                 app.tomSelectInstances[id].destroy();
             }
 
-            // تشغيل التحديد المتعدد
+            el.innerHTML = arr.map(v => `<option value="${v}">${v}</option>`).join('');
+
             app.tomSelectInstances[id] = new TomSelect(el, {
                 plugins: ['remove_button'],
                 placeholder: placeholderText,
                 maxOptions: 100,
                 onChange: () => {
-                    if (id === 'catA') app.handleCatAChange();
+                    if (['catA', 'catB', 'catC'].includes(id)) app.handleCascadeChange(id);
                     else app.render(true);
                 }
             });
+
+            const validSelected = (Array.isArray(currentSelected) ? currentSelected : [currentSelected]).filter(val => arr.includes(val));
+            if (validSelected.length > 0) {
+                app.tomSelectInstances[id].setValue(validSelected, true);
+            }
         },
 
-        handleCatAChange: () => {
-            // جلب الأقسام الرئيسية المختارة كمصفوفة
+        handleCascadeChange: (changedId) => {
             const selectedA = app.tomSelectInstances['catA']?.getValue() || [];
+            const selectedB = app.tomSelectInstances['catB']?.getValue() || [];
+            const selectedC = app.tomSelectInstances['catC']?.getValue() || [];
+            const t = app.i18n[app.language];
+
+            let filteredA = app.data;
+            if (selectedA.length > 0) filteredA = filteredA.filter(i => selectedA.includes(i.catA));
             
-            let filtered = app.data;
-            if (selectedA.length > 0) {
-                filtered = app.data.filter(i => selectedA.includes(i.catA));
+            if (changedId === 'catA') {
+                const catBs = [...new Set(filteredA.map(i => i.catB))].filter(Boolean).sort();
+                app.fillSelect('catB', catBs, app.language === 'ar' ? 'القسم الفرعي' : 'Category B');
+                
+                const catCs = [...new Set(filteredA.map(i => i.catC))].filter(Boolean).sort();
+                app.fillSelect('catC', catCs, 'Category C');
+                
+                const brands = [...new Set(filteredA.map(i => i.brand))].filter(Boolean).sort();
+                app.fillSelect('brand', brands, t.brand);
             }
             
-            const catBs = [...new Set(filtered.map(i => i.catB))].filter(Boolean).sort();
-            const placeholder = app.language === 'ar' ? 'القسم الفرعي' : 'Sub-Cats';
-            app.fillSelect('catB', catBs, placeholder);
+            let filteredB = filteredA;
+            if (selectedB.length > 0) filteredB = filteredB.filter(i => selectedB.includes(i.catB));
+            
+            if (changedId === 'catB') {
+                const catCs = [...new Set(filteredB.map(i => i.catC))].filter(Boolean).sort();
+                app.fillSelect('catC', catCs, 'Category C');
+                
+                const brands = [...new Set(filteredB.map(i => i.brand))].filter(Boolean).sort();
+                app.fillSelect('brand', brands, t.brand);
+            }
+
+            let filteredC = filteredB;
+            if (selectedC.length > 0) filteredC = filteredC.filter(i => selectedC.includes(i.catC));
+            
+            if (changedId === 'catC') {
+                const brands = [...new Set(filteredC.map(i => i.brand))].filter(Boolean).sort();
+                app.fillSelect('brand', brands, t.brand);
+            }
             
             app.render(true);
         },
@@ -1835,7 +1889,7 @@ confirmUpload: async () => {
             if (searchInput) searchInput.value = '';
 
             // 2. تفريغ جميع الفلاتر المتعددة (Tom Select)
-            ['catA', 'catB', 'brand', 'month', 'status'].forEach(id => {
+            ['catA', 'catB', 'catC', 'brand', 'month', 'status'].forEach(id => {
                 if (app.tomSelectInstances[id]) {
                     // clear(true) تقوم بتفريغ القيم بدون إطلاق حدث onChange عشان ميعملش ريندر كتير
                     app.tomSelectInstances[id].clear(true); 
@@ -1851,8 +1905,11 @@ confirmUpload: async () => {
 
             // 4. إعادة بناء الأقسام الفرعية بناءً على أن القسم الرئيسي فارغ
             const catBs = [...new Set(app.data.map(i => i.catB))].filter(Boolean).sort();
-            const placeholder = app.language === 'ar' ? 'القسم الفرعي' : 'Sub-Cats';
-            app.fillSelect('catB', catBs, placeholder);
+            const catCs = [...new Set(app.data.map(i => i.catC))].filter(Boolean).sort();
+            const brands = [...new Set(app.data.map(i => i.brand))].filter(Boolean).sort();
+            app.fillSelect('catB', catBs, app.language === 'ar' ? 'القسم الفرعي' : 'Category B');
+            app.fillSelect('catC', catCs, 'Category C');
+            app.fillSelect('brand', brands, app.i18n[app.language].brand);
 
             // 5. عمل ريندر نهائي مرة واحدة بعد تصفير كل شيء
             app.render(true);
