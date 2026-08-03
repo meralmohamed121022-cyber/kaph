@@ -2209,8 +2209,8 @@ confirmUpload: async () => {
                 }
             });
 
-            // 3. إعادة الفلتر العلوي إلى "الكل" أو "قيد الانتظار" (اختياري، هنا نرجعه للكل)
-            app.statFilter = 'all'; 
+            // 3. إعادة الفلتر العلوي إلى "الكل" أو "قيد الانتظار" (هنا نجعله قيد الانتظار كافتراضي لصيدليتي)
+            app.statFilter = 'pending'; 
             app.exploreMode = false;
             app.selectedUsers = new Set();
             document.querySelectorAll('.stat-card').forEach(c => c.classList.remove('active'));
@@ -2219,9 +2219,9 @@ confirmUpload: async () => {
             const btnReturn = document.getElementById('btnReturnCard');
             if (btnReturn) btnReturn.classList.add('active');
             
-            // تحديد أول كارت إحصائيات (Total Items) ليكون هو الفعال
-            const firstStatCard = document.querySelector('.stat-card:not(#btnReturnCard):not(#btnExploreCard)');
-            if (firstStatCard) firstStatCard.classList.add('active');
+            // تحديد كارت (Pending) ليكون هو الفعال كإعداد افتراضي
+            const pendingStatCard = document.querySelector('.stat-card[onclick*="\'pending\'"]');
+            if (pendingStatCard) pendingStatCard.classList.add('active');
 
             // 4. إعادة بناء الأقسام الفرعية بناءً على أن القسم الرئيسي فارغ
             const catBs = [...new Set(app.data.map(i => i.catB))].filter(Boolean).sort();
