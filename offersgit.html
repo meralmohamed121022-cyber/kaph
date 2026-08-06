@@ -53759,8 +53759,13 @@
 
             // شروط "الحبتين"
             const matchesTwoPieces =
-              /2\s*pcs/i.test(safeText) ||
-              /حبتين/i.test(originalText);
+              /2\s*pcs?/i.test(safeText) ||
+              /buy\s*2/i.test(safeText) ||
+              /حبتين/i.test(originalText) ||
+              /الحبتين/i.test(originalText) ||
+              /2\s*حبة/i.test(originalText) ||
+              /حبة\s*2/i.test(originalText) ||
+              /2\s*pc\b/i.test(safeText);
 
             // تطبيق النص
             if (matchesSecondPiece) {
@@ -56872,10 +56877,13 @@
               /على.*الثانية/i.test(originalText);
 
             const isTwoPieces =
-              /2\s*pcs/i.test(safeText) ||
+              /2\s*pcs?/i.test(safeText) ||
               /buy\s*2/i.test(safeText) ||
               /حبتين/i.test(originalText) ||
-              /الحبتين/i.test(originalText);
+              /الحبتين/i.test(originalText) ||
+              /2\s*حبة/i.test(originalText) ||
+              /حبة\s*2/i.test(originalText) ||
+              /2\s*pc\b/i.test(safeText);
 
             const subText = isSecondPiece ? "الحبة الثانية" : (isTwoPieces ? "الحبتين" : "الحبة");
 
@@ -57680,7 +57688,7 @@
 
               let arabicLine = "";
               if (isSecondPiece) arabicLine = "الحبة الثانية";
-              else if (safeText.includes("buy 2") || safeText.includes("2 pcs")) arabicLine = "الحبتين";
+              else if (/2\s*pcs?/i.test(safeText) || /buy\s*2/i.test(safeText) || /2\s*pc\b/i.test(safeText)) arabicLine = "الحبتين";
               else arabicLine = "الحبة";
 
               return `
@@ -58097,7 +58105,7 @@
 
               let arabicLine = "";
               if (isSecondPiece) arabicLine = "الحبة الثانية";
-              else if (safeText.includes("buy 2") || safeText.includes("2 pcs") || safeText.includes("الحبتين")) arabicLine = "الحبتين";
+              else if (/2\s*pcs?/i.test(safeText) || /buy\s*2/i.test(safeText) || /حبتين/i.test(originalText) || /الحبتين/i.test(originalText) || /2\s*حبة/i.test(originalText) || /حبة\s*2/i.test(originalText) || /2\s*pc\b/i.test(safeText)) arabicLine = "الحبتين";
               else arabicLine = "الحبة";
 
               return `
@@ -60705,7 +60713,7 @@
 
             .print-container {
                 display: grid; grid-template-columns: repeat(3, 1fr);
-                grid-auto-flow: row dense; gap: 12px;
+                grid-auto-flow: row; gap: 12px;
                 padding: 15mm 5mm; 
                 width: 98%; max-width: 98%; margin: 80px auto 0 auto;
                 border: 5px solid #00235B; border-radius: 12px; 
