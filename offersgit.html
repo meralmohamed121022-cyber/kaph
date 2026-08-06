@@ -60601,10 +60601,8 @@
             const compressClass = 'to-be-compressed';
 
             if (productsCount > 1 && offerProducts?.length > 0) {
-              const displayImages = offerProducts.slice(0, 3);
-              const stackClass = displayImages.length === 2 ? 'stack-2' : 'stack-3';
-              imageHTML = `<div class="card-images-stack ${stackClass}">`;
-              displayImages.forEach((p, idx) => {
+              const validImages = [];
+              for (const p of offerProducts) {
                 let pImg = '';
                 if (p.Code) {
                     const exist = document.querySelector(`img[data-code="${p.Code}"]`);
@@ -60614,15 +60612,28 @@
                 if (!pImg) pImg = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || p.imageurl || p.imageUrl || p.ImageURL || p.itemURL || '';
                 
                 if (pImg && pImg !== 'null') {
-                  imageHTML += `<img src="${pImg}" class="stack-img img-${idx} ${compressClass}" crossorigin="anonymous" />`;
+                    validImages.push(pImg);
+                    if (validImages.length === 3) break;
                 }
-              });
-              imageHTML += '</div>';
-            } else {
+              }
+              
+              if (validImages.length > 1) {
+                  const stackClass = validImages.length === 2 ? 'stack-2' : 'stack-3';
+                  imageHTML = `<div class="card-images-stack ${stackClass}">`;
+                  validImages.forEach((imgUrl, idx) => {
+                      imageHTML += `<img src="${imgUrl}" class="stack-img img-${idx} ${compressClass}" referrerpolicy="no-referrer" />`;
+                  });
+                  imageHTML += '</div>';
+              } else if (validImages.length === 1) {
+                  imgSrc = validImages[0];
+              }
+            } 
+            
+            if (!imageHTML) {
               if (imgSrc) {
-                imageHTML = `<img src="${imgSrc}" class="single-img ${compressClass}" crossorigin="anonymous" />`;
+                imageHTML = `<img src="${imgSrc}" class="single-img ${compressClass}" referrerpolicy="no-referrer" />`;
               } else if (brandLogoSrc) {
-                imageHTML = `<div class="brand-logo-box"><img src="${brandLogoSrc}" class="brand-logo-img ${compressClass}" crossorigin="anonymous" /></div>`;
+                imageHTML = `<div class="brand-logo-box"><img src="${brandLogoSrc}" class="brand-logo-img ${compressClass}" referrerpolicy="no-referrer" /></div>`;
               } else {
                 imageHTML = `<div class="brand-text-fallback"><span class="fallback-brand-name">${brand}</span></div>`;
               }
