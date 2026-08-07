@@ -24271,6 +24271,7 @@
         }
         // دالة وسيطة لإتمام عملية الدخول
         function proceedToOffers(period) {
+          window.ACTIVE_PERIOD_LABEL = period.label || 'طباعة المجلة السريعة';
           offersDB = period.offers || [];
           exclusiveOffersDB = period.exclusive || [];
           CURRENT_OFFER_START = parseLocalDate(period.start);
@@ -32007,7 +32008,7 @@
           const win = window.open('', '_blank', 'width=1200,height=900');
           if (!win) { alert('⚠️ اسمح بالنوافذ المنبثقة!'); if (btn) { btn.innerHTML = originalText; btn.disabled = false; } return; }
 
-          let activePeriodLabel = 'طباعة المجلة السريعة';
+          let activePeriodLabel = window.ACTIVE_PERIOD_LABEL || 'طباعة المجلة السريعة';
           try {
               const sel = document.getElementById('periodSelector');
               if (sel && sel.options[sel.selectedIndex]) {
