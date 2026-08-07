@@ -112,7 +112,7 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
 .sup-card:hover{background:#06b6d4;color:white;border-color:#06b6d4;}
 
 #particles-bg-canvas{position:fixed;top:0;left:0;width:100%;height:100vh;z-index:-999;}
-.logout-btn{position:fixed;top:20px;right:20px;z-index:9999;padding:10px 20px;background:#ef4444;color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(239,68,68,0.4);}
+.logout-btn{position:absolute;top:20px;right:20px;z-index:9999;padding:10px 20px;background:#ef4444;color:white;border:none;border-radius:10px;font-weight:bold;cursor:pointer;box-shadow:0 4px 10px rgba(239,68,68,0.4);}
 .logout-btn:hover{background:#dc2626;}
 
 /* Auto Save Indicator */
@@ -132,6 +132,12 @@ body{background:linear-gradient(135deg,#06b6d4,#0891b2);min-height:100vh;padding
 .hide-toggle-btn { border:none; background:none; cursor:pointer; font-size:16px; margin-right:2px; opacity: 0.7; transition: 0.2s;}
 .hide-toggle-btn:hover { opacity: 1; transform: scale(1.1); }
 </style>
+
+<script>
+window.onerror = function(message, source, lineno, colno, error) {
+    alert("JS ERROR: " + message + " at line " + lineno);
+};
+</script>
 </head>
 <body>
 <style>
@@ -509,7 +515,7 @@ function launchApp() {
         document.getElementById('sendToSupervisorBtn').style.display = 'none';
         renderSupervisorPharmacies();
     } else {
-        document.getElementById('displayRoleInfo').innerText = `PHARMACY: #${activeSession.id}`;
+        document.getElementById('displayRoleInfo').innerHTML = `PHARMACY: #${activeSession.id}` + (activeSession.supName ? `<span style="font-size:12px; color:#f8fafc; background:rgba(0,0,0,0.2); padding:3px 10px; border-radius:12px; margin-left:15px; font-weight:800; border:1px solid rgba(255,255,255,0.3);">👮 Supervisor: ${activeSession.supName}</span>` : '');
         document.getElementById('pharmacyNo').value = activeSession.id;
         pharmacyNumber = activeSession.id;
         
@@ -691,7 +697,23 @@ function getShiftColor(h, p) {
     return '#7e57c2';
 }
 
+
+function sortShiftsArray() {
+    shifts.sort((a, b) => {
+        if (!a.startHour && b.startHour) return 1;
+        if (a.startHour && !b.startHour) return -1;
+        if (!a.startHour && !b.startHour) return 0;
+        
+        let ah = (a.startHour % 12) + (a.startPeriod === 'PM' ? 12 : 0);
+        let bh = (b.startHour % 12) + (b.startPeriod === 'PM' ? 12 : 0);
+        return ah - bh;
+    });
+}
+
 function renderShifts() {
+    sortShiftsArray();
+    updateGridSelects();
+
     const wrap = document.getElementById('shiftsList');
     wrap.innerHTML = shifts.map((s, i) => {
         const vac = simpleShiftVacations[s.id] || { enabled: false, list: [] };
@@ -709,7 +731,7 @@ function renderShifts() {
         return `
         <div class="shift-item-container">
             <div class="shift-header-row">
-                <input class="shift-name-input" value="${s.name}" onchange="shifts[${i}].name=this.value; renderPharmacists(); triggerAutoSave();">
+                <input class="shift-name-input" value="${s.name}" onchange="shifts[${i}].name=this.value; renderPharmacists(); updateGridSelects(); triggerAutoSave();">
                 <div style="display:flex; gap:10px; align-items:center;">
                     <div class="shift-color-circle" style="background:${s.color};"></div>
                     <button class="btn btn-danger btn-sm" style="padding:8px;" onclick="shifts.splice(${i},1); renderShifts(); renderPharmacists(); triggerAutoSave();">✖</button>
@@ -717,23 +739,23 @@ function renderShifts() {
             </div>
             <div class="time-select-row">
                 Start: <select class="time-select" onchange="updateTime(${i}, 'start', this.value, null)">${genOpts(s.startHour)}</select>
-                <select class="time-select" onchange="updateTime(${i}, 'start', null, this.value)"><option ${s.startPeriod=='AM'?'selected':''}>AM</option><option ${s.startPeriod=='PM'?'selected':''}>PM</option></select>
+                <select class="time-select" onchange="updateTime(${i}, 'start', null, this.value)"><option value="" ${!s.startPeriod?'selected':''}>-</option><option value="AM" ${s.startPeriod=='AM'?'selected':''}>AM</option><option value="PM" ${s.startPeriod=='PM'?'selected':''}>PM</option></select>
                 <span style="color:#06b6d4; font-weight:900;">→</span> 
                 End: <select class="time-select" onchange="updateTime(${i}, 'end', this.value, null)">${genOpts(s.endHour)}</select>
-                <select class="time-select" onchange="updateTime(${i}, 'end', null, this.value)"><option ${s.endPeriod=='AM'?'selected':''}>AM</option><option ${s.endPeriod=='PM'?'selected':''}>PM</option></select>
+                <select class="time-select" onchange="updateTime(${i}, 'end', null, this.value)"><option value="" ${!s.endPeriod?'selected':''}>-</option><option value="AM" ${s.endPeriod=='AM'?'selected':''}>AM</option><option value="PM" ${s.endPeriod=='PM'?'selected':''}>PM</option></select>
             </div>
             ${vacHtml}
         </div>`;
     }).join('');
 }
 
-function genOpts(sel) { let o=''; for(let i=1;i<=12;i++) o+=`<option value="${i}" ${i==sel?'selected':''}>${i}</option>`; return o; }
+function genOpts(sel) { let o=`<option value="" ${!sel?'selected':''}>-</option>`; for(let i=1;i<=12;i++) o+=`<option value="${i}" ${i==sel?'selected':''}>${i}</option>`; return o; }
 function updateTime(i, t, h, p) {
     if(t==='start') { if(h) shifts[i].startHour=parseInt(h); if(p) shifts[i].startPeriod=p; shifts[i].color = getShiftColor(shifts[i].startHour, shifts[i].startPeriod); }
     else { if(h) shifts[i].endHour=parseInt(h); if(p) shifts[i].endPeriod=p; }
     renderShifts(); renderPharmacists(); triggerAutoSave();
 }
-function addCustomShift() { shifts.push({id:Date.now(), name:'New Shift', startHour:9, startPeriod:'AM', endHour:5, endPeriod:'PM', color:'#4fc3f7'}); renderShifts(); renderPharmacists(); triggerAutoSave(); }
+function addCustomShift() { shifts.push({id:Date.now(), name:'New Shift', startHour:'', startPeriod:'', endHour:'', endPeriod:'', color:'#94a3b8'}); sortShiftsArray(); renderShifts(); renderPharmacists(); updateGridSelects(); triggerAutoSave(); }
 function resetToDefaultShifts() {
     shifts = [
         {id:1, name:'Morning', startHour: 8, startPeriod: 'AM', endHour: 4, endPeriod: 'PM', color:'#4fc3f7'},
@@ -824,6 +846,30 @@ function moveDay(idx, dir) {
 function toggleBreak(idx) {
     dayOrderConfigs[idx].breakAfter = !dayOrderConfigs[idx].breakAfter;
     renderDaySorter();
+}
+
+
+function updateGridSelects() {
+    const grid = document.getElementById('manualScheduleGrid');
+    if (!grid || grid.style.display === 'none') return;
+    
+    // Save current values
+    const selects = grid.querySelectorAll('select');
+    const values = [];
+    selects.forEach(s => values.push(s.value));
+    
+    // Regenerate grid
+    generateManualGrid();
+    
+    // Restore values
+    const newSelects = grid.querySelectorAll('select');
+    newSelects.forEach((s, i) => {
+        if(values[i]) {
+            // Check if the old value still exists as an option
+            let optionExists = Array.from(s.options).some(opt => opt.value === values[i]);
+            if(optionExists) s.value = values[i];
+        }
+    });
 }
 
 function generateManualGrid() {
