@@ -60562,24 +60562,24 @@
             const currentCatA = item.catA || 'General';
             const currentCatD = item.catD || '';
 
-            // Header A
+            // Add Category A full-width header
             if (currentCatA !== lastCatA) {
               contentHTML += `
-                <div class="cat-a-header-wrapper">
-                    <div class="cat-a-header"><span class="cat-a-title">${currentCatA}</span></div>
+                <div class="cat-a-header-wrapper" style="grid-column: 1 / -1; width: 100%; margin: 20px 0 10px 0;">
+                    <div class="cat-a-title" style="background: #00235B; color: white; padding: 8px 20px; font-size: 18px; font-weight: 900; border-radius: 8px; text-align: center; width: 100%; box-sizing: border-box;">${currentCatA}</div>
                 </div>`;
               lastCatA = currentCatA;
               lastCatD = '';
             }
 
-            // Header D
-            if (currentCatD !== lastCatD) {
-              const categoryDColor = (typeof getCategoryDColor === 'function') ? getCategoryDColor(currentCatD) : '#333';
-              contentHTML += `
-                <div class="cat-d-header-wrapper">
-                    <div class="cat-d-banner" style="background: ${categoryDColor};">${currentCatD}</div>
-                </div>`;
-              lastCatD = currentCatD;
+            // Keep track of catD without printing its full header
+            lastCatD = currentCatD;
+            
+            let categoryBadgeHTML = '';
+            const displayCat = item.catC || item.catD || item.catA;
+            if (displayCat && displayCat !== 'General') {
+                const catColor = (typeof getCategoryDColor === 'function' && item.catD) ? getCategoryDColor(item.catD) : '#00235B';
+                categoryBadgeHTML = `<div style="position: absolute; top: 0; left: 0; background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 12px 0 12px 0; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">${displayCat}</div>`;
             }
 
             // 📦 تجهيز الكارت
@@ -60678,7 +60678,8 @@
 
             contentHTML += `
             <div class="card-wrapper">
-                <div class="magazine-card">
+                <div class="magazine-card" style="position: relative;">
+                    ${categoryBadgeHTML}
                     ${badgeHTML} ${bestSellerBadge}
                     <div class="card-img-container">${imageHTML}</div>
                     <div class="card-info">
@@ -60812,12 +60813,20 @@
           const win = window.open('', '_blank', 'width=1200,height=900');
           if (!win) { alert('⚠️ اسمح بالنوافذ المنبثقة!'); if (btn) { btn.innerHTML = originalText; btn.disabled = false; } return; }
 
+          let activePeriodLabel = 'طباعة المجلة السريعة';
+          try {
+              const sel = document.getElementById('periodSelector');
+              if (sel && sel.options[sel.selectedIndex]) {
+                  activePeriodLabel = sel.options[sel.selectedIndex].text;
+              }
+          } catch(e) {}
+
           win.document.write(`
         <!DOCTYPE html>
         <html lang="ar" dir="rtl">
         <head>
             <meta charset="UTF-8">
-            <title>طباعة المجلة السريعة</title>
+            <title>${activePeriodLabel}</title>
             ${css}
         </head>
         <body>
