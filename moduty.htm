@@ -688,6 +688,23 @@ function renderPharmacists() {
             </select>
         </div>`;
     }).join('');
+
+    if (window.lastModifiedShiftId) {
+        const el = document.getElementById(`shift-item-container-${window.lastModifiedShiftId}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'box-shadow 0.8s ease, transform 0.5s ease';
+                el.style.boxShadow = '0 0 25px 5px rgba(6, 182, 212, 0.6)';
+                el.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    el.style.transform = 'scale(1)';
+                }, 2000);
+            }, 100);
+        }
+        window.lastModifiedShiftId = null;
+    }
 }
 
 function getShiftColor(h, p) {
@@ -700,9 +717,11 @@ function getShiftColor(h, p) {
 
 function sortShiftsArray() {
     shifts.sort((a, b) => {
-        if (!a.startHour && b.startHour) return 1;
-        if (a.startHour && !b.startHour) return -1;
-        if (!a.startHour && !b.startHour) return 0;
+        let aComplete = a.startHour && a.startPeriod && a.endHour && a.endPeriod;
+        let bComplete = b.startHour && b.startPeriod && b.endHour && b.endPeriod;
+        if (!aComplete && bComplete) return 1;
+        if (aComplete && !bComplete) return -1;
+        if (!aComplete && !bComplete) return 0;
         
         let ah = (a.startHour % 12) + (a.startPeriod === 'PM' ? 12 : 0);
         let bh = (b.startHour % 12) + (b.startPeriod === 'PM' ? 12 : 0);
@@ -729,7 +748,7 @@ function renderShifts() {
         </div>`;
 
         return `
-        <div class="shift-item-container">
+        <div id="shift-item-container-${s.id}" class="shift-item-container">
             <div class="shift-header-row">
                 <input class="shift-name-input" value="${s.name}" onchange="shifts[${i}].name=this.value; renderPharmacists(); updateGridSelects(); triggerAutoSave();">
                 <div style="display:flex; gap:10px; align-items:center;">
@@ -747,12 +766,30 @@ function renderShifts() {
             ${vacHtml}
         </div>`;
     }).join('');
+
+    if (window.lastModifiedShiftId) {
+        const el = document.getElementById(`shift-item-container-${window.lastModifiedShiftId}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'box-shadow 0.8s ease, transform 0.5s ease';
+                el.style.boxShadow = '0 0 25px 5px rgba(6, 182, 212, 0.6)';
+                el.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    el.style.transform = 'scale(1)';
+                }, 2000);
+            }, 100);
+        }
+        window.lastModifiedShiftId = null;
+    }
 }
 
 function genOpts(sel) { let o=`<option value="" ${!sel?'selected':''}>-</option>`; for(let i=1;i<=12;i++) o+=`<option value="${i}" ${i==sel?'selected':''}>${i}</option>`; return o; }
 function updateTime(i, t, h, p) {
     if(t==='start') { if(h) shifts[i].startHour=parseInt(h); if(p) shifts[i].startPeriod=p; shifts[i].color = getShiftColor(shifts[i].startHour, shifts[i].startPeriod); }
     else { if(h) shifts[i].endHour=parseInt(h); if(p) shifts[i].endPeriod=p; }
+    window.lastModifiedShiftId = shifts[i].id;
     renderShifts(); renderPharmacists(); triggerAutoSave();
 }
 function addCustomShift() { shifts.push({id:Date.now(), name:'New Shift', startHour:'', startPeriod:'', endHour:'', endPeriod:'', color:'#94a3b8'}); sortShiftsArray(); renderShifts(); renderPharmacists(); updateGridSelects(); triggerAutoSave(); }
@@ -851,7 +888,7 @@ function toggleBreak(idx) {
 
 function updateGridSelects() {
     const grid = document.getElementById('manualScheduleGrid');
-    if (!grid || grid.style.display === 'none') return;
+    if (!grid || grid.style.display === 'none' || grid.style.display === '') return;
     
     // Save current values
     const selects = grid.querySelectorAll('select');
@@ -863,6 +900,7 @@ function updateGridSelects() {
     
     // Restore values
     const newSelects = grid.querySelectorAll('select');
+    // showToast('Grid Updated in Real Time!', 'success');
     newSelects.forEach((s, i) => {
         if(values[i]) {
             // Check if the old value still exists as an option
@@ -1151,6 +1189,23 @@ function generateTimeBasedScheduleTables(isSupervisor = false, supName = "", sho
                 return sh ? `<td style="background:${sh.color};color:white;">${sh.startHour}:00 ${sh.startPeriod} - ${sh.endHour}:00 ${sh.endPeriod}</td>` 
                           : `<td class="off-row">OFF</td>`;
             }).join('');
+
+    if (window.lastModifiedShiftId) {
+        const el = document.getElementById(`shift-item-container-${window.lastModifiedShiftId}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'box-shadow 0.8s ease, transform 0.5s ease';
+                el.style.boxShadow = '0 0 25px 5px rgba(6, 182, 212, 0.6)';
+                el.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    el.style.transform = 'scale(1)';
+                }, 2000);
+            }, 100);
+        }
+        window.lastModifiedShiftId = null;
+    }
             
             let info = `<strong style="font-size:14px; color:#1e293b;">${p.name}</strong>`;
             if (p.shift) info += `<span style="display:block;font-size:11px;color:#64748b;">(Shift Base)</span>`;
@@ -1159,6 +1214,23 @@ function generateTimeBasedScheduleTables(isSupervisor = false, supName = "", sho
             
             return `<tr><td style="background:#f8fafc;">${info}</td>${cells}</tr>`;
         }).join('');
+
+    if (window.lastModifiedShiftId) {
+        const el = document.getElementById(`shift-item-container-${window.lastModifiedShiftId}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'box-shadow 0.8s ease, transform 0.5s ease';
+                el.style.boxShadow = '0 0 25px 5px rgba(6, 182, 212, 0.6)';
+                el.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    el.style.transform = 'scale(1)';
+                }, 2000);
+            }, 100);
+        }
+        window.lastModifiedShiftId = null;
+    }
 
         const weekSubStr = idx === 0 && rawDate ? `<div style="font-size:14px; color:#64748b; font-weight:600;">${formattedDateEn}</div>` : '';
 
@@ -1315,6 +1387,23 @@ async function openHistory() {
                 </div>
             </div>`;
         }).join('');
+
+    if (window.lastModifiedShiftId) {
+        const el = document.getElementById(`shift-item-container-${window.lastModifiedShiftId}`);
+        if (el) {
+            setTimeout(() => {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.transition = 'box-shadow 0.8s ease, transform 0.5s ease';
+                el.style.boxShadow = '0 0 25px 5px rgba(6, 182, 212, 0.6)';
+                el.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    el.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    el.style.transform = 'scale(1)';
+                }, 2000);
+            }, 100);
+        }
+        window.lastModifiedShiftId = null;
+    }
     } catch (err) {
         console.error("Critical History Error:", err);
         list.innerHTML = "<div style='text-align:center; padding:20px; color:#ef4444; font-weight:bold;'>❌ Failed to load history. Please try refreshing.</div>";
