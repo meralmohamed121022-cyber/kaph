@@ -1635,6 +1635,15 @@
             rgba(254, 226, 226, 0.92) 100%) !important;
       }
 
+      @media print {
+        .magazine-page.magazine-page-health,
+        .magazine-page.magazine-page-baby,
+        .magazine-page.magazine-page-beauty,
+        .magazine-page.magazine-page-personal {
+          background: white !important;
+        }
+      }
+
       /* ===== 3️⃣ CATEGORY HEADER - STICKY ===== */
       .magazine-category-header {
         position: sticky;
@@ -3661,6 +3670,30 @@
         position: relative !important;
       }
 
+      .contact-icons-container {
+        position: absolute;
+        left: 40px;
+        top: calc(40% + 75px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        width: 140px;
+        z-index: 10;
+      }
+
+      /* تنسيق للموبايل */
+      @media (max-width: 768px) {
+        .contact-icons-container {
+          position: relative;
+          left: auto;
+          top: auto;
+          width: 100%;
+          margin-top: 0;
+          padding-bottom: 10px;
+        }
+      }
+
       /* تعديل الموبايل */
       @media (max-width: 768px) {
         .header-personal-img {
@@ -4304,6 +4337,7 @@
         align-items: center;
         justify-content: space-between;
         padding: 0 20px !important;
+        z-index: 30000 !important;
         z-index: 10000;
       }
 
@@ -5011,11 +5045,11 @@
 
       .promo-media-head h2 {
         margin: 0 0 8px;
-        color: #fff;
+        color: var(--text-main);
         font-size: 26px;
         font-weight: 900;
         letter-spacing: 0.5px;
-        text-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        text-shadow: none;
       }
 
       .promo-media-head p {
@@ -5026,18 +5060,42 @@
       }
 
       .promo-media-swiper {
-        display: grid;
-        grid-auto-flow: column;
-        grid-auto-columns: minmax(280px, 340px);
-        gap: 16px;
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 12px;
+        padding: 12px;
         overflow-x: auto;
-        overflow-y: hidden;
-        padding: 8px 4px 12px;
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
-        scrollbar-width: thin;
-        scrollbar-color: #d4af37 rgba(255, 255, 255, 0.15);
-        touch-action: pan-x pinch-zoom;
+        scrollbar-width: none;
+      }
+      .promo-media-swiper::-webkit-scrollbar {
+        display: none;
+      }
+      
+      .promo-media-text-btn {
+        flex: 0 0 auto;
+        scroll-snap-align: start;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 20px;
+        background: rgba(15, 23, 42, 0.72);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 30px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      }
+      
+      .promo-media-text-btn:hover {
+        background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+        border-color: #8b5cf6;
+        transform: translateY(-2px);
       }
 
       .promo-media-swiper::-webkit-scrollbar {
@@ -5776,12 +5834,13 @@
         </div>
       </div>
       <div id="fixedHeader" style="display:none;">
-        <div class="header-logo" onclick="goHome()">
-          <svg viewBox="0 0 24 24">
-            <path
-              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zm-1.5-3.5c-3.59 0-6.5-2.91-6.5-6.5s2.91-6.5 6.5-6.5c.66 0 1.29.1 1.89.28-2.3 1.05-3.89 3.39-3.89 6.22 0 2.83 1.59 5.17 3.89 6.22-.6.18-1.23.28-1.89.28z" />
-          </svg>
-          <span>HOME</span>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <button id="fixedHeaderBackBtn" onclick="if(window.parent && typeof window.parent.closeIframe === 'function'){window.parent.closeIframe();}else{goHome();}" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-left: -5px;">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="header-logo" onclick="goHome()" style="margin: 0;">
+            <span>HOME</span>
+          </div>
         </div>
 
         <img id="headerCenterImg" src="" class="header-center-img" alt="" style="max-height: 50px; width: auto;">
@@ -5796,7 +5855,11 @@
         <div class="sidebar-header">
           <button class="sidebar-close" onclick="toggleToolsSidebar()">✖</button>
         </div>
-        <div class="sidebar-content">
+        <div class="sidebar-content" id="sidebarContentWrapper">
+          <button id="layoutToggleBtn" class="sidebar-btn" onclick="toggleMenuLayoutMode()">
+            <span class="icon">🔄</span> <span id="layoutToggleText" class="btn-text" style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); padding: 5px 15px; border-radius: 12px; color: white; box-shadow: 0 0 10px rgba(139, 92, 246, 0.5); font-weight: bold; display: inline-block;">Inline Layout</span>
+          </button>
+
           <button class="sidebar-btn btn-custom-print" onclick="openCustomPrintModal(); toggleToolsSidebar();"
             style="display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 15px 20px; height: auto; width: 100%; border: none; border-radius: 15px; cursor: pointer; transition: 0.3s; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);">
 
@@ -5815,7 +5878,6 @@
           <div
             style="font-size: 9px; font-weight: 700; color: #ffd700; padding-left: 32px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9;">
           </div>
-          </button>
 
           <button id="sidebarMagazineBtn" class="sidebar-btn btn-magazine" onclick="toggleMagazineModeFromSidebar()">
             <span class="icon">📰</span> MAGAZINE MODE: OFF
@@ -5854,7 +5916,7 @@
         <style>
           .theme-hint-pointer {
             position: absolute;
-            top: 12px;
+            top: 100px;
             left: 70px;
             z-index: 26000;
             display: none;
@@ -5892,6 +5954,48 @@
             0% { transform: translateX(0); }
             100% { transform: translateX(-8px); }
           }
+          
+          /* --- Inline Layout Mode CSS --- */
+          .inline-layout-mode {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: 15px;
+            padding: 25px;
+            margin: 30px auto;
+            max-width: 1200px;
+            background: rgba(13, 33, 55, 0.4);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 95%;
+          }
+          
+          .inline-layout-mode .sidebar-btn,
+          .inline-layout-mode .sidebar-upload-box {
+            flex: 1;
+            min-width: 250px;
+            margin: 0 !important;
+          }
+          
+          #layoutToggleBtn {
+            flex-basis: 100%;
+            width: 100%;
+            background: transparent !important;
+            box-shadow: none !important;
+            border: 2px dashed rgba(255,255,255,0.3) !important;
+            color: #d1d5db !important;
+            margin-bottom: 20px !important;
+            transition: all 0.3s;
+          }
+          
+          #layoutToggleBtn:hover {
+            border-color: #8b5cf6 !important;
+            background: rgba(139, 92, 246, 0.1) !important;
+          }
         </style>
         <div id="themeHintPointer" class="theme-hint-pointer">
           <div class="hand-emoji">👈</div>
@@ -5904,7 +6008,7 @@
           <img
             src="https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d8/6_20251129_184528_0005.png"
             class="header-personal-img" alt="Profile">
-          <div style="display: flex; align-items: center; gap: 15px; padding: 10px;">
+          <div class="contact-icons-container">
             <div onclick="openEmail()" style="cursor: pointer;"><svg width="30" height="30" viewBox="0 0 24 24">
                 <path
                   d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
@@ -5956,97 +6060,33 @@
 
           <div class="promo-media-swiper" id="promoMediaSwiper">
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">SCAN 6 CODE ITEM AND PRINT OFFERS</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4')">
-                <video muted playsinline preload="metadata"
-                  poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/scan%20code.jpeg">
-                  <source
-                    src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4"
-                    type="video/mp4">
-                </video>
-                <span class="promo-play-badge">▶</span>
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SCAN%206%20CODE%20ITEM%20AND%20PRINT%20OFFERS.mp4')">
+              SCAN 6 CODE ITEM AND PRINT OFFERS <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">▶</span>
+            </button>
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">Sidebar Options</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDEBAR%20OPTIONS.mp4')">
-                <video muted playsinline preload="metadata"
-                  poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDE%20BAR%20OPTIONS.jpeg">
-                  <source
-                    src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDEBAR%20OPTIONS.mp4"
-                    type="video/mp4">
-                </video>
-                <span class="promo-play-badge">▶</span>
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/SIDEBAR%20OPTIONS.mp4')">
+              Sidebar Options <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">▶</span>
+            </button>
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">CONNECTION ERROR</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/CONNECTION%20ERROR.mp4')">
-                <video muted playsinline preload="metadata"
-                  poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/WhatsApp%20Image%202026-04-27%20at%205.56.33%20PM.jpeg">
-                  <source
-                    src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/CONNECTION%20ERROR.mp4"
-                    type="video/mp4">
-                </video>
-                <span class="promo-play-badge">▶</span>
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/CONNECTION%20ERROR.mp4')">
+              CONNECTION ERROR <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">▶</span>
+            </button>
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">كيف تفلتر</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/FILTERS.mp4')">
-                <video muted playsinline preload="metadata">
-                  <source
-                    src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/FILTERS.mp4"
-                    type="video/mp4">
-                </video>
-                <span class="promo-play-badge">▶</span>
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/refs/heads/main/FILTERS.mp4')">
+              كيف تفلتر <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">▶</span>
+            </button>
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">print setting</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('image','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png')">
-                <img
-                  src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png"
-                  alt="Printer Settings" loading="lazy">
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('image','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/d4f83b18f5ac37fac564406d27a2b3dc990c9d31/PRINTER%20SETTING.png')">
+              print setting <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">👁</span>
+            </button>
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">PRINT OFFERS FROM FILE</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4')">
-                <video muted playsinline preload="metadata">
-                  <source
-                    src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4"
-                    type="video/mp4">
-                </video>
-                <span class="promo-play-badge">▶</span>
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/PRINT%20OFFERS%20FROM%20FILE%20.mp4')">
+              PRINT OFFERS FROM FILE <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">▶</span>
+            </button>
 
-            <article class="promo-media-card">
-              <h3 class="promo-media-title">Magazine offers file</h3>
-              <button class="promo-media-thumb" type="button"
-                onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazine%20offers%20print.mp4')">
-                <video muted playsinline preload="metadata"
-                  poster="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazie%20offers.jpeg">
-                  <source
-                    src="https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazine%20offers%20print.mp4"
-                    type="video/mp4">
-                </video>
-                <span class="promo-play-badge">▶</span>
-              </button>
-            </article>
+            <button class="promo-media-text-btn" type="button" onclick="openPromoMedia('video','https://raw.githubusercontent.com/meralmohamed121022-cyber/photos/main/magazine%20offers%20print.mp4')">
+              Magazine offers file <span style="font-size: 12px; opacity: 0.8; margin-left: 5px;">▶</span>
+            </button>
 
           </div>
         </div>
@@ -24400,7 +24440,7 @@
           document.getElementById('mainOffersContainer').style.display = 'block';
           document.getElementById('fixedHeader').style.display = 'flex';
           if (document.getElementById('toolsSidebarToggle')) {
-            document.getElementById('toolsSidebarToggle').style.display = 'flex';
+            document.getElementById('toolsSidebarToggle').style.display = window.isInlineMenuMode ? 'none' : 'flex';
           }
           
           if (document.getElementById('themeHintPointer')) {
@@ -26908,7 +26948,7 @@
           const isScannerVisible = document.getElementById('scannerModalOverlay') && document.getElementById('scannerModalOverlay').style.display === 'flex';
 
           if (toggleBtn) {
-            if (!isGatewayVisible && !isScannerVisible) {
+            if (!isGatewayVisible && !isScannerVisible && !window.isInlineMenuMode) {
               toggleBtn.style.display = 'flex';
             } else {
               toggleBtn.style.display = 'none';
@@ -31894,7 +31934,6 @@
             const currentCatA = item.catA || 'General';
             const currentCatD = item.catD || '';
 
-            // Add Category A full-width header
             if (currentCatA !== lastCatA) {
               contentHTML += `
                 <div class="cat-a-header-wrapper" style="grid-column: 1 / -1; width: 100%; margin: 20px 0 10px 0;">
@@ -31911,7 +31950,7 @@
             const displayCat = item.catC || item.catD || item.catA;
             if (displayCat && displayCat !== 'General') {
                 const catColor = (typeof getCategoryDColor === 'function' && item.catD) ? getCategoryDColor(item.catD) : '#00235B';
-                categoryBadgeHTML = `<div style="position: absolute; top: 0; left: 0; background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 12px 0 12px 0; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">${displayCat}</div>`;
+                categoryBadgeHTML = `<div style="position: absolute; top: 0; right: 0; background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 0 12px 0 12px; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">${displayCat}</div>`;
             }
 
             // 📦 تجهيز الكارت
@@ -32298,6 +32337,41 @@
             btn.disabled = false;
           }
         }
+        window.isInlineMenuMode = false;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+          setTimeout(() => {
+            if (!window.isInlineMenuMode) toggleMenuLayoutMode();
+          }, 300);
+        });
+
+        function toggleMenuLayoutMode() {
+          const sidebarContent = document.getElementById('sidebarContentWrapper');
+          const toolsSidebar = document.getElementById('toolsSidebar');
+          const promoMediaSection = document.querySelector('.promo-media-section');
+          const layoutToggleText = document.getElementById('layoutToggleText');
+          const topMenuBtn = document.getElementById('toolsSidebarToggle');
+          
+          if (!window.isInlineMenuMode) {
+            // Move out to inline
+            sidebarContent.classList.add('inline-layout-mode');
+            if (promoMediaSection && promoMediaSection.parentNode) {
+              promoMediaSection.parentNode.insertBefore(sidebarContent, promoMediaSection);
+            }
+            if (layoutToggleText) layoutToggleText.innerText = 'Sidebar Menu';
+            if (toolsSidebar.classList.contains('active')) toggleToolsSidebar();
+            if (topMenuBtn) topMenuBtn.style.setProperty('display', 'none', 'important');
+            window.isInlineMenuMode = true;
+          } else {
+            // Move back to sidebar
+            sidebarContent.classList.remove('inline-layout-mode');
+            toolsSidebar.appendChild(sidebarContent);
+            if (layoutToggleText) layoutToggleText.innerText = 'Inline Layout';
+            if (topMenuBtn) topMenuBtn.style.setProperty('display', 'flex', 'important');
+            window.isInlineMenuMode = false;
+          }
+        }
+
         // دوال فتح وقفل السايدبار
         function toggleToolsSidebar() {
           const sidebar = document.getElementById('toolsSidebar');
