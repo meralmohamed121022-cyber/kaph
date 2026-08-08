@@ -5835,7 +5835,7 @@
       </div>
       <div id="fixedHeader" style="display:none;">
         <div style="display: flex; align-items: center; gap: 15px;">
-          <button id="fixedHeaderBackBtn" onclick="if(window.parent && typeof window.parent.closeIframe === 'function'){window.parent.closeIframe();}else{goHome();}" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-left: -5px;">
+          <button id="fixedHeaderBackBtn" onclick="goHome()" style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-left: -5px;">
             <i class="fas fa-arrow-left"></i>
           </button>
           <div class="header-logo" onclick="goHome()" style="margin: 0;">
@@ -6090,6 +6090,14 @@
 
           </div>
         </div>
+        <!-- STARTUP ANNOUNCEMENT MODAL -->
+        <div id="startupAnnouncementModal" style="display:none; position:fixed; inset:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:100000; flex-direction:column; align-items:center; justify-content:center; padding:15px; opacity:0; transition: opacity 0.5s ease; backdrop-filter: blur(5px);" onclick="if(event.target === this) closeStartupAnnouncement()">
+          <div style="position:relative; width:100%; max-width:850px; border-radius:20px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.5); transform:scale(0.9); transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);" id="startupAnnouncementBox">
+            <button onclick="closeStartupAnnouncement()" style="position:absolute; top:15px; right:15px; width:40px; height:40px; border-radius:50%; background:rgba(0,0,0,0.6); color:white; border:none; font-size:20px; cursor:pointer; z-index:10; display:flex; align-items:center; justify-content:center; backdrop-filter:blur(5px); box-shadow: 0 4px 10px rgba(0,0,0,0.3); transition: 0.3s;">✕</button>
+            <img id="startupAnnouncementImg" src="" style="width:100%; height:auto; display:block; object-fit:cover;" alt="Announcement">
+          </div>
+        </div>
+        
         <!-- FULLSCREEN LIGHTBOX -->
         <div id="promoMediaLightbox" class="promo-media-lightbox" onclick="closePromoMedia(event)">
           <button class="promo-media-close" type="button" onclick="closePromoMedia()">✕</button>
@@ -34753,6 +34761,67 @@ function toggleScannerLayout() {
         shell.classList.toggle('scanner-shell-horizontal');
     }
 }
+
+// Startup Popup Logic
+function checkStartupAnnouncement() {
+  const defaultImage = "https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/refs/heads/main/0e03439768a3f0e6660c88432d83b387.jpg"; // Fallback image if needed
+  
+  // أضفنا ?t= لمنع المتصفح من تخزين النتيجة القديمة (Cache-Busting)
+  fetch(`https://online.meralmohamed121022.workers.dev/startup-image?t=${new Date().getTime()}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.isActive) {
+        let urlToShow = data.imageUrl || "";
+        
+        // لو الرابط اللي المستخدم حطه ناقص (مثلاً نسي يكتب https://)، نعالجه هنا احتياطياً
+        if (urlToShow && !urlToShow.startsWith("http")) {
+          // يمكن إضافة الرابط الأساسي لـ github لو كان ناقص
+          if(urlToShow.includes("meralmohamed121022")) {
+              urlToShow = "https://raw.githubusercontent.com/" + urlToShow;
+          } else {
+              urlToShow = "https://" + urlToShow;
+          }
+        }
+
+        if (urlToShow) {
+          showStartupAnnouncement(urlToShow);
+        } else {
+          showStartupAnnouncement(defaultImage);
+        }
+      }
+    })
+    .catch(err => {
+      console.error("Failed to fetch startup image", err);
+    });
+}
+
+function showStartupAnnouncement(url) {
+  const modal = document.getElementById('startupAnnouncementModal');
+  const img = document.getElementById('startupAnnouncementImg');
+  const box = document.getElementById('startupAnnouncementBox');
+  if (modal && img && box) {
+    img.src = url;
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      modal.style.opacity = '1';
+      box.style.transform = 'scale(1)';
+    }, 50);
+  }
+}
+
+function closeStartupAnnouncement() {
+  const modal = document.getElementById('startupAnnouncementModal');
+  const box = document.getElementById('startupAnnouncementBox');
+  if (modal && box) {
+    modal.style.opacity = '0';
+    box.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 500);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', checkStartupAnnouncement);
 
 function openEmail() { window.location.href = "mailto:Muhammedkhulif@yahoo.com"; }
 function openWhatsApp() { window.open("https://wa.me/966541932559", '_blank'); }
