@@ -5905,15 +5905,22 @@
           <div style="margin-top:15px; font-size:1.2em;">Preparing Print Layout...<br>Please wait</div>
         </div>
 
-        <div id="mainPageStatusContainer" class="main-page-status-container" style="display: none;">
-          <div id="codesFileStatus"></div>
-        </div>
+
 
         <button id="newThemeToggleBtn" onclick="toggleTheme()" style="position: relative; float: left; margin: 5px 15px 10px 15px; z-index: 25000; width: 45px; height: 45px; border-radius: 50%; background: linear-gradient(135deg, #0d2137 0%, #1a3a52 100%); color: white; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
           <i id="themeIcon" class="fas fa-moon"></i>
         </button>
 
         <style>
+          .is-processing-modal {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            z-index: 100000 !important;
+            box-shadow: 0 0 0 100vmax rgba(0,0,0,0.7), 0 20px 50px rgba(0,0,0,0.5) !important;
+            margin-bottom: 0 !important;
+          }
           .theme-hint-pointer {
             position: absolute;
             top: 100px;
@@ -6053,6 +6060,12 @@
         <!-- =========================
      PROMO MEDIA SWIPER SECTION
 ========================= -->
+        <!-- Status Container moved here to be right above PLATFORM FEATURES -->
+        <div id="mainPageStatusContainer" class="main-page-status-container" style="display: none; background: var(--card-bg, rgba(15, 23, 42, 0.95)); padding: 25px; border-radius: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); backdrop-filter: blur(10px); width: 100%; border: 1px solid var(--border-color, rgba(255,255,255,0.1)); position: relative; margin-bottom: 25px;">
+          <button onclick="document.getElementById('mainPageStatusContainer').style.display='none';" style="position: absolute; top: 10px; left: 10px; background: rgba(255,255,255,0.1); border: none; color: white; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; transition: 0.3s;" onmouseover="this.style.background='rgba(255,0,0,0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">✕</button>
+          <div id="codesFileStatus" style="margin-top: 15px;"></div>
+        </div>
+
         <div class="promo-media-section">
           <div class="promo-media-head">
             <h2>PLATFORM FEATURES</h2>
@@ -31425,6 +31438,107 @@
 
           console.log(`✅ تم إرسال ${productsToPrint.length} منتج إلى الطابعة.`);
         }
+        // ==========================================
+        // 🖨️ طباعة أنواع العروض فقط للأكواد المرفوعة
+        // ==========================================
+        async function printUploadedOfferTypesDirectly() {
+          if (!uploadedCodesFilter || uploadedCodesFilter.length === 0) {
+            alert('⚠️ حمّل أكواد الأول! 📤');
+            return;
+          }
+
+          console.log('🖨️ بدء طباعة أنواع العروض لـ', uploadedCodesFilter.length, 'كود');
+
+          const uniqueOffersMap = new Map();
+
+          uploadedCodesFilter.forEach(code => {
+            const cleanCode = String(code).trim().replace(/\s+/g, '');
+            let product = null;
+            if (typeof findProductByCode === 'function') {
+              product = findProductByCode(cleanCode);
+            } else if (typeof productsDB !== 'undefined') {
+              product = productsDB.find(p => String(p.Code).trim() === cleanCode);
+            }
+
+            if (product && typeof getOffer === 'function') {
+              const offer = getOffer(product.Code);
+              if (offer && offer.offerType) {
+                const key = offer.offerType.trim();
+                if (!uniqueOffersMap.has(key)) {
+                  uniqueOffersMap.set(key, {
+                    en: key,
+                    ar: (offer.offerTypeAR || offer.offerType).trim()
+                  });
+                }
+              }
+            }
+          });
+
+          const finalOffers = Array.from(uniqueOffersMap.values());
+
+          if (finalOffers.length === 0) {
+            alert('⚠️ لم يتم العثور على أي عروض للأكواد المرفوعة.');
+            return;
+          }
+
+          const quantityInput = document.getElementById('customQuantity');
+          const quantity = (quantityInput && parseInt(quantityInput.value) > 0) ? parseInt(quantityInput.value) : 6;
+
+          const customData = {
+            dateRange: '',
+            productEN: '',
+            productAR: '',
+            category: ''
+          };
+
+          const customCards = [];
+          
+          finalOffers.forEach(off => {
+            for (let i = 0; i < quantity; i++) {
+              customCards.push({
+                Code: "",
+                customData: { ...customData, offerEN: off.en, offerAR: off.ar }
+              });
+            }
+          });
+
+          const container = document.getElementById('printContainer');
+          const loader = document.getElementById('printLoader');
+
+          if (!container) return;
+
+          container.innerHTML = '';
+          if (loader) loader.style.display = 'flex';
+
+          if (typeof injectPrintStylesOnce === 'function') {
+            injectPrintStylesOnce();
+          }
+
+          setTimeout(async () => {
+            try {
+              if (typeof renderCustomPrint === 'function') {
+                renderCustomPrint(customCards);
+              }
+              
+              if (typeof exportRiyalSymbolsForPrint === 'function') {
+                 await exportRiyalSymbolsForPrint();
+              }
+              if (typeof waitForPrintAssets === 'function') {
+                 await waitForPrintAssets();
+              }
+
+              setTimeout(() => {
+                window.print();
+              }, 100);
+
+            } catch (err) {
+              console.error("حدث خطأ أثناء تجهيز الطباعة:", err);
+            } finally {
+              if (loader) loader.style.display = 'none';
+            }
+          }, 300);
+        }
+
         // ============================================================
         // 🔔 Wake Up Server قبل أي طلب PDF
         // ============================================================
@@ -31456,7 +31570,18 @@
           }
 
           const fileName = file.name.toLowerCase();
-          const statusDiv = document.getElementById('codesFileStatus');
+          const _statusDivElement = document.getElementById('codesFileStatus');
+          const statusDiv = {
+            set innerHTML(html) {
+              const container = document.getElementById('mainPageStatusContainer');
+              if (html.includes('spinner')) {
+                if (container) container.classList.add('is-processing-modal');
+              } else {
+                if (container) container.classList.remove('is-processing-modal');
+              }
+              if (_statusDivElement) _statusDivElement.innerHTML = html;
+            }
+          };
 
           // ✅ لو PDF → صحّي السيرفر الأول
           if (fileName.endsWith('.pdf')) {
@@ -31480,9 +31605,12 @@
           statusDiv.innerHTML = `
     <div style="display:flex; align-items:center; gap:10px; color:#3b82f6; font-weight:bold;">
       <div class="spinner" style="width:15px; height:15px; border:2px solid #3b82f6; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite;"></div>
-      <span>جاري معالجة ملف ${fileName} سحابياً...</span>
+      <span>جاري معالجة ملف ${fileName}...</span>
     </div>
   `;
+
+          // Give browser a chance to render the loading indicator before heavy parsing
+          await new Promise(r => setTimeout(r, 100));
 
           try {
             let rawCodes = [];
@@ -31696,7 +31824,19 @@
           transition: all 0.3s ease;
         " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16, 185, 129, 0.5)';" 
           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(16, 185, 129, 0.4)';">
-          🖨️ طباعة العروض
+          🖨️ طباعة العروض (لكل كود)
+        </button>
+
+        <button onclick="printUploadedOfferTypesDirectly()" style="
+          flex:1; padding: 12px 24px;
+          background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+          color: white; border: none; border-radius: 8px;
+          font-weight: 700; font-size: 14px; cursor: pointer;
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+          transition: all 0.3s ease;
+        " onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(139, 92, 246, 0.5)';" 
+          onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 12px rgba(139, 92, 246, 0.4)';">
+          🏷️ طباعة أنواع العروض فقط
         </button>
 
         <button onclick="resetUploadedFilters()" style="
@@ -31857,6 +31997,9 @@
           if (typeof renderProducts === 'function') {
             renderProducts();
           }
+
+          const statusContainer = document.getElementById('mainPageStatusContainer');
+          if (statusContainer) statusContainer.classList.remove('is-processing-modal');
 
           const statusDiv = document.getElementById('codesFileStatus');
           if (statusDiv) {
@@ -32408,10 +32551,17 @@
 
         // دالة رفع الملف وفتح بوكس الإحصائيات في الصفحة الرئيسية
         function handleSidebarFileUpload(event) {
-          toggleToolsSidebar();
+          const sidebar = document.getElementById('toolsSidebar');
+          if (sidebar && sidebar.classList.contains('active')) {
+            toggleToolsSidebar();
+          }
           const statusContainer = document.getElementById('mainPageStatusContainer');
+          const overlay = document.getElementById('mainPageStatusOverlay');
           if (statusContainer) {
             statusContainer.style.display = 'block';
+          }
+          if (overlay) {
+            overlay.style.display = 'block';
           }
           if (typeof handleCodesFileUpload === 'function') {
             handleCodesFileUpload(event);
