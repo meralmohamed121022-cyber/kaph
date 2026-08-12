@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en" dir="ltr">
 
 <head>
@@ -1707,7 +1707,12 @@ body.day-mode .sadaqa-badge {
 
         const supabaseUrl = 'https://uzydzvfcrlqmtondugte.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6eWR6dmZjcmxxbXRvbmR1Z3RlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3OTA1MzMsImV4cCI6MjA5MjM2NjUzM30.z7-eKWrYjW9cbzTcoyyKprgXbcqCHk_kF6ETHokudzo';
-        const supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+        let supabaseClient = null;
+        try {
+            if (window.supabase) {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            }
+        } catch(e) { console.error('Supabase init failed:', e); }
 
         const WORKER_BANNERS_URL = "https://online.meralmohamed121022.workers.dev/api/banners?lang=ar";
 
@@ -1815,10 +1820,13 @@ body.day-mode .sadaqa-badge {
                     localStorage.setItem('pharmacy_number', val);
                     requestNotificationPermission();
                     try {
-                        await supabaseClient.from('login_logs').upsert(
-                            { pharmacy_number: currentPharmacy, login_time: new Date().toISOString() },
-                            { onConflict: 'pharmacy_number' }
-                        );
+                        if (supabaseClient) {
+                            await supabaseClient.from('login_logs').upsert(
+                                { pharmacy_number: currentPharmacy, login_time: new Date().toISOString() },
+                                { onConflict: 'pharmacy_number' }
+                            );
+                        }
+
                     } catch (e) { console.error("Failed to log login:", e); }
                     checkAuth();
                     if (btn) btn.innerHTML = 'Login <i class="fas fa-sign-in-alt"></i>';
@@ -1883,13 +1891,14 @@ body.day-mode .sadaqa-badge {
         await autoScheduleReminders();
         await fetchReminders();
         startAlarmChecker();
+        triggerStartupOffer();
     } catch (err) {
         console.error('System Critical Error:', err);
         if (loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; }, 300); }
     }
 }
         async function autoScheduleReminders() {
-            if (!currentPharmacy) return;
+            if (!currentPharmacy || !supabaseClient) return;
 
             try {
                 // 1. تجميع كل الـ IDs الحالية (30 دقيقة والوقت الفعلي) لعمل تنظيف
@@ -1942,14 +1951,15 @@ body.day-mode .sadaqa-badge {
         }
 
         async function fetchReminders() {
-            if (!currentPharmacy) return;
-            const { data, error } = await supabaseClient.from('reminders').select('*').eq('pharmacy_number', currentPharmacy).in('status', ['pending', 'snoozed']);
-            if (!error && data) {
-                userReminders = data;
+            if (!currentPharmacy || !supabaseClient) return;
+            try {
+                const { data, error } = await supabaseClient.from('reminders').select('*').eq('pharmacy_number', currentPharmacy).in('status', ['pending', 'snoozed']);
+                if (!error && data) {
+                    userReminders = data;
 
-                // تجهيز خريطة الصور لإرسالها للـ Service Worker
-                const offerImages = {};
-                const uniqueOfferIds = [...new Set(data.map(r => r.offer_id.replace('_30min', '').replace('_exact', '')))];
+                    // تجهيز خريطة الصور لإرسالها للـ Service Worker
+                    const offerImages = {};
+                    const uniqueOfferIds = [...new Set(data.map(r => r.offer_id.replace('_30min', '').replace('_exact', '')))];
                 for (const pid of uniqueOfferIds) {
                     const dynamic = await fetchDynamicOffer(pid);
                     if (dynamic && dynamic.image) {
@@ -1977,6 +1987,7 @@ body.day-mode .sadaqa-badge {
                     });
                 }
             }
+            } catch(e) { console.error('fetchReminders error:', e); }
         }
 
         async function stopAlarm() {
@@ -2565,7 +2576,29 @@ function openLink(url) {
                 return null;
             }
         }
-
+        function triggerStartupOffer() {
+            if (sessionStorage.getItem('startupOfferShown')) return;
+            sessionStorage.setItem('startupOfferShown', 'true');
+            
+            fetchDynamicOffer().then(randomOffer => {
+                if (!randomOffer) return;
+                
+                let offerImageUrl = randomOffer.image || null;
+                const notifTitle = `عروضنا حصرياً: ${randomOffer.offerType}`;
+                const notifBody = "لا تفوت فرصة الاستفادة من: " + randomOffer.title;
+                
+                if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ 
+                        type: 'SHOW_NOTIFICATION', 
+                        title: notifTitle, 
+                        body: notifBody,
+                        image: offerImageUrl
+                    });
+                } else {
+                    showBrowserNotification(notifTitle, notifBody);
+                }
+            });
+        }
 
         function startAlarmChecker() {
             if (alarmCheckInterval) clearInterval(alarmCheckInterval);
@@ -2589,15 +2622,15 @@ function openLink(url) {
                 
                 // For testing purposes or immediate firing if it's been a long time
                 if (nowMs - lastRandomNotif >= twoHoursMs) {
-                    // Update time immediately to prevent multiple rapid triggers
-                    localStorage.setItem('lastRandomNotifTime', nowMs);
-                    
                     fetchDynamicOffer().then(randomOffer => {
                         if (!randomOffer) {
                             // Fallback if no dynamic offer found
-                            console.log("No dynamic offer found, skipping 8-hour alert.");
+                            console.log("No dynamic offer found, skipping 2-hour alert.");
                             return;
                         }
+                        
+                        // Update time immediately ONLY when an offer is found to prevent skipping
+                        localStorage.setItem('lastRandomNotifTime', new Date().getTime());
                         
                         let offerImageUrl = randomOffer.image || null;
 
