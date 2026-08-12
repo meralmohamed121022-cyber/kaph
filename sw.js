@@ -49,7 +49,8 @@ self.addEventListener('message', (event) => {
                 icon: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png',
                 image: event.data.image || null, // دعم الصورة الكبيرة
                 vibrate: [200, 100, 200],
-                badge: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png'
+                badge: 'https://raw.githubusercontent.com/meralmohamed12/1022-cyberDrug-Monograph/858ba78ce2719a0e7069fd4807b725e0002a17d86/20251129_184528_0005.png',
+                data: { url: self.location.origin + '/index.htm' }
             });
         }
     }
@@ -109,7 +110,8 @@ self.addEventListener('notificationclick', (event) => {
                 }
                 return client.focus();
             }
-            return clients.openWindow(event.notification.data.url);
+            const url = (event.notification.data && event.notification.data.url) ? event.notification.data.url : self.location.origin + '/index.htm';
+            return clients.openWindow(url);
         })
     );
 });

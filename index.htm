@@ -1457,28 +1457,33 @@ body.day-mode .sadaqa-badge {
         </div>
     </div>
 
-    <div id="alarmActionModal" class="custom-modal-overlay" style="display: none;">
-        <div class="custom-modal-box" style="border: 2px solid red;">
-            <h1 style="color: red; font-size: 26px; margin-bottom: 10px;"><i class="fas fa-bell"></i> تنبيه العروض!</h1>
-            <p id="alarmOfferName" style="font-size:18px; margin-bottom:20px; color: white;"></p>
+    <div id="alarmActionModal" class="custom-modal-overlay" style="display: none; z-index: 40000; backdrop-filter: blur(15px);">
+        <div class="custom-modal-box logout-art" style="border: 2px solid var(--accent-orange); box-shadow: 0 10px 40px rgba(255, 107, 53, 0.4); max-width: 380px;">
+            <div class="art-icon" style="background: linear-gradient(135deg, var(--accent-orange), #ff416c); color: white; width: 80px; height: 80px; font-size: 35px; animation: pulse-red 2s infinite;">
+                <i class="fas fa-bell"></i>
+            </div>
+            <h1 style="color: var(--text-primary); font-size: 24px; margin-bottom: 5px; font-weight: 900;">تنبيه العروض القادمة! 🔥</h1>
+            
+            <div id="alarmOfferImageContainer" style="margin: 15px 0; border-radius: 15px; overflow: hidden; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3);">
+                <img id="alarmOfferImage" src="" alt="Offer Image" style="width: 100%; height: auto; display: block;">
+            </div>
+
+            <p id="alarmOfferName" style="font-size:16px; margin-bottom:20px; color: var(--text-secondary); font-weight: bold;"></p>
 
             <input type="hidden" id="currentReminderId">
 
-            <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 15px;">
-                <label style="display:block; margin-bottom:10px; color:var(--accent-orange); font-weight: bold;">تأجيل
-                    التنبيه (غفوة):</label>
-                <select id="snoozeSelect">
+            <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.1);">
+                <label style="display:block; margin-bottom:10px; color:var(--accent-orange-light); font-weight: bold; font-size: 14px;">تأجيل التنبيه (غفوة):</label>
+                <select id="snoozeSelect" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; padding: 10px;">
                     <option value="1">غفوة لمدة ساعة</option>
                     <option value="2">غفوة لمدة ساعتين</option>
                     <option value="custom">تحديد وقت مخصص...</option>
                 </select>
-                <input type="datetime-local" id="customSnoozeTime" style="display:none;">
-                <button onclick="snoozeAlarm()" style="background: #f39c12;"><i class="fas fa-clock"></i> تأجيل
-                    التنبيه</button>
+                <input type="datetime-local" id="customSnoozeTime" style="display:none; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; padding: 10px; margin-top: 10px;">
+                <button onclick="snoozeAlarm()" class="btn-cancel" style="margin-top: 12px;"><i class="fas fa-clock"></i> تأجيل التنبيه</button>
             </div>
 
-            <button onclick="stopAlarm()" style="background: #28a745;"><i class="fas fa-check-circle"></i> إيقاف الصوت
-                والتنبيه</button>
+            <button onclick="stopAlarm()" class="btn-confirm" style="width: 100%; font-size: 16px;"><i class="fas fa-check-circle"></i> حسناً، إيقاف التنبيه</button>
         </div>
     </div>
 <div id="iframeContainer">
@@ -1944,9 +1949,17 @@ body.day-mode .sadaqa-badge {
 
                 // تجهيز خريطة الصور لإرسالها للـ Service Worker
                 const offerImages = {};
-                START_OFFERS.forEach(off => {
-                    if (off.image) offerImages[off.id] = off.image;
-                });
+                const uniqueOfferIds = [...new Set(data.map(r => r.offer_id.replace('_30min', '').replace('_exact', '')))];
+                for (const pid of uniqueOfferIds) {
+                    const dynamic = await fetchDynamicOffer(pid);
+                    if (dynamic && dynamic.image) {
+                        offerImages[pid] = dynamic.image;
+                    } else {
+                        // Fallback
+                        const old = START_OFFERS.find(o => o.id === pid);
+                        if (old && old.image) offerImages[pid] = old.image;
+                    }
+                }
 
                 // إرسال التنبيهات والصور للـ Service Worker ليعمل في الخلفية
                 const msgData = {
@@ -2434,30 +2447,40 @@ function openLink(url) {
             if (overlay) overlay.classList.add('show');
         }
 
-        function triggerAlarm(reminderObj) {
+        async function triggerAlarm(reminderObj) {
             const audio = document.getElementById('offerAlarmSound');
             if (audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Audio prevented:", e)); }
 
-            let timeString = ""; let isExactlyNow = false;
+            let timeString = ""; let isExactlyNow = false; let offerImageUrl = null;
             const cleanId = reminderObj.offer_id.replace('_30min', '').replace('_exact', '');
-            const originalOffer = START_OFFERS.find(o => o.id === cleanId);
-
-            if (originalOffer) {
-                const offerTime = new Date(originalOffer.start_date);
-                timeString = " الساعة " + offerTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                const diff = Math.abs(new Date().getTime() - offerTime.getTime());
-                if (diff < 60000) { isExactlyNow = true; }
+            
+            const randomOffer = await fetchDynamicOffer(cleanId);
+            if (randomOffer && randomOffer.image) offerImageUrl = randomOffer.image;
+            
+            if (!offerImageUrl) {
+                const originalOffer = START_OFFERS.find(o => o.id === cleanId);
+                if (originalOffer && originalOffer.image) { offerImageUrl = originalOffer.image; }
             }
+
+            const offerTime = new Date(reminderObj.trigger_time);
+            timeString = " الساعة " + offerTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const diff = Math.abs(new Date().getTime() - offerTime.getTime());
+            if (diff < 60000) { isExactlyNow = true; }
 
             const message = isExactlyNow
                 ? `${reminderObj.offer_title} بدأ الآن! 🔥`
                 : `${reminderObj.offer_title}${timeString} سيبدأ خلال 30 دقيقة! ⏳`;
 
-            const titleDisplay = document.getElementById('alarmOfferName');
-            if (titleDisplay) titleDisplay.innerText = message;
-
-            const actionModal = document.getElementById('alarmActionModal');
-            if (actionModal) actionModal.style.display = 'flex';
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ 
+                    type: 'SHOW_NOTIFICATION', 
+                    title: isExactlyNow ? "عرض بدأ الآن! 🔥" : "تنبيه بدء عرض! ⏳", 
+                    body: message,
+                    image: offerImageUrl
+                });
+            } else {
+                showBrowserNotification(isExactlyNow ? "عرض بدأ الآن! 🔥" : "تنبيه بدء عرض! ⏳", message);
+            }
 
             const idInput = document.getElementById('currentReminderId');
             if (idInput) idInput.value = reminderObj.id;
@@ -2475,19 +2498,126 @@ function openLink(url) {
             }, 20000);
         }
 
+        async function fetchDynamicOffer() {
+            try {
+                const htmlRes = await fetch('offersgit.html');
+                const html = await htmlRes.text();
+                const match = html.match(/const\s+ALL_PERIODS_OFFERS\s*=\s*(\[\s*\{[\s\S]*?\n\s*\])\s*;/);
+                if (!match) return null;
+                let periods;
+                try {
+                    periods = eval("(" + match[1] + ")");
+                } catch(e) { return null; }
+
+                const now = new Date();
+                const currentPeriod = periods.find(p => {
+                    const s = new Date(p.start);
+                    const e = new Date(p.end);
+                    e.setHours(23,59,59,999);
+                    return now >= s && now <= e;
+                }) || periods[0];
+
+                if (!currentPeriod || !currentPeriod.offers) return null;
+                
+                let possibleOffers = [];
+                currentPeriod.offers.forEach(off => {
+                    if (off.codes) {
+                        off.codes.forEach(c => {
+                            possibleOffers.push({ code: c, offerType: off.offerType, offerTypeAR: off.offerTypeAR });
+                        });
+                    }
+                });
+                
+                if (possibleOffers.length === 0) return null;
+                
+                const decodeURL = (str) => atob(str.split('').reverse().join(''));
+                const urls = [
+                    decodeURL("==gbvNnauEjclR3ch12LulWYt9yckFWZo9ycmVmcv0WZ0NXez9mbv1WL0NXZ09iclJWej1iMyATMyEDZl1WYo9WbsFmcl12Lt92YuQnblRnbvNmclNXdiVHa0l2ZucXYy9yL6MHc0RHa"),
+                    decodeURL("==gbvNnauEjclR3ch12LulWYt9yckFWZo9ycmVmcv0WZ0NXez9mbv1WL0NXZ09iclJWej1iMyATMwEDZl1WYo9WbsFmcl12Lt92YuQnblRnbvNmclNXdiVHa0l2ZucXYy9yL6MHc0RHa"),
+                    decodeURL("==gbvNnauEjclR3ch12LulWYt9yckFWZo9ycmVmcv0WZ0NXez9mbv1WL0NXZ09iclJWej1iMyATMvEDZl1WYo9WbsFmcl12Lt92YuQnblRnbvNmclNXdiVHa0l2ZucXYy9yL6MHc0RHa")
+                ];
+                
+                // Shuffle possible offers and find the first one that exists in JSONs
+                possibleOffers = possibleOffers.sort(() => 0.5 - Math.random());
+                
+                for (const randomChoice of possibleOffers) {
+                    for (const u of urls) {
+                        try {
+                            const res = await fetch(u);
+                            const data = await res.json();
+                            const product = data.find(p => p.Code == randomChoice.code);
+                            if (product) {
+                                const img = (product.itemurl && product.itemurl !== 'No Image' && product.itemurl !== '#N/A') ? product.itemurl : null;
+                                if (img) {
+                                    return {
+                                        title: product['Item Description'] || product['أسم المنتج'] || 'منتج مميز',
+                                        image: img,
+                                        offerType: randomChoice.offerTypeAR || randomChoice.offerType || ''
+                                    };
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                }
+                return null;
+            } catch (e) {
+                console.error("fetchDynamicOffer error:", e);
+                return null;
+            }
+        }
+
+
         function startAlarmChecker() {
             if (alarmCheckInterval) clearInterval(alarmCheckInterval);
             alarmCheckInterval = setInterval(() => {
                 const nowMs = new Date().getTime();
+                
+                // 1. Check existing reminders (30 min / exact)
                 userReminders.forEach((rem) => {
                     const trigTimeMs = new Date(rem.trigger_time).getTime();
-                    const isTooOld = (nowMs - trigTimeMs) > (15 * 60 * 1000); // تقليل المدة لـ 15 دقيقة فقط لتجنب التنبيهات القديمة جداً
+                    const isTooOld = (nowMs - trigTimeMs) > (15 * 60 * 1000); 
                     if ((rem.status === 'pending' || rem.status === 'snoozed') && nowMs >= trigTimeMs && !isTooOld) {
                         console.log(`Triggering alarm: ${rem.offer_title}`);
                         rem.status = 'firing';
                         triggerAlarm(rem);
                     }
                 });
+
+                // 2. Check 2-hour interval for random active offer
+                const lastRandomNotif = localStorage.getItem('lastRandomNotifTime') || 0;
+                const twoHoursMs = 2 * 60 * 60 * 1000;
+                
+                // For testing purposes or immediate firing if it's been a long time
+                if (nowMs - lastRandomNotif >= twoHoursMs) {
+                    // Update time immediately to prevent multiple rapid triggers
+                    localStorage.setItem('lastRandomNotifTime', nowMs);
+                    
+                    fetchDynamicOffer().then(randomOffer => {
+                        if (!randomOffer) {
+                            // Fallback if no dynamic offer found
+                            console.log("No dynamic offer found, skipping 8-hour alert.");
+                            return;
+                        }
+                        
+                        let offerImageUrl = randomOffer.image || null;
+
+                        console.log(`Triggering 8-hour random offer: ${randomOffer.title}`);
+                        const notifTitle = `عروضنا حصرياً: ${randomOffer.offerType}`;
+                        const notifBody = "لا تفوت فرصة الاستفادة من: " + randomOffer.title;
+                        
+                        if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                            navigator.serviceWorker.controller.postMessage({ 
+                                type: 'SHOW_NOTIFICATION', 
+                                title: notifTitle, 
+                                body: notifBody,
+                                image: offerImageUrl
+                            });
+                        } else {
+                            showBrowserNotification(notifTitle, notifBody);
+                        }
+                    });
+                }
+
             }, 5000);
         }
 
