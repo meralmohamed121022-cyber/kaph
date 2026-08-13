@@ -728,6 +728,10 @@
 
       @media print {
 
+      /* Prevent massive PDF sizes by disabling rasterizing CSS properties */
+      * { mix-blend-mode: normal !important; box-shadow: none !important; backdrop-filter: none !important; filter: none !important; }
+
+
         /* ✅ الحل الجذري للصفحات البيضا:
        إخفاء أبناء الـ body المباشرين فقط (السايدبار، الهيدر، إلخ)
        وليس كل العناصر — أسرع بكتير من body * */
@@ -49156,8 +49160,8 @@
         async function exportFullMagazinePDF() {
           // 🎛️ إعدادات السرعة والجودة
           // ------------------------------------------------------------
-          const COMPRESSION_QUALITY = 0.1; // جودة متوسطة
-          const MAX_IMG_WIDTH = 120;       // عرض مناسب
+          const COMPRESSION_QUALITY = 0.8; // جودة متوسطة
+          const MAX_IMG_WIDTH = 1000;       // عرض مناسب
           const BATCH_SIZE = 10;           // ضغط 10 صور مع بعض
           // ------------------------------------------------------------
 
@@ -49190,9 +49194,9 @@
           function getBadgeFilterStyle(offerText) {
             if (!offerText) return '';
             const t = offerText.toLowerCase();
-            if (t.includes('2nd') || t.includes('second')) return 'filter: hue-rotate(210deg) brightness(1.1);';
-            if (t.includes('+') || t.includes('buy') || t.includes('مجانا')) return 'filter: hue-rotate(100deg) brightness(1.1);';
-            if (t.includes('sar') || t.includes('sr') || t.includes('ريال')) return 'filter: hue-rotate(270deg) brightness(1.1) saturate(1.2);';
+            if (t.includes('2nd') || t.includes('second')) return '';
+            if (t.includes('+') || t.includes('buy') || t.includes('مجانا')) return '';
+            if (t.includes('sar') || t.includes('sr') || t.includes('ريال')) return '';
             return '';
           }
 
@@ -49532,66 +49536,42 @@
                 const progressContainer = document.getElementById('progress-container');
                 const progressFill = document.getElementById('progress-fill');
 
+                
                 function compressImage(img) {
                     return new Promise((resolve) => {
-                        let isFinished = false;
-
-                        // دالة إنهاء الـ Promise مرة واحدة فقط
-                        const finish = () => {
-                            if (!isFinished) {
-                                isFinished = true;
-                                resolve();
-                            }
-                        };
-
-                        // مؤقت أمان: لو الصورة علقت أكتر من 3 ثواني، كمل
-                        setTimeout(() => {
-                            if (!isFinished) {
-                                console.warn('Timeout forcing skip for image:', img.src);
-                                finish();
-                            }
-                        }, 3000);
-
-                        const doWork = () => {
+                        if (img.src.startsWith('data:')) {
+                            return resolve();
+                        }
+                        
+                        // Proxy through wsrv.nl to avoid CORS and pre-compress
+                        let originalUrl = img.src;
+                        let proxyUrl = 'https://wsrv.nl/?url=' + encodeURIComponent(originalUrl) + '&w=' + MAX_WIDTH + '&q=' + (QUALITY * 100) + '&output=webp';
+                        
+                        const tempImg = new Image();
+                        tempImg.crossOrigin = 'anonymous';
+                        tempImg.onload = () => {
                             try {
                                 const canvas = document.createElement('canvas');
                                 const ctx = canvas.getContext('2d');
-                                let width = img.naturalWidth;
-                                let height = img.naturalHeight;
-                                
-                                if (width > MAX_WIDTH) {
-                                    height *= MAX_WIDTH / width;
-                                    width = MAX_WIDTH;
-                                }
-                                canvas.width = width;
-                                canvas.height = height;
-                                ctx.drawImage(img, 0, 0, width, height);
-                                
-                                const compressedData = canvas.toDataURL('image/jpeg', QUALITY);
-                                img.src = compressedData;
-                                img.removeAttribute('crossorigin');
-                                finish();
+                                canvas.width = tempImg.naturalWidth;
+                                canvas.height = tempImg.naturalHeight;
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                ctx.drawImage(tempImg, 0, 0);
+                                img.src = canvas.toDataURL('image/jpeg', QUALITY);
+                                resolve();
                             } catch (e) {
-                                console.warn('Compression error:', e);
-                                finish(); 
+                                // Fallback to proxy URL directly if canvas fails
+                                img.src = proxyUrl;
+                                resolve();
                             }
                         };
-
-                        // التحقق المباشر
-                        if (img.complete) {
-                            if (img.naturalWidth > 0) {
-                                doWork();
-                            } else {
-                                console.warn('Broken image found, skipping:', img.src);
-                                finish();
-                            }
-                        } else {
-                            img.onload = doWork;
-                            img.onerror = finish;
-                        }
+                        tempImg.onerror = () => {
+                            resolve(); // Keep original if proxy fails
+                        };
+                        tempImg.src = proxyUrl;
                     });
                 }
-
                 async function startFastProcess() {
                     const btn = document.querySelector('.btn-compress');
                     btn.style.display = 'none';
