@@ -49156,8 +49156,8 @@
         async function exportFullMagazinePDF() {
           // 🎛️ إعدادات السرعة والجودة
           // ------------------------------------------------------------
-          const COMPRESSION_QUALITY = 0.5; // جودة متوسطة
-          const MAX_IMG_WIDTH = 350;       // عرض مناسب
+          const COMPRESSION_QUALITY = 0.1; // جودة متوسطة
+          const MAX_IMG_WIDTH = 120;       // عرض مناسب
           const BATCH_SIZE = 10;           // ضغط 10 صور مع بعض
           // ------------------------------------------------------------
 
@@ -49169,7 +49169,7 @@
           const singleImageScale = 1.4;
           const stackImageScale = 1.4;
           const originalBgImage = 'https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/refs/heads/main/f51b8f14f5d8bc0dbc6c21a67388c5bb.jpg';
-          const bgOpacity = 0.05;
+          const bgOpacity = 0.0;
           const bgBlur = '0px';
 
           // فحص البيانات
@@ -49220,7 +49220,7 @@
             const displayCat = item.catC || item.catD || item.catA;
             if (displayCat && displayCat !== 'General') {
               const catColor = (typeof getCategoryDColor === 'function' && item.catD) ? getCategoryDColor(item.catD) : '#00235B';
-              categoryBadgeHTML = `<div style="position: absolute; top: 0; right: 0; background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 0 12px 0 12px; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">${displayCat}</div>`;
+              categoryBadgeHTML = `<div style="background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; text-align: center; margin-top: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); width: 100%; box-sizing: border-box;">${displayCat}</div>`;
             }
 
             // 📦 تجهيز الكارت
@@ -49320,7 +49320,6 @@
             contentHTML += `
             <div class="card-wrapper">
                 <div class="magazine-card" style="position: relative;">
-                    ${categoryBadgeHTML}
                     ${badgeHTML} ${bestSellerBadge}
                     <div class="card-img-container">${imageHTML}</div>
                     <div class="card-info">
@@ -49328,6 +49327,7 @@
                         <div class="desc">${product["Item Description"] || ''}</div>
                         ${productsCount > 1 ? `<span class="count-pill">${productsCount} منتجات</span>` : ''}
                     </div>
+                    ${categoryBadgeHTML}
                 </div>
             </div>`;
           });
@@ -52437,3 +52437,7 @@
     </body>
 
 </html>
+
+
+
+
