@@ -91,7 +91,7 @@
       padding-bottom: 50vh !important;
     }
 
-    .scanner-mode-active #mainOffersContainer>*:not(#scannerModalOverlay):not(#promoMediaLightbox) {
+    .scanner-mode-active #mainOffersContainer>*:not(#scannerModalOverlay) {
       display: none !important;
     }
 
@@ -727,10 +727,6 @@
       }
 
       @media print {
-
-      /* Prevent massive PDF sizes by disabling rasterizing CSS properties */
-      * { mix-blend-mode: normal !important; box-shadow: none !important; backdrop-filter: none !important; filter: none !important; }
-
 
         /* ✅ الحل الجذري للصفحات البيضا:
        إخفاء أبناء الـ body المباشرين فقط (السايدبار، الهيدر، إلخ)
@@ -44124,7 +44120,9 @@
           window.fullProductsCount = filteredProducts.length;
 
           let showLoadAllButton = false;
-          if (!filters.loadAll && filteredProducts.length > 50) {
+        if (isInitialLoad && !filters.loadAll && filteredProducts.length > 50) {
+    // ...
+
             showLoadAllButton = true;
             filteredProducts = filteredProducts.slice(0, 50);
           }
@@ -49160,8 +49158,8 @@
         async function exportFullMagazinePDF() {
           // 🎛️ إعدادات السرعة والجودة
           // ------------------------------------------------------------
-          const COMPRESSION_QUALITY = 0.8; // جودة متوسطة
-          const MAX_IMG_WIDTH = 1000;       // عرض مناسب
+          const COMPRESSION_QUALITY = 0.5; // جودة متوسطة
+          const MAX_IMG_WIDTH = 350;       // عرض مناسب
           const BATCH_SIZE = 10;           // ضغط 10 صور مع بعض
           // ------------------------------------------------------------
 
@@ -49173,7 +49171,7 @@
           const singleImageScale = 1.4;
           const stackImageScale = 1.4;
           const originalBgImage = 'https://raw.githubusercontent.com/meralmohamed121022-cyber/Drug-Monograph/refs/heads/main/f51b8f14f5d8bc0dbc6c21a67388c5bb.jpg';
-          const bgOpacity = 0.0;
+          const bgOpacity = 0.05;
           const bgBlur = '0px';
 
           // فحص البيانات
@@ -49194,9 +49192,9 @@
           function getBadgeFilterStyle(offerText) {
             if (!offerText) return '';
             const t = offerText.toLowerCase();
-            if (t.includes('2nd') || t.includes('second')) return '';
-            if (t.includes('+') || t.includes('buy') || t.includes('مجانا')) return '';
-            if (t.includes('sar') || t.includes('sr') || t.includes('ريال')) return '';
+            if (t.includes('2nd') || t.includes('second')) return 'filter: hue-rotate(210deg) brightness(1.1);';
+            if (t.includes('+') || t.includes('buy') || t.includes('مجانا')) return 'filter: hue-rotate(100deg) brightness(1.1);';
+            if (t.includes('sar') || t.includes('sr') || t.includes('ريال')) return 'filter: hue-rotate(270deg) brightness(1.1) saturate(1.2);';
             return '';
           }
 
@@ -49224,7 +49222,7 @@
             const displayCat = item.catC || item.catD || item.catA;
             if (displayCat && displayCat !== 'General') {
               const catColor = (typeof getCategoryDColor === 'function' && item.catD) ? getCategoryDColor(item.catD) : '#00235B';
-              categoryBadgeHTML = `<div style="background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 4px; text-align: center; margin-top: 5px; box-shadow: 2px 2px 5px rgba(0,0,0,0.2); width: 100%; box-sizing: border-box;">${displayCat}</div>`;
+              categoryBadgeHTML = `<div style="position: absolute; top: 0; right: 0; background: ${catColor}; color: white; padding: 4px 10px; font-size: 11px; font-weight: bold; border-radius: 0 12px 0 12px; z-index: 100; box-shadow: 2px 2px 5px rgba(0,0,0,0.2);">${displayCat}</div>`;
             }
 
             // 📦 تجهيز الكارت
@@ -49324,6 +49322,7 @@
             contentHTML += `
             <div class="card-wrapper">
                 <div class="magazine-card" style="position: relative;">
+                    ${categoryBadgeHTML}
                     ${badgeHTML} ${bestSellerBadge}
                     <div class="card-img-container">${imageHTML}</div>
                     <div class="card-info">
@@ -49331,7 +49330,6 @@
                         <div class="desc">${product["Item Description"] || ''}</div>
                         ${productsCount > 1 ? `<span class="count-pill">${productsCount} منتجات</span>` : ''}
                     </div>
-                    ${categoryBadgeHTML}
                 </div>
             </div>`;
           });
@@ -49536,42 +49534,66 @@
                 const progressContainer = document.getElementById('progress-container');
                 const progressFill = document.getElementById('progress-fill');
 
-                
                 function compressImage(img) {
                     return new Promise((resolve) => {
-                        if (img.src.startsWith('data:')) {
-                            return resolve();
-                        }
-                        
-                        // Proxy through wsrv.nl to avoid CORS and pre-compress
-                        let originalUrl = img.src;
-                        let proxyUrl = 'https://wsrv.nl/?url=' + encodeURIComponent(originalUrl) + '&w=' + MAX_WIDTH + '&q=' + (QUALITY * 100) + '&output=webp';
-                        
-                        const tempImg = new Image();
-                        tempImg.crossOrigin = 'anonymous';
-                        tempImg.onload = () => {
-                            try {
-                                const canvas = document.createElement('canvas');
-                                const ctx = canvas.getContext('2d');
-                                canvas.width = tempImg.naturalWidth;
-                                canvas.height = tempImg.naturalHeight;
-                                ctx.fillStyle = '#ffffff';
-                                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                                ctx.drawImage(tempImg, 0, 0);
-                                img.src = canvas.toDataURL('image/jpeg', QUALITY);
-                                resolve();
-                            } catch (e) {
-                                // Fallback to proxy URL directly if canvas fails
-                                img.src = proxyUrl;
+                        let isFinished = false;
+
+                        // دالة إنهاء الـ Promise مرة واحدة فقط
+                        const finish = () => {
+                            if (!isFinished) {
+                                isFinished = true;
                                 resolve();
                             }
                         };
-                        tempImg.onerror = () => {
-                            resolve(); // Keep original if proxy fails
+
+                        // مؤقت أمان: لو الصورة علقت أكتر من 3 ثواني، كمل
+                        setTimeout(() => {
+                            if (!isFinished) {
+                                console.warn('Timeout forcing skip for image:', img.src);
+                                finish();
+                            }
+                        }, 3000);
+
+                        const doWork = () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                const ctx = canvas.getContext('2d');
+                                let width = img.naturalWidth;
+                                let height = img.naturalHeight;
+                                
+                                if (width > MAX_WIDTH) {
+                                    height *= MAX_WIDTH / width;
+                                    width = MAX_WIDTH;
+                                }
+                                canvas.width = width;
+                                canvas.height = height;
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                const compressedData = canvas.toDataURL('image/jpeg', QUALITY);
+                                img.src = compressedData;
+                                img.removeAttribute('crossorigin');
+                                finish();
+                            } catch (e) {
+                                console.warn('Compression error:', e);
+                                finish(); 
+                            }
                         };
-                        tempImg.src = proxyUrl;
+
+                        // التحقق المباشر
+                        if (img.complete) {
+                            if (img.naturalWidth > 0) {
+                                doWork();
+                            } else {
+                                console.warn('Broken image found, skipping:', img.src);
+                                finish();
+                            }
+                        } else {
+                            img.onload = doWork;
+                            img.onerror = finish;
+                        }
                     });
                 }
+
                 async function startFastProcess() {
                     const btn = document.querySelector('.btn-compress');
                     btn.style.display = 'none';
@@ -52417,6 +52439,3 @@
     </body>
 
 </html>
-
-
-
