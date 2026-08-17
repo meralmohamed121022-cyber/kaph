@@ -91,7 +91,7 @@
       padding-bottom: 50vh !important;
     }
 
-    .scanner-mode-active #mainOffersContainer>*:not(#scannerModalOverlay) {
+    .scanner-mode-active #mainOffersContainer>*:not(#scannerModalOverlay):not(#promoMediaLightbox) {
       display: none !important;
     }
 
@@ -44525,6 +44525,28 @@
                                 <div style="position: absolute; top: 10px; left: 10px; background: #dc2626; color: white; font-size: 10px; font-weight: 800; padding: 4px 8px; border-radius: 4px; z-index: 10; direction: ltr !important;">
                                     ${shortOfferType}
                                 </div>
+                                ${(function () {
+              const safeType = (offer.offerType || '').toLowerCase();
+              if (safeType.match(/\d+\s*(?:pcs?|pc)?\s*(?:\+|plus)\s*\d+/) || safeType.match(/buy\s*\d+\s*get\s*\d+/) || safeType.includes("free") || /(?:free|مجان)/i.test(safeType)) {
+                const m = safeType.match(/\b(\d{6})\b/);
+                if (m) {
+                  const code = m[1];
+                  let src = `https://cdn.aldawaa.com/media/catalog/product/${code[0]}/${code[1]}/${code}.jpg`;
+                  if (typeof window !== 'undefined' && window.productsDB) {
+                    const p = window.productsDB.find(x => String(x.Code).trim() === code);
+                    if (p) {
+                      src = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || src;
+                    }
+                  }
+                  return `
+                                  <div style="position: absolute; top: 10px; right: 10px; width: 65px; height: 65px; border-radius: 50%; border: 3px solid #28a745; background: white; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                      <img src="${src}" style="width: 80%; height: 80%; object-fit: contain; margin-bottom: 12px;" onerror="this.outerHTML='<span style=\\'font-size:11px;color:#333;font-weight:900;line-height:1;word-break:break-all;\\'>${code}</span>';" />
+                                      <div style="background: #28a745; color: white; font-size: 10px; width: 100%; text-align: center; position: absolute; bottom: 0; padding: 1px 0; font-weight: bold; line-height: 1.2;">مجاناً</div>
+                                  </div>`;
+                }
+              }
+              return '';
+            })()}
                                 <img data-code="${product.Code}" data-brand="${product.Brand || 'Generic'}" data-itemurl="${product.image_url || product.itemurl || product.ItemURL || product.Image || product.image || product.imageurl || product.imageUrl || product.ImageURL || product.itemURL || ''}" referrerpolicy="no-referrer" class="product-image smart-lazy-img" style="max-width: 100%; max-height: 100%; object-fit: contain; opacity: 0; transition: opacity 0.3s;" alt="${product["Item Description"]}"/>
                             </div>
                             <div style="flex: 1; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; background: transparent;">
@@ -46673,6 +46695,38 @@
               if (plusM) { x = plusM[1]; y = plusM[2]; }
               else if (buyM) { x = buyM[1]; y = buyM[2]; }
               else if (getM) { y = getM[1]; }
+
+              const mCode = safeText.match(/\b(\d{6})\b/);
+              if (mCode) {
+                  const code = mCode[1];
+                  let src = `https://cdn.aldawaa.com/media/catalog/product/${code[0]}/${code[1]}/${code}.jpg`;
+                  if (typeof window !== 'undefined' && window.productsDB) {
+                    const p = window.productsDB.find(x => String(x.Code).trim() === code);
+                    if (p) {
+                      src = p.image_url || p.itemurl || p.ItemURL || p.Image || p.image || src;
+                    }
+                  }
+                  
+                  return `
+        <div style="${colCenter} padding: 0;">
+          <div style="
+            width: 115%; 
+            height: 115%; 
+            border-radius: 50%; 
+            background: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            position: relative;
+          ">
+              <img src="${src}" style="width: 80%; height: 80%; object-fit: contain; margin-bottom: 25px; margin-top: 5px;" onerror="this.outerHTML='<span style=\\'font-size:11px;color:#333;font-weight:900;line-height:1;word-break:break-all;\\'>${code}</span>';" />
+              <div style="background: #059669; color: white; font-size: 14pt; width: 100%; text-align: center; position: absolute; bottom: 8px; padding: 2px 0; font-weight: bold; line-height: 1.2; font-family: 'Cairo', sans-serif;">مجاناً</div>
+          </div>
+        </div>
+                  `;
+              }
 
               return `
         <div style="${colCenter}">
