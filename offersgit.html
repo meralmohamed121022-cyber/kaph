@@ -150,7 +150,12 @@
       background: rgba(30, 58, 138, 0.5) !important;
       border-color: #f59e0b !important;
     }
-  </style>
+  
+@media print {
+    .magazine-blob-bg { background: transparent !important; }
+    .magazine-page { background: #ffffff !important; }
+}
+</style>
 
   <!-- OVERRIDE STYLES AND TABS CSS -->
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
@@ -68231,6 +68236,7 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
             @media print {
                 @page { margin: 0; size: A4 portrait; }
                 .control-panel { display: none !important; }
+                #bg-image-fixed { display: none !important; }
                 .print-container { margin: 0 auto !important; border: 5px solid #00235B !important; width: 98% !important; min-height: 99vh !important; }
             }
         
