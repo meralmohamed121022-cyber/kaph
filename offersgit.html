@@ -70362,10 +70362,7 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
               ].filter(f => f !== undefined);
             }
 
-            await html5QrScanner.start(
-              { facingMode: "environment" },
-              config,
-              (decodedText) => {
+            const onScanSuccess = (decodedText) => {
                 const cleanDecoded = String(decodedText || "").trim();
                 const nowTs = Date.now();
 
@@ -70381,9 +70378,40 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
 
                 // إمرار الكود المعالج ومعه النص الخام للمطابقة
                 processScannedCode(processedCode, cleanDecoded);
-              },
-              () => { }
-            );
+            };
+
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            
+            const startScanner = async (cameraParam) => {
+                await html5QrScanner.start(
+                    cameraParam,
+                    config,
+                    onScanSuccess,
+                    () => { }
+                ).catch(err => {
+                    console.error("Camera start error:", err);
+                    if (isIOS && typeof cameraParam === 'string') {
+                        html5QrScanner.start({ facingMode: "environment" }, config, onScanSuccess, () => {}).catch(e => console.error(e));
+                    }
+                });
+            };
+
+            if (isIOS) {
+                try {
+                    const devices = await Html5Qrcode.getCameras();
+                    if (devices && devices.length > 0) {
+                        const backCameras = devices.filter(c => c.label.toLowerCase().includes('back'));
+                        const mainCam = backCameras.find(c => !c.label.toLowerCase().includes('ultra')) || backCameras[0];
+                        await startScanner(mainCam ? mainCam.id : { facingMode: "environment" });
+                    } else {
+                        await startScanner({ facingMode: "environment" });
+                    }
+                } catch(err) {
+                    await startScanner({ facingMode: "environment" });
+                }
+            } else {
+                await startScanner({ facingMode: "environment" });
+            }
 
             // تأخير إجبار تشغيل الفيديو لضمان عدم تعليق الكاميرا باللون الأسود داخل الـ Iframe
             setTimeout(() => {
