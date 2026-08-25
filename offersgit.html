@@ -7558,6 +7558,16 @@
                     style="width:50px; height:35px; background:#111827; border:1px solid #475569; color:#fff; border-radius:999px; text-align:center; font-weight:bold; outline:none;" />
                 </div>
 
+                <div class="scanner-sort-box"
+                  style="display:flex; align-items:center; justify-content:space-between; gap:10px; background:rgba(255,255,255,0.05); padding:10px 12px; border-radius:14px; margin-bottom:10px;">
+                  <label style="color:#fff; font-size:12px; font-weight:bold;">ترتيب الطباعة</label>
+                  <select id="scannerPrintSortOrder"
+                    style="flex:1; height:35px; background:#111827; border:1px solid #475569; color:#fff; border-radius:14px; text-align:center; font-weight:bold; outline:none; font-size:12px; margin-right:10px;">
+                    <option value="fifo">أول صنف أولاً (افتراضي)</option>
+                    <option value="lifo">آخر صنف أولاً</option>
+                  </select>
+                </div>
+
                 <button onclick="clearAllScannerData()" class="scanner-panel-btn"
                   style="width:100%; margin-bottom:8px; padding:10px; background:linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color:white; border:none; border-radius:12px; font-weight:bold; font-size:12px;">Reset</button>
                 <button onclick="toggleScannerPrintPanel(); printScannedCustom()" class="scanner-panel-btn"
@@ -70645,13 +70655,30 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
 
           const qtyInput = document.getElementById('scannerQuantityPerCode');
           const multiplier = (qtyInput && parseInt(qtyInput.value) > 0) ? parseInt(qtyInput.value) : 1;
-          let scannedCodes = validItems.map(item => item.cleanCode.toString());
-          let productsToPrintRaw = (typeof productsDB !== 'undefined' ? productsDB : []).filter(p => scannedCodes.includes(p.Code.toString()));
-
           let finalProducts = [];
-          productsToPrintRaw.forEach(p => {
-            for (let i = 0; i < multiplier; i++) {
-              finalProducts.push(p);
+          const uniqueItems = [];
+          const seenCodes = new Set();
+          validItems.forEach(item => {
+            const code = String(item.cleanCode || item.code || '').trim();
+            if (!seenCodes.has(code)) {
+              seenCodes.add(code);
+              uniqueItems.push(item);
+            }
+          });
+
+          const sortOrderSelect = document.getElementById('scannerPrintSortOrder');
+          const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'fifo';
+          if (sortOrder === 'fifo') {
+            uniqueItems.reverse();
+          }
+
+          uniqueItems.forEach(item => {
+            const codeStr = String(item.cleanCode || item.code || '').trim();
+            const p = (typeof productsDB !== 'undefined' ? productsDB : []).find(prod => String(prod.Code).trim() === codeStr);
+            if (p) {
+              for (let i = 0; i < multiplier; i++) {
+                finalProducts.push(p);
+              }
             }
           });
 
@@ -70698,7 +70725,23 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
 
           let customCards = [];
 
+          const uniqueItems = [];
+          const seenCodes = new Set();
           validItems.forEach(item => {
+            const code = String(item.cleanCode || item.code || '').trim();
+            if (!seenCodes.has(code)) {
+              seenCodes.add(code);
+              uniqueItems.push(item);
+            }
+          });
+
+          const sortOrderSelect = document.getElementById('scannerPrintSortOrder');
+          const sortOrder = sortOrderSelect ? sortOrderSelect.value : 'fifo';
+          if (sortOrder === 'fifo') {
+            uniqueItems.reverse();
+          }
+
+          uniqueItems.forEach(item => {
             let product = null;
             const codeStr = String(item.cleanCode || item.code || '').trim();
             const offer = (typeof getOffer === 'function') ? getOffer(codeStr) : null;
