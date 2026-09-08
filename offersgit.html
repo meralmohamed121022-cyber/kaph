@@ -78847,6 +78847,11 @@
           }
 
           document.body.style.overflow = 'auto';
+          
+          if (typeof resetUploadedFilters === 'function') resetUploadedFilters();
+          if (typeof isMagazineMode !== 'undefined' && isMagazineMode && typeof toggleMagazineMode === 'function') toggleMagazineMode();
+          if (typeof isBriefMode !== 'undefined' && isBriefMode && typeof toggleBriefMode === 'function') toggleBriefMode();
+          
           if (typeof clearAllFilters === 'function') clearAllFilters();
           if (typeof initializeFilters === 'function') initializeFilters();
           if (typeof applyFilters === 'function') applyFilters();
@@ -78991,6 +78996,19 @@
 
           btnList.innerHTML = '';
 
+          // إضافة زر المقارنة في الأعلى (يمتد بعرض العمودين وله لون مميز)
+          const compareBtn = document.createElement('div');
+          compareBtn.className = 'gateway-btn';
+          compareBtn.style.setProperty('background', 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', 'important');
+          compareBtn.style.setProperty('border', '2px solid rgba(167, 139, 250, 0.4)', 'important');
+          compareBtn.style.gridColumn = '1 / -1'; // Span across all columns
+          compareBtn.style.justifyContent = 'center';
+          compareBtn.style.boxShadow = '0 4px 15px rgba(139, 92, 246, 0.4)';
+          compareBtn.style.marginBottom = '5px';
+          compareBtn.innerHTML = `<div class="btn-label" style="font-weight:900; font-size:18px; text-align:center; display:flex; flex-direction:column; gap:4px;"><span>مقارنة فترات العروض</span><span style="font-size:12px; font-weight:700; opacity:0.9; letter-spacing:1px; font-family:'Roboto', sans-serif;">COMPARE OFFER PERIODS</span></div>`;
+          compareBtn.onclick = () => openComparePeriodsModal();
+          btnList.appendChild(compareBtn);
+
           // الحصول على تاريخ اليوم فقط بدون ساعات
           const now = new Date();
           const todayTime = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -79035,6 +79053,7 @@
 
             btnList.appendChild(btn);
           });
+
 
           console.log("🎨 Buttons rendered with status colors applied.");
         }
@@ -81468,7 +81487,7 @@
           window.fullProductsCount = filteredProducts.length;
 
           let showLoadAllButton = false;
-        if (isInitialLoad && !filters.loadAll && filteredProducts.length > 50) {
+        if ((isInitialLoad || hasUploadedCodesFilter) && !filters.loadAll && filteredProducts.length > 50) {
     // ...
 
             showLoadAllButton = true;
@@ -81536,7 +81555,7 @@
             container.appendChild(loadAllBtnContainer);
           }
 
-          window.currentFilteredProducts = filteredProducts;
+
 
           // ✅ التأكد من وجود الشريط وتحديث حالته فوراً
           if (!document.getElementById('printSelectionBar')) {
@@ -82974,7 +82993,8 @@
       ${customData.offerEN ? `<div style="font-weight:700;font-size:11pt;color:#1e3a8a;margin-bottom:1mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${customData.offerEN}</div>` : ''}
       ${customData.offerAR ? `<div style="font-family:'Cairo';font-weight:700;font-size:11pt;color:#1e3a8a;margin-bottom:1mm;direction:rtl;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${customData.offerAR}</div>` : ''}
       
-      ${customData.dateRange ? `<div class="print-offer-date" style="font-size:9pt;color:#666;margin:1mm 0;">${customData.dateRange}</div>` : ''}
+      
+
       
 
       ${pEN ? `<div style="font-size:10pt;font-weight:600;margin-bottom:1mm;height:16px;overflow:hidden;">${pEN}</div>` : ''}
@@ -83516,12 +83536,14 @@
           const options = { month: 'short', day: 'numeric' };
           let dateRange = '';
 
-          if (typeof CURRENT_OFFER_START !== 'undefined' && typeof CURRENT_OFFER_END !== 'undefined') {
-            const startStr = CURRENT_OFFER_START.toLocaleDateString('en-US', options);
-            const endStr = CURRENT_OFFER_END.toLocaleDateString('en-US', options);
-            dateRange = `${startStr} - ${endStr}`;
-          } else {
-            dateRange = 'Jan 19 - Feb 02';
+          if (!(typeof uploadedCodesFilter !== 'undefined' && uploadedCodesFilter && uploadedCodesFilter.length > 0)) {
+              if (typeof CURRENT_OFFER_START !== 'undefined' && typeof CURRENT_OFFER_END !== 'undefined') {
+                const startStr = CURRENT_OFFER_START.toLocaleDateString('en-US', options);
+                const endStr = CURRENT_OFFER_END.toLocaleDateString('en-US', options);
+                dateRange = `${startStr} - ${endStr}`;
+              } else {
+                dateRange = 'Jan 19 - Feb 02';
+              }
           }
 
           if (!Array.isArray(offers)) return;
@@ -83768,7 +83790,7 @@
       <div style="font-size:10pt; margin-bottom:1mm; font-family:Tahoma, sans-serif; font-weight:900; color:#000; direction:rtl; unicode-bidi:plaintext; white-space: normal !important; display: block !important; line-height: 1.2; height: 1.2em !important; overflow: hidden !important;">
         ${offerTypeAR}
       </div>
-      <div style="margin-bottom:0mm; font-size:8pt; color:#666;">${dateRange}</div>
+      <div style="margin-bottom:0mm; font-size:8pt; color:#666;"></div>
       <div style="height:0.5px; background:#ddd; margin:1.5mm auto; width:80%;"></div>
       <div style="margin-bottom:0.4mm; font-weight:700; font-size:10pt; color:#000; line-height:1.2; white-space:normal; overflow-wrap:anywhere; word-break:break-word;">
         ${offerText}
@@ -84030,7 +84052,11 @@
           const options = { month: 'short', day: 'numeric' };
           const startStr = typeof CURRENT_OFFER_START !== 'undefined' ? CURRENT_OFFER_START.toLocaleDateString('en-US', options) : '';
           const endStr = typeof CURRENT_OFFER_END !== 'undefined' ? CURRENT_OFFER_END.toLocaleDateString('en-US', options) : '';
-          const dateRange = `${startStr} - ${endStr}`;
+          let dateRange = `${startStr} - ${endStr}`;
+          
+          if (typeof uploadedCodesFilter !== 'undefined' && uploadedCodesFilter && uploadedCodesFilter.length > 0) {
+              dateRange = '';
+          }
 
           let categoryName = product["Category Level D"] || "";
           let nameAr = product["أسم المنتج"] || "";
@@ -84343,6 +84369,7 @@
       </div>
       <div style="margin-bottom:5px; font-size:8pt; color:#666; line-height: 1.2;">
         ${dateRange}
+      </div>
       <div style="margin: 0 auto; margin-bottom: 5px; font-weight: 700; font-size: 9pt; color: #000; line-height: 1.2; width: 100%; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis; display: block;">
         ${product["Item Description"]}
       </div>
@@ -84675,6 +84702,14 @@
           document.querySelectorAll('.custom-option').forEach(option => {
             option.style.cssText = 'display: flex !important; visibility: visible !important;';
           });
+          
+          // ✅ Clear uploaded/compared codes
+          if (typeof uploadedCodesFilter !== 'undefined') {
+             uploadedCodesFilter = null;
+          }
+          if (typeof uploadedBrandsFilter !== 'undefined') {
+             uploadedBrandsFilter = null;
+          }
 
           hideSuggestions();
           applyFilters();
@@ -85661,8 +85696,9 @@
 
           let allOffersSource = [];
           const hasActiveFilters = document.getElementById('activeFiltersSummary')?.style.display === 'block';
+          const hasUploadedCodes = typeof uploadedCodesFilter !== 'undefined' && uploadedCodesFilter && uploadedCodesFilter.length > 0;
 
-          if (hasActiveFilters && window.currentFilteredProducts && window.currentFilteredProducts.length > 0) {
+          if ((hasActiveFilters || hasUploadedCodes) && window.currentFilteredProducts && window.currentFilteredProducts.length > 0) {
             // 🔥 حالة الفلترة: نسحب العروض من المنتجات المفلترة فقط
             const filteredOffersMap = new Map();
             window.currentFilteredProducts.forEach(product => {
@@ -89150,18 +89186,27 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
 
             html5QrScanner = new Html5Qrcode("reader");
 
+            const isIOSLocal = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
             const config = {
-              fps: 30,
+              fps: isIOSLocal ? 10 : 20,
               qrbox: (viewfinderWidth, viewfinderHeight) => {
                 // تكبير مساحة المسح لتشمل أغلب الشاشة
                 const w = Math.min(viewfinderWidth * 0.95, 600);
                 const h = Math.min(viewfinderHeight * 0.85, 600);
                 return { width: w, height: h };
               },
+              aspectRatio: 1.0,
+              videoConstraints: isIOSLocal ? {
+                  facingMode: "environment",
+                  focusMode: "continuous",
+                  advanced: [{ focusMode: "continuous" }]
+              } : undefined,
               experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
+                useBarCodeDetectorIfSupported: !isIOSLocal
               }
             };
+
 
             if (typeof Html5QrcodeSupportedFormats !== 'undefined') {
               config.formatsToSupport = [
@@ -90140,6 +90185,205 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
           border-color: #f59e0b !important;
         }
       </style>
+
+<!-- Compare Periods Modal -->
+<div id="comparePeriodsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center; flex-direction:column; padding: 20px;">
+  <div style="background:#1e293b; padding:25px; border-radius:15px; width:100%; max-width:800px; color:white; max-height: 90vh; overflow-y: auto; border: 2px solid #6366f1;">
+    <h2 style="text-align:center; color:#818cf8; margin-top:0;">مقارنة العروض بين فترتين</h2>
+    
+    <div style="display:flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap;">
+      <div style="flex:1; min-width: 250px;">
+        <label>الفترة الأساسية (القديمة):</label>
+        <select id="compareBasePeriod" style="width:100%; padding: 10px; border-radius: 8px; background: #0f172a; color: white; border: 1px solid #475569; margin-top: 5px; outline: none;"></select>
+      </div>
+      <div style="flex:1; min-width: 250px;">
+        <label>الفترة المستهدفة (الجديدة):</label>
+        <select id="compareTargetPeriod" style="width:100%; padding: 10px; border-radius: 8px; background: #0f172a; color: white; border: 1px solid #475569; margin-top: 5px; outline: none;"></select>
+      </div>
+    </div>
+    
+    <button onclick="runPeriodsComparison()" style="width:100%; padding:15px; background:linear-gradient(135deg, #4f46e5, #7c3aed); color:white; border:none; border-radius:10px; font-size:16px; font-weight:bold; cursor:pointer; margin-bottom: 20px;">بدء المقارنة</button>
+
+    <div id="compareResultsContainer" style="display:none; flex-direction:column; gap: 15px;">
+        <!-- Unchanged -->
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid #10b981; padding: 15px; border-radius: 10px;">
+            <h3 style="margin-top:0; color: #34d399;">✅ عروض لم تتغير (نفس العرض) - <span id="compareCountUnchanged">0</span> صنف</h3>
+            <div style="display:flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="compareAction('unchanged', 'view')" class="dashboard-btn" style="background:#047857; border:none; color:white;">عرض الأكواد</button>
+            </div>
+        </div>
+
+        <!-- New/Modified -->
+        <div style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3b82f6; padding: 15px; border-radius: 10px;">
+            <h3 style="margin-top:0; color: #60a5fa;">✨ عروض جديدة أو معدلة - <span id="compareCountNew">0</span> صنف</h3>
+            <div style="display:flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="compareAction('new', 'view')" class="dashboard-btn" style="background:#1d4ed8; border:none; color:white;">عرض الأكواد</button>
+            </div>
+        </div>
+
+        <!-- Removed -->
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid #ef4444; padding: 15px; border-radius: 10px;">
+            <h3 style="margin-top:0; color: #f87171;">❌ عروض ملغاة - <span id="compareCountRemoved">0</span> صنف</h3>
+            <div style="display:flex; gap: 10px; flex-wrap: wrap;">
+                <button onclick="compareAction('removed', 'print-magazine')" class="dashboard-btn" style="background:#ef4444; border:none; color:white;">طباعة المجلة للأكواد الملغاة</button>
+            </div>
+        </div>
+    </div>
+    
+    <button onclick="document.getElementById('comparePeriodsModal').style.display='none'" style="width:100%; padding:10px; background:#475569; color:white; border:none; border-radius:10px; margin-top: 20px; cursor:pointer;">إغلاق</button>
+  </div>
+</div>
+
+<script>
+function openComparePeriodsModal() {
+  const modal = document.getElementById('comparePeriodsModal');
+  const baseSelect = document.getElementById('compareBasePeriod');
+  const targetSelect = document.getElementById('compareTargetPeriod');
+  
+  baseSelect.innerHTML = '';
+  targetSelect.innerHTML = '';
+  
+  ALL_PERIODS_OFFERS.forEach(p => {
+    baseSelect.innerHTML += `<option value="${p.id}">${p.label}</option>`;
+    targetSelect.innerHTML += `<option value="${p.id}">${p.label}</option>`;
+  });
+  
+  if (ALL_PERIODS_OFFERS.length > 1) {
+    baseSelect.selectedIndex = 0;
+    targetSelect.selectedIndex = 1;
+  }
+  
+  document.getElementById('compareResultsContainer').style.display = 'none';
+  modal.style.display = 'flex';
+}
+
+let compareResultsData = {
+  unchanged: [],
+  new: [],
+  removed: []
+};
+
+function runPeriodsComparison() {
+  const baseId = document.getElementById('compareBasePeriod').value;
+  const targetId = document.getElementById('compareTargetPeriod').value;
+  
+  if(baseId === targetId) {
+    alert("الرجاء اختيار فترتين مختلفتين.");
+    return;
+  }
+  
+  const basePeriod = ALL_PERIODS_OFFERS.find(p => p.id === baseId);
+  const targetPeriod = ALL_PERIODS_OFFERS.find(p => p.id === targetId);
+  
+  const baseOffersMap = new Map();
+  if(basePeriod && basePeriod.offers) {
+    basePeriod.offers.forEach(off => {
+      if(off.codes) off.codes.forEach(c => baseOffersMap.set(c.trim(), off.offerTypeEN || off.offerType || off.offerTypeAR));
+    });
+  }
+  
+  const targetOffersMap = new Map();
+  if(targetPeriod && targetPeriod.offers) {
+    targetPeriod.offers.forEach(off => {
+      if(off.codes) off.codes.forEach(c => targetOffersMap.set(c.trim(), off.offerTypeEN || off.offerType || off.offerTypeAR));
+    });
+  }
+  
+  compareResultsData.unchanged = [];
+  compareResultsData.new = [];
+  compareResultsData.removed = [];
+  
+  targetOffersMap.forEach((offerType, code) => {
+    if(baseOffersMap.has(code)) {
+      if(baseOffersMap.get(code) === offerType) {
+        compareResultsData.unchanged.push(code);
+      } else {
+        compareResultsData.new.push(code);
+      }
+    } else {
+      compareResultsData.new.push(code);
+    }
+  });
+  
+  baseOffersMap.forEach((offerType, code) => {
+    if(!targetOffersMap.has(code)) {
+      compareResultsData.removed.push(code);
+    }
+  });
+  
+  document.getElementById('compareCountUnchanged').innerText = compareResultsData.unchanged.length;
+  document.getElementById('compareCountNew').innerText = compareResultsData.new.length;
+  document.getElementById('compareCountRemoved').innerText = compareResultsData.removed.length;
+  
+  document.getElementById('compareResultsContainer').style.display = 'flex';
+}
+
+function compareAction(type, action) {
+  const codes = compareResultsData[type];
+  if(!codes || codes.length === 0) {
+    alert("لا توجد أكواد في هذه الفئة.");
+    return;
+  }
+  
+  const targetId = document.getElementById('compareTargetPeriod').value;
+  const targetPeriod = ALL_PERIODS_OFFERS.find(p => p.id === targetId);
+  if(targetPeriod && typeof proceedToOffers === 'function') {
+      proceedToOffers(targetPeriod);
+      
+      setTimeout(() => {
+          if (action === 'view') {
+            document.getElementById('comparePeriodsModal').style.display = 'none';
+            
+            // Apply filtering using the existing uploaded codes functionality
+            uploadedCodesFilter = codes;
+            if(typeof showUploadedProducts === 'function') {
+                showUploadedProducts();
+            } else if(typeof applyFilters === 'function') {
+                applyFilters();
+            }
+          } else if (action === 'print-magazine') {
+            document.getElementById('comparePeriodsModal').style.display = 'none';
+            
+            const baseId = document.getElementById('compareBasePeriod').value;
+            const basePeriod = ALL_PERIODS_OFFERS.find(p => p.id === baseId);
+            
+            if (basePeriod && typeof proceedToOffers === 'function') {
+                // Change the label to indicate these are removed codes
+                const originalLabel = basePeriod.label;
+                basePeriod.label = "أكواد ملغاة - " + (originalLabel || "الفترة السابقة");
+                
+                proceedToOffers(basePeriod);
+                
+                // Restore original label in the object so it doesn't break future usage
+                basePeriod.label = originalLabel;
+                
+                // Set filter to the removed codes
+                uploadedCodesFilter = codes;
+                
+                // Turn on magazine mode if not active
+                if (typeof toggleMagazineMode === 'function' && typeof isMagazineMode !== 'undefined' && !isMagazineMode) {
+                   toggleMagazineMode();
+                }
+                
+                // Filter the products
+                if(typeof showUploadedProducts === 'function') {
+                    showUploadedProducts();
+                } else if(typeof applyFilters === 'function') {
+                    applyFilters();
+                }
+
+                // Wait for render to finish, then export PDF
+                setTimeout(() => {
+                    if (typeof exportFullMagazinePDF === 'function') {
+                        exportFullMagazinePDF();
+                    }
+                }, 1500);
+            }
+          }
+      }, 50);
+  }
+}
+</script>
     </body>
 
 </html>
