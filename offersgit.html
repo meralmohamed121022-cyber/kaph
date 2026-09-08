@@ -88841,7 +88841,7 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
                     <div style="display: flex; flex-direction: column; gap: 6px; align-items: center; width: ${imageW}px; flex-shrink: 0;">
                         ${getScannerThumbMarkup(imageUrl, nameEN || cleanCode, imageW, imageH, cleanCode)}
                         
-                        <div style="width: 100%; text-align: center;">
+                        <div style="width: 100%; display: flex; gap: 4px; justify-content: space-between; align-items: center;">
                             <span style="
                                 display:inline-flex;
                                 align-items:center;
@@ -88855,7 +88855,7 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
                                 font-family:monospace;
                                 font-size:${codeSize};
                                 font-weight:700;
-                                width: 100%;
+                                flex: 1;
                                 box-sizing: border-box;
                                 overflow:hidden;
                                 text-overflow:ellipsis;
@@ -88863,6 +88863,21 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
                             ">
                                 ${escapeHtml(cleanCode)}
                             </span>
+                            ${statusColor !== '#ef4444' ? `
+                            <input id="print-count-${cleanCode}" type="number" min="1" max="50" value="1" title="عدد كروت الصنف للطباعة" style="
+                                width: 45px;
+                                height: 100%;
+                                min-height: 28px;
+                                background: rgba(15,23,42,0.95);
+                                border: 1px solid rgba(148,163,184,0.35);
+                                color: #e2e8f0;
+                                border-radius: 999px;
+                                text-align: center;
+                                font-weight: bold;
+                                font-size: ${codeSize};
+                                outline: none;
+                            " onclick="event.stopPropagation();" />
+                            ` : ''}
                         </div>
                     </div>
 
@@ -89504,7 +89519,9 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
             const codeStr = String(item.cleanCode || item.code || '').trim();
             const p = (typeof productsDB !== 'undefined' ? productsDB : []).find(prod => String(prod.Code).trim() === codeStr);
             if (p) {
-              for (let i = 0; i < multiplier; i++) {
+              const cardInput = document.getElementById('print-count-' + codeStr);
+              const cardQty = (cardInput && parseInt(cardInput.value) > 1) ? parseInt(cardInput.value) : multiplier;
+              for (let i = 0; i < cardQty; i++) {
                 finalProducts.push(p);
               }
             }
@@ -89578,7 +89595,9 @@ ${sdaiCircleHTML ? '' : badgeHTML} ${bestSellerBadge}
               product = productsDB.find(p => String(p.Code).trim() === codeStr);
             }
 
-            for (let i = 0; i < quantity; i++) {
+            const cardInput = document.getElementById('print-count-' + codeStr);
+            const cardQty = (cardInput && parseInt(cardInput.value) > 1) ? parseInt(cardInput.value) : quantity;
+            for (let i = 0; i < cardQty; i++) {
               customCards.push({
                 Code: codeStr,
                 Product: product || null,
