@@ -1811,8 +1811,15 @@ body.day-mode .sadaqa-badge {
                 // Play success animation (placeholder clapping Lottie URL)
                 const lottie = document.getElementById('loginLottie');
                 if (lottie) {
-                    lottie.load('https://lottie.host/80164c92-75d1-4b13-8874-8b6fa2021197/H8wH0P9O7i.json');
-                    lottie.loop = false;
+                    try {
+                        if (typeof lottie.load === 'function') {
+                            lottie.load('https://lottie.host/80164c92-75d1-4b13-8874-8b6fa2021197/H8wH0P9O7i.json');
+                            lottie.loop = false;
+                        } else {
+                            lottie.setAttribute('src', 'https://lottie.host/80164c92-75d1-4b13-8874-8b6fa2021197/H8wH0P9O7i.json');
+                            lottie.removeAttribute('loop');
+                        }
+                    } catch (e) { console.warn("Lottie error", e); }
                 }
 
                 setTimeout(async () => {
