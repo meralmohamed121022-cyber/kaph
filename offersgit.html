@@ -81448,7 +81448,15 @@
           } else if (isInitialLoad && filters.loadAll && window.initialRandomProducts) {
             filteredProducts = [...window.initialRandomProducts];
           } else {
-            filteredProducts.sort((a, b) => a["Item Description"].localeCompare(b["Item Description"]));
+            filteredProducts.sort((a, b) => {
+              const catA1 = (a["Category Level A"] || "").toString().toLowerCase();
+              const catA2 = (b["Category Level A"] || "").toString().toLowerCase();
+              if (catA1 < catA2) return -1;
+              if (catA1 > catA2) return 1;
+              const desc1 = (a["Item Description"] || "").toString().toLowerCase();
+              const desc2 = (b["Item Description"] || "").toString().toLowerCase();
+              return desc1.localeCompare(desc2);
+            });
           }
 
           console.log(`📊 ${isInitialLoad ? '🚀 INITIAL' : '✅ FILTERED'}: ${filteredProducts.length} products`);
@@ -83873,6 +83881,15 @@
         // 2️⃣ دالة renderPrint
         // ==========================================
         function renderPrint(filteredProducts) {
+          filteredProducts.sort((a, b) => {
+            const catC1 = (a["Category Level C"] || "").toString().toLowerCase();
+            const catC2 = (b["Category Level C"] || "").toString().toLowerCase();
+            if (catC1 < catC2) return -1;
+            if (catC1 > catC2) return 1;
+            const desc1 = (a["Item Description"] || "").toString().toLowerCase();
+            const desc2 = (b["Item Description"] || "").toString().toLowerCase();
+            return desc1.localeCompare(desc2);
+          });
           const container = document.getElementById("printContainer");
           const itemsPerPage = 6;
           const itemsPerRow = 3;
